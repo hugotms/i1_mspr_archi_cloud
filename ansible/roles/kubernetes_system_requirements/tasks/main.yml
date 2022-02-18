@@ -1,0 +1,26 @@
+---
+
+- name: install apt dependencies
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ _apt_dependencies }}"
+  tags: system
+  become: True
+
+- name: disable swap
+  shell: swapoff -a
+  args:
+    executable: /bin/bash
+  when: ansible_swaptotal_mb > 0
+  tags: system
+  become: True
+
+- name: remove swap fs
+  mount:
+    name: "{{ item }}"
+    fstype: swap
+    state: absent
+  loop: "{{ _swap_fs }}"
+  tags: system
+  become: True

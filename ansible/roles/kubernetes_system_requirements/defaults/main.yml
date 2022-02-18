@@ -1,0 +1,12 @@
+---
+
+_apt_dependencies:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg-agent
+  - software-properties-common
+
+_swap_fs:
+  - swap
+  - none

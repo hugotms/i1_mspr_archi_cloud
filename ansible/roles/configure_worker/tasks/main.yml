@@ -1,0 +1,30 @@
+---
+
+- name: copy join command on workers
+  copy:
+    src: "/tmp/{{ client_id }}.sh"
+    dest: /tmp/join_command.sh
+  tags: worker
+  become: True
+
+- name: remove command file on localhost
+  file:
+    path: "/tmp/{{ client_id }}.sh"
+    state: absent
+  delegate_to: localhost
+  tags: worker
+  become: True
+
+- name: launch joining command on workers
+  shell: bash /tmp/join_command.sh
+  args:
+    executable: /bin/bash
+  tags: worker
+  become: True
+
+- name: remove command file on workers
+  file:
+    path: /tmp/join_command.sh
+    state: absent
+  tags: worker
+  become: True

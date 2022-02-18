@@ -1,0 +1,45 @@
+---
+
+- name: add kubernetes key
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+  tags: kubernetes
+  become: True
+
+- name: add kubernetes repository
+  apt_repository:
+    repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+    state: present
+    filename: kubernetes.list
+  tags: kubernetes
+  become: True
+
+- name: reload apt cache
+  apt:
+    update_cache: yes
+  tags: kubernetes
+  become: True
+
+- name: install kubernetes packages
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ _kubernetes_packages }}"
+  tags: kubernetes
+  become: True
+
+- name: Configure node ip
+  lineinfile:
+    path: /etc/default/kubelet
+    line: KUBELET_EXTRA_ARGS=--node-ip={{ ansible_host }}
+  tags: kubernetes
+  become: True
+
+- name: Restart kubelet
+  service:
+    name: kubelet
+    daemon_reload: True
+    state: restarted
+  tags: kubernetes
+  become: True

@@ -1,0 +1,37 @@
+---
+
+- name: add docker key
+  apt_key:
+    url: https://download.docker.com/linux/debian/gpg
+    state: present
+  tags: docker
+  become: True
+
+- name: add docker repository
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/debian bullseye stable
+    state: present
+    filename: docker.list
+  tags: docker
+  become: True
+
+- name: reload apt cache
+  apt:
+    update_cache: yes
+  tags: docker
+  become: True
+
+- name: install docker packages
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ _docker_packages }}"
+  tags: docker
+  become: True
+
+- name: add ansible user to docker group
+  user:
+    name: svcansible
+    group: docker
+  tags: docker
+  become: True

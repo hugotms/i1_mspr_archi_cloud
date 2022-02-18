@@ -1,0 +1,7 @@
+ansible/inventories/
+
+.terraform/
+
+.terraform.*
+
+terraform.*
