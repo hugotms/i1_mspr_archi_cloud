@@ -16,7 +16,7 @@ resource "random_string" "random2" {
 variable "client_id" {
   type = string
   description = "New client id (needed if cluster exists and you want to add workers)"
-  default = random_string.new_client_id
+  default = "${random_string.new_client_id}"
 }
 
 variable "root_password" {
