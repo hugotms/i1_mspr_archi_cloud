@@ -22,15 +22,17 @@ variable "client_id" {
 variable "root_password" {
   type = string
   description = "Template root password"
+  default = "changeit"
 }
 
 variable "ansible_private_key" {
   type = string
   description = "Path to ansible private key"
+  default = "/tmp/dummy/private.key"
 }
 
 locals {
-  client_id = defaults(variable.client_id, random_string.new_client_id)
+  client_id = defaults(var.client_id, random_string.new_client_id.id)
 }
 
 data "vsphere_datacenter" "dc" {
@@ -53,7 +55,7 @@ data "vsphere_network" "network" {
 }
 
 resource "vsphere_virtual_machine" "master" {
-  name             = "${locals.client_id}-master"
+  name             = "${local.client_id}-master"
   resource_pool_id = data.vsphere_compute_cluster.cluster.resource_pool_id
   datastore_id     = data.vsphere_datastore.datastore.id
 
@@ -67,7 +69,7 @@ resource "vsphere_virtual_machine" "master" {
   }
 
   disk {
-    label = "${locals.client_id}-master-vmdk"
+    label = "${local.client_id}-master-vmdk"
     size  = 50
     thin_provisioned = true
   }
@@ -79,13 +81,13 @@ resource "vsphere_virtual_machine" "master" {
       host        = self.default_ip_address
       type        = "ssh"
       user        = "root"
-      password    = variable.root_password
+      password    = var.root_password
     }
   }
 }
 
 resource "vsphere_virtual_machine" "worker1" {
-  name             = "${locals.client_id}-${random_string.random1}-worker"
+  name             = "${local.client_id}-${random_string.random1}-worker"
   resource_pool_id = data.vsphere_compute_cluster.cluster.resource_pool_id
   datastore_id     = data.vsphere_datastore.datastore.id
 
@@ -99,7 +101,7 @@ resource "vsphere_virtual_machine" "worker1" {
   }
 
   disk {
-    label = "${locals.client_id}-${random_string.random1}-worker"
+    label = "${local.client_id}-${random_string.random1}-worker"
     size  = 20
     thin_provisioned = true
   }
@@ -111,13 +113,13 @@ resource "vsphere_virtual_machine" "worker1" {
       host        = self.default_ip_address
       type        = "ssh"
       user        = "root"
-      password    = variable.root_password
+      password    = var.root_password
     }
   }
 }
 
 resource "vsphere_virtual_machine" "worker2" {
-  name             = "${locals.client_id}-${random_string.random2}-worker"
+  name             = "${local.client_id}-${random_string.random2}-worker"
   resource_pool_id = data.vsphere_compute_cluster.cluster.resource_pool_id
   datastore_id     = data.vsphere_datastore.datastore.id
 
@@ -131,7 +133,7 @@ resource "vsphere_virtual_machine" "worker2" {
   }
 
   disk {
-    label = "${locals.client_id}-${random_string.random2}-worker"
+    label = "${local.client_id}-${random_string.random2}-worker"
     size  = 20
     thin_provisioned = true
   }
@@ -143,7 +145,7 @@ resource "vsphere_virtual_machine" "worker2" {
       host        = self.default_ip_address
       type        = "ssh"
       user        = "root"
-      password    = variable.root_password
+      password    = var.root_password
     }
   }
 }
@@ -167,13 +169,13 @@ resource "local_file" "inventory" {
 
 resource "null_resource" "ansible" {
   provisioner "local-exec" {
-    command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -u svcansible -e client_id=${locals.client_id} -i ${local_file.inventory.filename} --private-key ${variable.ansible_private_key} ./ansible/play_configure_cluster.yml"
+    command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -u svcansible -e client_id=${local.client_id} -i ${local_file.inventory.filename} --private-key ${var.ansible_private_key} ./ansible/play_configure_cluster.yml"
   }
 }
 
 output "client_id" {
   depends_on = [null_resource.ansible]
   description = "Client informations"
-  value = "Cluster IP for client ${locals.client_id} is ${vsphere_virtual_machine.master.default_ip_address}"
+  value = "Cluster IP for client ${local.client_id} is ${vsphere_virtual_machine.master.default_ip_address}"
 }
 
