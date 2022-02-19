@@ -22,11 +22,13 @@ variable "client_id" {
 variable "root_password" {
   type = string
   description = "Template root password"
+  default = "changeit"
 }
 
 variable "ansible_private_key" {
   type = string
   description = "Path to ansible private key"
+  default = "/tmp/dummy/private.key"
 }
 
 locals {
