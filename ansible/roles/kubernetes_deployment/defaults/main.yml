@@ -1,0 +1,29 @@
+---
+
+_apps_deploying:
+  - name: mysql
+    image: msql:latest
+    envVars:
+      - name: MYSQL_USER
+        value: myuser
+    volumes:
+      - path: /var/lib/mysql
+    containerPort: 3306
+
+  - name: wordpress
+    image: wordpress:latest
+    envVars:
+      - name: MYSQL_URL
+        value: mysql-service
+      - name: MYSQL_USER
+        value: myuser
+    volumes:
+      - name: wordpress-site
+        path: /var/www/html
+    containerPort: 80
+    clusterPort: 8080
+    egressRules:
+      - ports: 3306
+        allowTo: mysql-service
+        # could also precise protocol if not TCP
+    

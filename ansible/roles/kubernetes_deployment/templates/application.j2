@@ -1,0 +1,55 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ item.name }}-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: {{ item.replicas | default('1') }}
+  selector:
+    matchLabels:
+      app: {{ item.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ item.name }}
+    spec:
+      containers:
+      - name: {{ item.name }}
+        image: {{ item.image }}
+        ports:
+        - containerPort: {{ item.containerPort }}
+{% if item.envVars is defined %}
+        env:
+    {% for env in item.envVars %}
+        - name: {{ env.name }}
+          value: {{ env.value }}
+    {% endfor %}
+{% endif %}
+{% if item.volumes is defined %}
+        volumeMounts:
+    {% for volume in item.volumes %}
+        - mountPath: {{ volume.path }}
+          name: {{ volume.name }}
+    {% endfor %}
+      volumes:
+    {% for volume in item.volumes %}
+      - name: {{ volume.name | default(client_id + '-' + item.name) }}
+        nfs:
+          server: {{ client_id }}-master
+          path: /{{ item.name }}/
+    {% endfor %} 
+{% endif %}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ item.name }}-service
+spec:
+  selector:
+    app: {{ item.name }}
+  ports:
+    - protocol: {{ item.protocol | upper | default('TCP') }}
+      port: {{ item.clusterPort | default(item.containerPort) }}
+      targetPort: {{ item.containerPort }}

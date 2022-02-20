@@ -1,0 +1,18 @@
+---
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: {{ item.name }}-policy
+spec:
+  selector:
+    name: {{ item.name }}
+  types:
+  - Egress
+  egress:
+  {% for egress in item.egressRules %}
+  - action: Allow
+    protocol: {{ egress.protocol | upper }}
+    source:
+      name: {{ egress.allowTo }}
+      ports: [{{ egress.ports }}]
+  {% endfor %}
