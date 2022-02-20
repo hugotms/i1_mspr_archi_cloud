@@ -1,0 +1,78 @@
+---
+
+- name: copy default network policy on master
+  copy:
+    src: default_policy.yml
+    dest: /tmp/default-network-policy.yml
+  tags: deployment
+  become: True
+
+- name: apply default network policy to cluster
+  shell: kubectl apply -f /tmp/default-network-policy.yml
+  args:
+    executable: /bin/bash
+  tags: deployment
+  become: True
+
+- name: delete policy configuration file
+  file:
+    path: /tmp/default-network-policy.yml
+    state: absent
+  tags: deployment
+  become: True
+
+- name: create services configuration directory
+  file:
+    path: /tmp/k8s-configurations/app
+    state: directory
+  tags: deployment
+  become: True
+
+- name: create policies configuration directory
+  file:
+    path: /tmp/k8s-configurations/policies
+    state: directory
+  tags: deployment
+  become: True
+
+- name: create services configuration files
+  template:
+    src: application.j2
+    dest: "/tmp/k8s-configurations/app/{{ item.name }}.yml"
+  loop: "{{ _apps_deploying }}"
+  loop_control:
+    label: "{{ item.name }}"
+  tags: deployment
+  become: True
+
+- name: create policies configuration files
+  template:
+    src: network_policy.j2
+    dest: "/tmp/k8s-configurations/policies/{{ item.name }}.yml"
+  loop: "{{ _apps_deploying }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: item.egressRules is defined
+  tags: deployment
+  become: True
+
+- name: create services on cluster
+  shell: kubectl create -k /tmp/k8s-configurations/app/
+  args:
+    executable: /bin/bash
+  tags: deployment
+  become: True
+
+- name: apply services network policies
+  shell: kubectl apply -f /tmp/k8s-configurations/policies/
+  args:
+    executable: /bin/bash
+  tags: deployment
+  become: True
+
+- name: delete configuration directory
+  file:
+    path: /tmp/k8s-configurations
+    state: absent
+  tags: deployment
+  become: True
