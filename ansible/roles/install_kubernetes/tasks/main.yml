@@ -33,6 +33,7 @@
   lineinfile:
     path: /etc/default/kubelet
     line: "KUBELET_EXTRA_ARGS=--node-ip={{ ansible_host }}"
+    create: True
   tags: kubernetes
   become: True
 

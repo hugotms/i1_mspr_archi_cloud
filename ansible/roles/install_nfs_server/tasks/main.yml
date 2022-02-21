@@ -6,7 +6,7 @@
     state: directory
     user: root
     group: nfs-group
-    mode: "0770"
+    mode: "2770"
   tags: nfs
   become: True
 

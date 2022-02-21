@@ -11,6 +11,22 @@
   tags: master
   become: True
 
+- name: create svcansible kubernetes config folder
+  file:
+    path: /home/svcansible/.kube
+    state: directory
+  tags: master
+
+- name: copy kubernetes config in svcansible config folder
+  copy:
+    remote_src: True
+    src: /etc/kubernetes/admin.conf
+    dest: /home/svcansible/.kube/config
+    user: svcansible
+    group: ansible
+  tags: master
+  become: True
+
 - name: install calico network
   shell: >-
     kubectl create -f https://projectcalico.docs.tigera.io/manifests/tigera-operator.yaml \
