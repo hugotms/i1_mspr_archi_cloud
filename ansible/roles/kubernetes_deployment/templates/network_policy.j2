@@ -7,12 +7,29 @@ spec:
   selector:
     name: {{ item.name }}
   types:
+{% if item.rules.ingressRules is defined %}
+  - Ingress
+  ingress:
+  {% for ingress in item.rules.ingressRules %}
+  - action: Allow
+    protocol: {{ ingress.protocol | upper | default('TCP') }}
+    source:
+    {% if ingress.allowFrom is defined %}
+      name: {{ ingress.allowFrom }}
+    {% endif %}
+      ports: [{{ ingress.ports }}]
+  {% endfor %}
+{% endif %}
+{% if item.rules.egressRules is defined %}
   - Egress
   egress:
-  {% for egress in item.egressRules %}
+  {% for egress in item.rules.egressRules %}
   - action: Allow
-    protocol: {{ egress.protocol | upper }}
+    protocol: {{ egress.protocol | upper | default('TCP') }}
     source:
-      name: {{ egress.allowTo }}
+    {% if egress.allowFrom is defined %}
+      name: {{ egress.allowFrom }}
+    {% endif %}
       ports: [{{ egress.ports }}]
   {% endfor %}
+{% endif %}

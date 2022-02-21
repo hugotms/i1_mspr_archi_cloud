@@ -19,7 +19,9 @@ spec:
       - name: {{ item.name }}
         image: {{ item.image }}
         ports:
-        - containerPort: {{ item.containerPort }}
+      {% for port in item.ports %}
+        - containerPort: {{ port.containerPort }}
+      {% endfor %}
 {% if item.envVars is defined %}
         env:
     {% for env in item.envVars %}
@@ -50,6 +52,8 @@ spec:
   selector:
     app: {{ item.name }}
   ports:
-    - protocol: {{ item.protocol | upper | default('TCP') }}
-      port: {{ item.clusterPort | default(item.containerPort) }}
-      targetPort: {{ item.containerPort }}
+  {% for port in item.ports %}
+    - protocol: {{ port.protocol | upper | default('TCP') }}
+      port: {{ port.clusterPort | default(port.containerPort) }}
+      targetPort: {{ port.containerPort }}
+  {% endfor %}
