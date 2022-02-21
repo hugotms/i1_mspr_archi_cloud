@@ -8,7 +8,8 @@ _apps_deploying:
         value: myuser
     volumes:
       - path: /var/lib/mysql
-    containerPort: 3306
+    ports:
+      - containerPort: 3306
 
   - name: wordpress
     image: wordpress:latest
@@ -20,10 +21,38 @@ _apps_deploying:
     volumes:
       - name: wordpress-site
         path: /var/www/html
-    containerPort: 80
-    clusterPort: 8080
-    egressRules:
-      - ports: 3306
-        allowTo: mysql-service
-        # could also precise protocol if not TCP
+    ports:
+      - containerPort: 80
+        clusterPort: 8080
+    rules:
+      egressRules:
+        - ports: 3306
+          allowTo: mysql-service
+          # could also precise protocol if not TCP
+
+  - name: 3cx
+    image: farfui/3cx:18.0.2.314
+    volumes:
+      - path: /mnt/backup
+        name: 3cx_backup
+      - path: /mnt/recordings
+        name: 3cx_recordings
+      - path: /var/log
+        name: 3cx_log
+    ports:
+      - containerPort: 443
+        clusterPort: 8443
+      - containerPort: 5015
+      - containerPort: 5060
+      - containerPort: 5060
+        protocol: udp
+      - containerPort: 5061
+      - containerPort: 5090
+      - containerPort: 5090
+        protocol: udp
+    rules:
+      ingressRules:
+        - ports: 8443, 5015, 5060, 5061, 5090
+        - ports: 5060, 5090
+          protocol: udp
     

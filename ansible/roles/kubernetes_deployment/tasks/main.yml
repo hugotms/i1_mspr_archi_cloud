@@ -52,7 +52,7 @@
   loop: "{{ _apps_deploying }}"
   loop_control:
     label: "{{ item.name }}"
-  when: item.egressRules is defined
+  when: item.rules is defined
   tags: deployment
   become: True
 
