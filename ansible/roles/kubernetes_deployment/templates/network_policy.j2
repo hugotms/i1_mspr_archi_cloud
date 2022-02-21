@@ -27,8 +27,8 @@ spec:
   - action: Allow
     protocol: {{ egress.protocol | upper | default('TCP') }}
     source:
-    {% if egress.allowFrom is defined %}
-      name: {{ egress.allowFrom }}
+    {% if egress.allowTo is defined %}
+      name: {{ egress.allowTo }}
     {% endif %}
       ports: [{{ egress.ports }}]
   {% endfor %}

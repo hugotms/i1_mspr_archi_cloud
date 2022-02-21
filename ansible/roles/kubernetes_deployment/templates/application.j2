@@ -16,33 +16,35 @@ spec:
         app: {{ item.name }}
     spec:
       containers:
-      - name: {{ item.name }}
-        image: {{ item.image }}
+{% for container in item.containers %}
+      - name: {{ container.name | default(item.name) }}
+        image: {{ container.image }}
         ports:
-      {% for port in item.ports %}
+      {% for port in container.ports %}
         - containerPort: {{ port.containerPort }}
       {% endfor %}
-{% if item.envVars is defined %}
+  {% if container.envVars is defined %}
         env:
-    {% for env in item.envVars %}
+    {% for env in container.envVars %}
         - name: {{ env.name }}
           value: {{ env.value }}
     {% endfor %}
-{% endif %}
-{% if item.volumes is defined %}
+  {% endif %}
+  {% if container.volumes is defined %}
         volumeMounts:
-    {% for volume in item.volumes %}
+    {% for volume in container.volumes %}
         - mountPath: {{ volume.path }}
           name: {{ volume.name }}
     {% endfor %}
       volumes:
-    {% for volume in item.volumes %}
+    {% for volume in container.volumes %}
       - name: {{ volume.name | default(client_id + '-' + item.name) }}
         nfs:
           server: {{ client_id }}-master
           path: /{{ item.name }}/
     {% endfor %} 
-{% endif %}
+  {% endif %}
+{% endfor %}
 ---
 apiVersion: v1
 kind: Service
@@ -52,8 +54,10 @@ spec:
   selector:
     app: {{ item.name }}
   ports:
-  {% for port in item.ports %}
+  {% for container in item.containers %}
+    {% for port in container.ports %}
     - protocol: {{ port.protocol | upper | default('TCP') }}
       port: {{ port.clusterPort | default(port.containerPort) }}
       targetPort: {{ port.containerPort }}
+    {% endfor %}
   {% endfor %}
