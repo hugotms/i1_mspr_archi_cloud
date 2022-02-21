@@ -3,10 +3,16 @@
 _apps_deploying:
   - name: mysql
     containers:
-      - image: msql:latest
+      - image: mysql:latest
         envVars:
+          - name: MYSQL_ROOT_PASSWORD
+            value: MotDePasseEnClair!
+          - name: MYSQL_DATABASE
+            value: wordpress
           - name: MYSQL_USER
-            value: myuser
+            value: wordpress
+          - name: MYSQL_PASSWORD
+            value: epsi2022
         volumes:
           - path: /var/lib/mysql
         ports:
@@ -21,16 +27,23 @@ _apps_deploying:
       - image: wordpress:latest
         replicas: 2
         envVars:
-          - name: MYSQL_URL
+          - name: WORDPRESS_DB_HOST
             value: mysql-service
-          - name: MYSQL_USER
-            value: myuser
+          - name: WORDPRESS_DB_NAME
+            value: wordpress
+          - name: WORDPRESS_DB_USER
+            value: wordpress
+          - name: WORDPRESS_DB_PASSWORD
+            value: epsi2022
         volumes:
           - name: wordpress-site
             path: /var/www/html
         ports:
           - containerPort: 80
             clusterPort: 8080
+    rules:
+      ingressRules:
+        - ports: 8080
 
   - name: 3cx
     containers:
@@ -62,13 +75,15 @@ _apps_deploying:
   - name: wso2
     containers:
       - image: wso2/wso2am:latest
+        replicas: 2
         name: wso2am
         ports:
           - containerPort: 8280
           - containerPort: 8243
           - containerPort: 9443
           - containerPort: 5005
-      - image: wso2/wso2mi:lates
+      - image: wso2/wso2mi:latest
+        replicas: 2
         name: wso2mi
         ports:
           - containerPort: 8290
