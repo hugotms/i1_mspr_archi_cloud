@@ -13,4 +13,8 @@ export VSPHERE_PASSWORD=<VOTRE_PASSWORD>
 export VSPHERE_SERVER=<VOTRE_SERVEUR>
 ```
 
-Une fois ceci fait, il conviendra de faire un `terraform init` afin d'initialiser le projet. Enfin, afin de lancer la configuration, un `terraform apply` devra être exécuté.
+Une fois ceci fait, il conviendra de faire un `terraform init` afin d'initialiser le projet. Enfin, afin de lancer la configuration, la commande suivante devra être exécutée :
+
+```bash
+terraform apply -var="root_password=<template_root_password>" -var="ansible_private_key=<path_to_key>" -var="gateway_ip=<ip_address>" -var="master_ip=<ip_address>" -var="worker1_ip=<ip_address>" -var="worker2_ip=<ip_address>"
+```

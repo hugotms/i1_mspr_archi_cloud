@@ -31,6 +31,26 @@ variable "ansible_private_key" {
   default = "/tmp/dummy/private.key"
 }
 
+variable "master_ip" {
+  type = string
+  description = "Master ip address"
+}
+
+variable "worker1_ip" {
+  type = string
+  description = "Worker 1 ip address"
+}
+
+variable "worker2_ip" {
+  type = string
+  description = "Worker 2 ip address"
+}
+
+variable "gateway_ip" {
+  type = string
+  description = "Worker 2 ip address"
+}
+
 locals {
   client_id = defaults(var.client_id, random_string.new_client_id.id)
 }
@@ -40,7 +60,7 @@ data "vsphere_datacenter" "dc" {
 }
 
 data "vsphere_datastore" "datastore" {
-  name          = "default_datastore"
+  name          = "datastore1"
   datacenter_id = data.vsphere_datacenter.dc.id
 }
 
@@ -50,6 +70,11 @@ data "vsphere_compute_cluster" "cluster" {
 }
 
 data "vsphere_network" "network" {
-  name          = "internet"
+  name          = "VM Network"
+  datacenter_id = data.vsphere_datacenter.dc.id
+}
+
+data "vsphere_virtual_machine" "template" {
+  name          = "default_template"
   datacenter_id = data.vsphere_datacenter.dc.id
 }

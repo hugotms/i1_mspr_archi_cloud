@@ -5,8 +5,8 @@ resource "vsphere_virtual_machine" "worker1" {
 
   num_cpus = 2
   num_cores_per_socket = 2
-  memory   = 8192
-  guest_id = "debian11_64Guest"
+  memory   = 4096
+  guest_id = "debian10_64Guest"
 
   network_interface {
     network_id = data.vsphere_network.network.id
@@ -18,11 +18,29 @@ resource "vsphere_virtual_machine" "worker1" {
     thin_provisioned = true
   }
 
+  clone {
+    template_uuid = data.vsphere_virtual_machine.template.id
+
+    customize {
+      linux_options {
+        host_name = "${local.client_id}-${random_string.random1}-worker"
+        domain    = "geronimo.com"
+      }
+
+      network_interface {
+        ipv4_address = var.worker1_ip
+        ipv4_netmask = 24
+      }
+
+      ipv4_gateway = var.gateway_ip
+    }
+  }
+
   provisioner "remote-exec" {
     script = "./bash/init.sh"
 
     connection {
-      host        = self.default_ip_address
+      host        = var.worker1_ip
       type        = "ssh"
       user        = "root"
       password    = var.root_password
@@ -37,8 +55,8 @@ resource "vsphere_virtual_machine" "worker2" {
 
   num_cpus = 2
   num_cores_per_socket = 2
-  memory   = 8192
-  guest_id = "debian11_64Guest"
+  memory   = 4096
+  guest_id = "debian10_64Guest"
 
   network_interface {
     network_id = data.vsphere_network.network.id
@@ -50,11 +68,29 @@ resource "vsphere_virtual_machine" "worker2" {
     thin_provisioned = true
   }
 
+  clone {
+    template_uuid = data.vsphere_virtual_machine.template.id
+
+    customize {
+      linux_options {
+        host_name = "${local.client_id}-${random_string.random2}-worker"
+        domain    = "geronimo.com"
+      }
+
+      network_interface {
+        ipv4_address = var.worker2_ip
+        ipv4_netmask = 24
+      }
+
+      ipv4_gateway = var.gateway_ip
+    }
+  }
+
   provisioner "remote-exec" {
     script = "./bash/init.sh"
 
     connection {
-      host        = self.default_ip_address
+      host        = var.worker2_ip
       type        = "ssh"
       user        = "root"
       password    = var.root_password

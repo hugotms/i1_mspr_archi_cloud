@@ -10,6 +10,9 @@
 
     - role: configure_master
       when: cloud_function == "master"
+
+    - role: install_nfs_server
+      when: cloud_function == "master"
     
     - role: configure_worker
       when: cloud_function == "worker"
