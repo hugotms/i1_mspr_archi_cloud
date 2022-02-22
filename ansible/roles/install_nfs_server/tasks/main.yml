@@ -1,5 +1,12 @@
 ---
 
+- name: create nfs-group
+  group:
+    name: nfs-group
+    state: present
+  tags: nfs
+  become: True
+
 - name: create data directory
   file:
     path: /data
