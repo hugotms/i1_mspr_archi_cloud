@@ -31,9 +31,7 @@
   become: True
 
 - name: install calico network
-  shell: >-
-    kubectl create -f https://projectcalico.docs.tigera.io/manifests/tigera-operator.yaml \
-    && kubectl create -f https://projectcalico.docs.tigera.io/manifests/custom-resources.yaml
+  shell: https://docs.projectcalico.org/v3.4/getting-started/kubernetes/installation/hosted/calico.yaml
   args:
     executable: /bin/bash
   when: cloud_function == "master"
