@@ -52,7 +52,7 @@
 - name: save command in temporary file
   lineinfile:
     path: "/tmp/{{ client_id }}.sh"
-    line: "{{ join_command.results[0].stdout }}"
+    line: "{{ join_command.stdout }}"
     create: True
   delegate_to: localhost
   when: cloud_function == "master"
