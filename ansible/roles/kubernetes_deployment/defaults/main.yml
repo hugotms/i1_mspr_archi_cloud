@@ -40,7 +40,7 @@ _apps_deploying:
             path: /var/www/html
         ports:
           - containerPort: 80
-            clusterPort: 8080
+            clusterPort: 8081
     rules:
       ingressRules:
         - ports: 8080
