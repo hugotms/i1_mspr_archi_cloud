@@ -59,6 +59,6 @@
   service:
     name: nfs-server
     enabled: True
-    state: started
+    state: restarted
   tags: nfs
   become: True
