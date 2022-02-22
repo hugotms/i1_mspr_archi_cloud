@@ -54,11 +54,11 @@
 
 - name: save command in temporary file
   lineinfile:
-    path: "/tmp/{{ client_id }}.sh"
+    path: "/tmp/{{ client_id }}-{{ inventory_hostname }}.sh"
     line: "{{ join_command.stdout }} --node-name {{ inventory_hostname }}"
     create: True
   delegate_to: localhost
-  when: cloud_function == "master"
+  when: cloud_function == "worker"
   tags: cluster
   become: True
 
@@ -71,7 +71,7 @@
 
 - name: copy join command on workers
   copy:
-    src: "/tmp/{{ client_id }}.sh"
+    src: "/tmp/{{ client_id }}-{{ inventory_hostname }}.sh"
     dest: /tmp/join_command.sh
   when: cloud_function == "worker"
   tags: cluster
@@ -79,9 +79,10 @@
 
 - name: remove command file on localhost
   file:
-    path: "/tmp/{{ client_id }}.sh"
+    path: "/tmp/{{ client_id }}-{{ inventory_hostname }}.sh"
     state: absent
   delegate_to: localhost
+  when: cloud_function == "worker"
   tags: worker
   become: True
 
