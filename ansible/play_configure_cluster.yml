@@ -18,3 +18,6 @@
       when: cloud_function == "worker"
     
     - start_docker
+
+    - role: kubernetes_deployment
+      when: cloud_function == "master"
