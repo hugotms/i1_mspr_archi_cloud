@@ -56,7 +56,7 @@ spec:
   ports:
 {% for container in item.containers %}
 {% for port in container.ports %}
-    - name: port-{{ port.clusterPort | default(port.containerPort) }}-{{ port.protocol | default('tcp') | upper }}
+    - name: port-{{ port.clusterPort | default(port.containerPort) }}-{{ port.protocol | default('tcp') | lower }}
       protocol: {{ port.protocol | default('tcp') | upper }}
       port: {{ port.clusterPort | default(port.containerPort) }}
       targetPort: {{ port.containerPort }}
