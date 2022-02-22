@@ -23,9 +23,9 @@ _apps_deploying:
           allowFrom: wordpress-service
 
   - name: wordpress
+    replicas: 2
     containers:
       - image: wordpress:latest
-        replicas: 2
         envVars:
           - name: WORDPRESS_DB_HOST
             value: mysql-service
@@ -73,9 +73,9 @@ _apps_deploying:
           protocol: udp
     
   - name: wso2
+    replicas: 2
     containers:
       - image: wso2/wso2am:latest
-        replicas: 2
         name: wso2am
         ports:
           - containerPort: 8280
@@ -83,7 +83,6 @@ _apps_deploying:
           - containerPort: 9443
           - containerPort: 5005
       - image: wso2/wso2mi:latest
-        replicas: 2
         name: wso2mi
         ports:
           - containerPort: 8290

@@ -12,7 +12,7 @@ spec:
   ingress:
   {% for ingress in item.rules.ingressRules %}
   - action: Allow
-    protocol: {{ ingress.protocol | upper | default('TCP') }}
+    protocol: {{ ingress.protocol | default('tcp') | upper }}
     source:
     {% if ingress.allowFrom is defined %}
       name: {{ ingress.allowFrom }}
@@ -25,7 +25,7 @@ spec:
   egress:
   {% for egress in item.rules.egressRules %}
   - action: Allow
-    protocol: {{ egress.protocol | upper | default('TCP') }}
+    protocol: {{ egress.protocol | default('tcp') | upper }}
     source:
     {% if egress.allowTo is defined %}
       name: {{ egress.allowTo }}
