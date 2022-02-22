@@ -30,10 +30,17 @@
   tags: cluster
   become: True
 
+- name: get calico manifest
+  get_url:
+    url: https://docs.projectcalico.org/v3.10/manifests/calico.yaml
+    dest: /tmp
+  when: cloud_function == "master"
+  tags: cluster
+
 - name: install calico network
   shell: >-
-    kubectl create -f https://projectcalico.docs.tigera.io/manifests/tigera-operator.yaml \
-    && kubectl create -f https://projectcalico.docs.tigera.io/manifests/custom-resources.yaml
+    sed -i "s/192.168.0.0\/16/{{ ansible_host.split(".")[0] }}.{{ ansible_host.split(".")[1] }}.0.0\/16/g" /tmp/calico.yaml \
+    && kubectl create -f /tmp/calico.yaml
   args:
     executable: /bin/bash
   when: cloud_function == "master"
