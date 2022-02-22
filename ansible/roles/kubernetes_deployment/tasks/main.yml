@@ -8,7 +8,7 @@
   become: True
 
 - name: apply default network policy to cluster
-  shell: kubectl apply -f /tmp/default-network-policy.yml
+  shell: calicoctl apply -f /tmp/default-network-policy.yml
   args:
     executable: /bin/bash
   tags: deployment
@@ -62,7 +62,7 @@
   tags: deployment
 
 - name: apply services network policies
-  shell: kubectl apply -f /tmp/k8s-configurations/policies/
+  shell: calicoctl apply -f /tmp/k8s-configurations/policies/
   args:
     executable: /bin/bash
   tags: deployment
