@@ -22,7 +22,7 @@
     remote_src: True
     src: /etc/kubernetes/admin.conf
     dest: /home/svcansible/.kube/config
-    user: svcansible
+    owner: svcansible
     group: ansible
   tags: master
   become: True
