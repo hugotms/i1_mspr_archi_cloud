@@ -32,7 +32,7 @@
 
 - name: get calico manifest
   get_url:
-    url: https://docs.projectcalico.org/v3.10/manifests/calico.yaml
+    url: https://docs.projectcalico.org/v3.22/manifests/calico.yaml
     dest: /tmp
   when: cloud_function == "master"
   tags: cluster
