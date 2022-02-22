@@ -48,17 +48,13 @@
   tags: cluster
   become: True
 
-- name: debug join command
-  debug:
-    var: join_command
-
 - name: save command in temporary file
   lineinfile:
-    path: "/tmp/{{ client_id }}-{{ inventory_hostname }}.sh"
-    line: "{{ join_command.stdout }} --node-name {{ inventory_hostname }}"
+    path: "/tmp/{{ client_id }}.sh"
+    line: "{{ join_command.stdout }}"
     create: True
   delegate_to: localhost
-  when: cloud_function == "worker"
+  when: cloud_function == "master"
   tags: cluster
   become: True
 
@@ -71,18 +67,26 @@
 
 - name: copy join command on workers
   copy:
-    src: "/tmp/{{ client_id }}-{{ inventory_hostname }}.sh"
+    src: "/tmp/{{ client_id }}.sh"
     dest: /tmp/join_command.sh
+  when: cloud_function == "worker"
+  tags: cluster
+  become: True
+
+- name: appen hostname to script
+  shell: "sed -i '/kubeadm/ s/$/ --node-name {{ inventory_hostname }}/' /tmp/join_command.sh"
+  args:
+    executable: /bin/bash
   when: cloud_function == "worker"
   tags: cluster
   become: True
 
 - name: remove command file on localhost
   file:
-    path: "/tmp/{{ client_id }}-{{ inventory_hostname }}.sh"
+    path: "/tmp/{{ client_id }}.sh"
     state: absent
   delegate_to: localhost
-  when: cloud_function == "worker"
+  when: cloud_function == "master"
   tags: worker
   become: True
 
