@@ -23,9 +23,9 @@ _apps_deploying:
           allowFrom: wordpress-service
 
   - name: wordpress
+    replicas: 2
     containers:
       - image: wordpress:latest
-        replicas: 2
         envVars:
           - name: WORDPRESS_DB_HOST
             value: mysql-service
@@ -40,21 +40,21 @@ _apps_deploying:
             path: /var/www/html
         ports:
           - containerPort: 80
-            clusterPort: 8080
+            clusterPort: 8081
     rules:
       ingressRules:
-        - ports: 8080
+        - ports: 8081
 
-  - name: 3cx
+  - name: ipbx3cx
     containers:
       - image: farfui/3cx:18.0.2.314
         volumes:
           - path: /mnt/backup
-            name: 3cx_backup
+            name: 3cx-backup
           - path: /mnt/recordings
-            name: 3cx_recordings
+            name: 3cx-recordings
           - path: /var/log
-            name: 3cx_log
+            name: 3cx-log
         ports:
           - containerPort: 443
             clusterPort: 8443
@@ -73,9 +73,9 @@ _apps_deploying:
           protocol: udp
     
   - name: wso2
+    replicas: 2
     containers:
       - image: wso2/wso2am:latest
-        replicas: 2
         name: wso2am
         ports:
           - containerPort: 8280
@@ -83,7 +83,6 @@ _apps_deploying:
           - containerPort: 9443
           - containerPort: 5005
       - image: wso2/wso2mi:latest
-        replicas: 2
         name: wso2mi
         ports:
           - containerPort: 8290

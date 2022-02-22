@@ -4,7 +4,7 @@ kind: Deployment
 metadata:
   name: {{ item.name }}-deployment
   labels:
-    app: nginx
+    app: {{ item.name }}
 spec:
   replicas: {{ item.replicas | default('1') }}
   selector:
@@ -20,44 +20,47 @@ spec:
       - name: {{ container.name | default(item.name) }}
         image: {{ container.image }}
         ports:
-      {% for port in container.ports %}
+{% for port in container.ports %}
         - containerPort: {{ port.containerPort }}
-      {% endfor %}
-  {% if container.envVars is defined %}
+{% endfor %}
+{% if container.envVars is defined %}
         env:
-    {% for env in container.envVars %}
+{% for env in container.envVars %}
         - name: {{ env.name }}
           value: {{ env.value }}
-    {% endfor %}
-  {% endif %}
-  {% if container.volumes is defined %}
+{% endfor %}
+{% endif %}
+{% if container.volumes is defined %}
         volumeMounts:
-    {% for volume in container.volumes %}
+{% for volume in container.volumes %}
         - mountPath: {{ volume.path }}
-          name: {{ volume.name }}
-    {% endfor %}
+          name: {{ volume.name | default(client_id + '-' + item.name) }}
+{% endfor %}
       volumes:
-    {% for volume in container.volumes %}
+{% for volume in container.volumes %}
       - name: {{ volume.name | default(client_id + '-' + item.name) }}
         nfs:
           server: {{ client_id }}-master
           path: /{{ item.name }}/
-    {% endfor %} 
-  {% endif %}
+{% endfor %} 
+{% endif %}
 {% endfor %}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ item.name }}-service
+  labels:
+    app: {{ item.name }}
 spec:
   selector:
     app: {{ item.name }}
   ports:
-  {% for container in item.containers %}
-    {% for port in container.ports %}
-    - protocol: {{ port.protocol | upper | default('TCP') }}
+{% for container in item.containers %}
+{% for port in container.ports %}
+    - name: port-{{ port.clusterPort | default(port.containerPort) }}-{{ port.protocol | default('tcp') | lower }}
+      protocol: {{ port.protocol | default('tcp') | upper }}
       port: {{ port.clusterPort | default(port.containerPort) }}
       targetPort: {{ port.containerPort }}
-    {% endfor %}
-  {% endfor %}
+{% endfor %}
+{% endfor %}

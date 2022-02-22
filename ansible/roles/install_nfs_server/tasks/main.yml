@@ -1,12 +1,19 @@
 ---
 
+- name: create nfs-group
+  group:
+    name: nfs-group
+    state: present
+  tags: nfs
+  become: True
+
 - name: create data directory
   file:
     path: /data
     state: directory
-    user: root
+    owner: root
     group: nfs-group
-    mode: "0770"
+    mode: "2770"
   tags: nfs
   become: True
 
@@ -17,9 +24,16 @@
   tags: nfs
   become: True
 
+- name: removing unwanted data
+  shell: tune2fs -m 0 /dev/sdb
+  args:
+    executable: /bin/bash
+  tags: nfs
+  become: True
+
 - name: mount partition on filesystem
   mount:
-    src: /dev/sdb1
+    src: /dev/sdb
     path: /data
     state: mounted
     fstype: ext4
@@ -45,6 +59,6 @@
   service:
     name: nfs-server
     enabled: True
-    state: started
+    state: restarted
   tags: nfs
   become: True

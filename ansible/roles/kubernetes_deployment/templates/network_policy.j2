@@ -4,32 +4,39 @@ kind: NetworkPolicy
 metadata:
   name: {{ item.name }}-policy
 spec:
-  selector:
-    name: {{ item.name }}
+{% if item.rules.ingressRules is defined and item.rules.egressRules is defined %}
+  selector: app == '{{ item.name }}'
+{% endif %}
+{% if item.rules.ingressRules is defined and item.rules.egressRules is not defined %}
+  selector: name == '{{ item.name }}-service'
+{% endif %}
+{% if item.rules.ingressRules is not defined and item.rules.egressRules is defined %}
+  selector: name == '{{ item.name }}-deployment'
+{% endif %}
   types:
 {% if item.rules.ingressRules is defined %}
   - Ingress
   ingress:
-  {% for ingress in item.rules.ingressRules %}
+{% for ingress in item.rules.ingressRules %}
   - action: Allow
-    protocol: {{ ingress.protocol | upper | default('TCP') }}
+    protocol: {{ ingress.protocol | default('tcp') | upper }}
     source:
-    {% if ingress.allowFrom is defined %}
-      name: {{ ingress.allowFrom }}
-    {% endif %}
+{% if ingress.allowFrom is defined %}
+      selector: name == '{{ ingress.allowFrom }}'
+{% endif %}
       ports: [{{ ingress.ports }}]
-  {% endfor %}
+{% endfor %}
 {% endif %}
 {% if item.rules.egressRules is defined %}
   - Egress
   egress:
-  {% for egress in item.rules.egressRules %}
+{% for egress in item.rules.egressRules %}
   - action: Allow
-    protocol: {{ egress.protocol | upper | default('TCP') }}
+    protocol: {{ egress.protocol | default('tcp') | upper }}
     source:
-    {% if egress.allowTo is defined %}
-      name: {{ egress.allowTo }}
-    {% endif %}
+{% if egress.allowTo is defined %}
+      selector: name == '{{ egress.allowTo }}'
+{% endif %}
       ports: [{{ egress.ports }}]
-  {% endfor %}
+{% endfor %}
 {% endif %}

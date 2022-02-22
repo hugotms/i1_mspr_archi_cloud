@@ -1,0 +1,121 @@
+---
+
+- name: initialize kubernetes cluster
+  shell: >-
+    kubeadm init --apiserver-advertise-address={{ ansible_host }} \
+    --apiserver-cert-extra-sans={{ ansible_host }}  \
+    --node-name {{ inventory_hostname }} \
+    --pod-network-cidr={{ ansible_host.split(".")[0] }}.{{ ansible_host.split(".")[1] }}.0.0/16
+  args:
+    executable: /bin/bash
+  when: cloud_function == "master"
+  tags: cluster
+  become: True
+
+- name: create svcansible kubernetes config folder
+  file:
+    path: /home/svcansible/.kube
+    state: directory
+  when: cloud_function == "master"
+  tags: cluster
+
+- name: copy kubernetes config in svcansible config folder
+  copy:
+    remote_src: True
+    src: /etc/kubernetes/admin.conf
+    dest: /home/svcansible/.kube/config
+    owner: svcansible
+    group: ansible
+  when: cloud_function == "master"
+  tags: cluster
+  become: True
+
+- name: get calico manifest
+  get_url:
+    url: https://docs.projectcalico.org/v3.22/manifests/calico.yaml
+    dest: /tmp
+  when: cloud_function == "master"
+  tags: cluster
+
+- name: install calico network
+  shell: >-
+    sed -i "s/192.168.0.0\/16/{{ ansible_host.split(".")[0] }}.{{ ansible_host.split(".")[1] }}.0.0\/16/g" /tmp/calico.yaml \
+    && kubectl create -f /tmp/calico.yaml
+  args:
+    executable: /bin/bash
+  when: cloud_function == "master"
+  tags: cluster
+
+- name: removing calico configuration file
+  file:
+    path: /tmp/calico.yaml
+    state: absent
+  when: cloud_function == "master"
+  tags: cluster
+
+- name: join cluster command
+  shell: kubeadm token create --print-join-command
+  args:
+    executable: /bin/bash
+  register: join_command
+  when: cloud_function == "master"
+  tags: cluster
+  become: True
+
+- name: save command in temporary file
+  lineinfile:
+    path: "/tmp/{{ client_id }}.sh"
+    line: "{{ join_command.stdout }}"
+    create: True
+  delegate_to: localhost
+  when: cloud_function == "master"
+  tags: cluster
+  become: True
+
+- name: restart docker service
+  service:
+    name: docker
+    state: restarted
+  tags: docker
+  become: True
+
+- name: copy join command on workers
+  copy:
+    src: "/tmp/{{ client_id }}.sh"
+    dest: /tmp/join_command.sh
+  when: cloud_function == "worker"
+  tags: cluster
+  become: True
+
+- name: appen hostname to script
+  shell: "sed -i '/kubeadm/ s/$/ --node-name {{ inventory_hostname }}/' /tmp/join_command.sh"
+  args:
+    executable: /bin/bash
+  when: cloud_function == "worker"
+  tags: cluster
+  become: True
+
+- name: remove command file on localhost
+  file:
+    path: "/tmp/{{ client_id }}.sh"
+    state: absent
+  delegate_to: localhost
+  when: cloud_function == "master"
+  tags: worker
+  become: True
+
+- name: launch joining command on workers
+  shell: bash /tmp/join_command.sh
+  args:
+    executable: /bin/bash
+  when: cloud_function == "worker"
+  tags: worker
+  become: True
+
+- name: remove command file on workers
+  file:
+    path: /tmp/join_command.sh
+    state: absent
+  when: cloud_function == "worker"
+  tags: worker
+  become: True

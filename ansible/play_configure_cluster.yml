@@ -7,14 +7,10 @@
     - kubernetes_system_requirements
     - install_docker
     - install_kubernetes
-
-    - role: configure_master
-      when: cloud_function == "master"
+    - configure_cluster
 
     - role: install_nfs_server
       when: cloud_function == "master"
-    
-    - role: configure_worker
-      when: cloud_function == "worker"
-    
-    - start_docker
+
+    - role: kubernetes_deployment
+      when: cloud_function == "master"
