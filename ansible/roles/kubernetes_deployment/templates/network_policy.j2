@@ -4,8 +4,7 @@ kind: NetworkPolicy
 metadata:
   name: {{ item.name }}-policy
 spec:
-  selector:
-    name: {{ item.name }}-service
+  selector: name == "{{ item.name }}-service"
   types:
 {% if item.rules.ingressRules is defined %}
   - Ingress
