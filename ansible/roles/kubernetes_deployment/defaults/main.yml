@@ -43,7 +43,7 @@ _apps_deploying:
             clusterPort: 8081
     rules:
       ingressRules:
-        - ports: 8080
+        - ports: 8081
 
   - name: ipbx3cx
     containers:
