@@ -55,7 +55,7 @@
 - name: save command in temporary file
   lineinfile:
     path: "/tmp/{{ client_id }}.sh"
-    line: "{{ join_command.stdout }}"
+    line: "{{ join_command.stdout }} --node-name {{ inventory_hostname }}"
     create: True
   delegate_to: localhost
   when: cloud_function == "master"
