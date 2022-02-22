@@ -45,7 +45,7 @@ _apps_deploying:
       ingressRules:
         - ports: 8080
 
-  - name: 3cx
+  - name: ipbx3cx
     containers:
       - image: farfui/3cx:18.0.2.314
         volumes:
