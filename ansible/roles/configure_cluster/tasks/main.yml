@@ -30,14 +30,14 @@
   tags: cluster
   become: True
 
-#- name: install calico network
-#  shell: >-
-#    kubectl create -f https://projectcalico.docs.tigera.io/manifests/tigera-operator.yaml \
-#    && kubectl create -f https://projectcalico.docs.tigera.io/manifests/custom-resources.yaml
-#  args:
-#    executable: /bin/bash
-#  when: cloud_function == "master"
-#  tags: cluster
+- name: install calico network
+  shell: >-
+    kubectl create -f https://projectcalico.docs.tigera.io/manifests/tigera-operator.yaml \
+    && kubectl create -f https://projectcalico.docs.tigera.io/manifests/custom-resources.yaml
+  args:
+    executable: /bin/bash
+  when: cloud_function == "master"
+  tags: cluster
 
 - name: join cluster command
   shell: kubeadm token create --print-join-command
