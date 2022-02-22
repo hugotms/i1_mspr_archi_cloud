@@ -12,7 +12,6 @@
   args:
     executable: /bin/bash
   tags: deployment
-  become: True
 
 - name: delete policy configuration file
   file:
@@ -61,14 +60,12 @@
   args:
     executable: /bin/bash
   tags: deployment
-  become: True
 
 - name: apply services network policies
   shell: kubectl apply -f /tmp/k8s-configurations/policies/
   args:
     executable: /bin/bash
   tags: deployment
-  become: True
 
 - name: delete configuration directory
   file:
