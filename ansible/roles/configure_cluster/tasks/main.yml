@@ -45,10 +45,14 @@
   tags: cluster
   become: True
 
+- name: debug join command
+  debug:
+    var: join_command
+
 - name: save command in temporary file
   lineinfile:
     path: "/tmp/{{ client_id }}.sh"
-    line: "{{ join_command.stdout_lines[0] }}"
+    line: "{{ join_command.results[0].stdout }}"
     create: True
   delegate_to: localhost
   when: cloud_function == "master"
