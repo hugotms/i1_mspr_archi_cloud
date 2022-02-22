@@ -50,11 +50,11 @@ _apps_deploying:
       - image: farfui/3cx:18.0.2.314
         volumes:
           - path: /mnt/backup
-            name: 3cx_backup
+            name: 3cx-backup
           - path: /mnt/recordings
-            name: 3cx_recordings
+            name: 3cx-recordings
           - path: /var/log
-            name: 3cx_log
+            name: 3cx-log
         ports:
           - containerPort: 443
             clusterPort: 8443
