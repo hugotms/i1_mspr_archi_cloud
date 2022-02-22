@@ -62,6 +62,13 @@
   tags: cluster
   become: True
 
+- name: start docker service
+  service:
+    name: docker
+    state: restarted
+  tags: docker
+  become: True
+
 - name: copy join command on workers
   copy:
     src: "/tmp/{{ client_id }}.sh"

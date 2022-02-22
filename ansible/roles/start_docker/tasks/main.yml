@@ -1,8 +1,0 @@
----
-
-- name: start docker service
-  service:
-    name: docker
-    state: started
-  tags: docker
-  become: True

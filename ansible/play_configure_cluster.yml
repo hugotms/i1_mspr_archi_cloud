@@ -11,8 +11,6 @@
 
     - role: install_nfs_server
       when: cloud_function == "master"
-    
-    - start_docker
 
     #- role: kubernetes_deployment
     #  when: cloud_function == "master"
