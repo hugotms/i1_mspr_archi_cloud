@@ -37,6 +37,13 @@
   tags: kubernetes
   become: True
 
+- name: renaming calico binaries
+  shell: mv /usr/local/bin/calicoctl-linux-amd64 /usr/local/bin/calicoctl
+  args:
+    executable: /bin/bash
+  tags: kubernetes
+  become: True
+
 - name: Configure node ip
   lineinfile:
     path: /etc/default/kubelet
