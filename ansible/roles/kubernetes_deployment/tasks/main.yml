@@ -42,7 +42,6 @@
   loop_control:
     label: "{{ item.name }}"
   tags: deployment
-  become: True
 
 - name: create policies configuration files
   template:
@@ -53,12 +52,14 @@
     label: "{{ item.name }}"
   when: item.rules is defined
   tags: deployment
-  become: True
 
 - name: create services on cluster
-  shell: kubectl create -k /tmp/k8s-configurations/app/
+  shell: "kubectl create -f /tmp/k8s-configurations/app/{{ item.name }}.yml"
   args:
     executable: /bin/bash
+  loop: "{{ _apps_deploying }}"
+  loop_control:
+    label: "{{ item.name }}"
   tags: deployment
 
 - name: apply services network policies
