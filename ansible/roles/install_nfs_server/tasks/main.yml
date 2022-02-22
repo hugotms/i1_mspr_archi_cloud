@@ -4,7 +4,7 @@
   file:
     path: /data
     state: directory
-    user: root
+    owner: root
     group: nfs-group
     mode: "2770"
   tags: nfs
