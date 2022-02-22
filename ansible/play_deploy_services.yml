@@ -1,0 +1,8 @@
+---
+
+- name: deploy services on cluster
+  hosts: all
+
+  roles:
+    - role: kubernetes_deployment
+      when: cloud_function == "master"
