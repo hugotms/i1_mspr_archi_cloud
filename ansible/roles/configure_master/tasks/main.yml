@@ -46,7 +46,7 @@
 - name: save command in temporary file
   lineinfile:
     path: "/tmp/{{ client_id }}.sh"
-    line: "{{ join_command.stdout }}"
+    line: "{{ join_command..stdout_lines[0] }}"
     create: True
   delegate_to: localhost
   tags: master
