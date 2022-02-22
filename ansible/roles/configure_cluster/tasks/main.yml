@@ -8,14 +8,15 @@
     --pod-network-cidr={{ ansible_host.split(".")[0] }}.{{ ansible_host.split(".")[1] }}.0.0/16
   args:
     executable: /bin/bash
-  tags: master
+  when: cloud_function == "master"
+  tags: cluster
   become: True
 
 - name: create svcansible kubernetes config folder
   file:
     path: /home/svcansible/.kube
     state: directory
-  tags: master
+  tags: cluster
 
 - name: copy kubernetes config in svcansible config folder
   copy:
@@ -24,7 +25,7 @@
     dest: /home/svcansible/.kube/config
     owner: svcansible
     group: ansible
-  tags: master
+  tags: cluster
   become: True
 
 - name: install calico network
@@ -33,14 +34,15 @@
     && kubectl create -f https://projectcalico.docs.tigera.io/manifests/custom-resources.yaml
   args:
     executable: /bin/bash
-  tags: master
+  tags: cluster
 
 - name: join cluster command
   shell: kubeadm token create --print-join-command
   args:
     executable: /bin/bash
   register: join_command
-  tags: master
+  when: cloud_function == "master"
+  tags: cluster
   become: True
 
 - name: save command in temporary file
@@ -49,5 +51,38 @@
     line: "{{ join_command.stdout_lines[0] }}"
     create: True
   delegate_to: localhost
-  tags: master
+  when: cloud_function == "master"
+  tags: cluster
+  become: True
+
+- name: copy join command on workers
+  copy:
+    src: "/tmp/{{ client_id }}.sh"
+    dest: /tmp/join_command.sh
+  when: cloud_function == "worker"
+  tags: cluster
+  become: True
+
+- name: remove command file on localhost
+  file:
+    path: "/tmp/{{ client_id }}.sh"
+    state: absent
+  delegate_to: localhost
+  tags: worker
+  become: True
+
+- name: launch joining command on workers
+  shell: bash /tmp/join_command.sh
+  args:
+    executable: /bin/bash
+  when: cloud_function == "worker"
+  tags: worker
+  become: True
+
+- name: remove command file on workers
+  file:
+    path: /tmp/join_command.sh
+    state: absent
+  when: cloud_function == "worker"
+  tags: worker
   become: True
