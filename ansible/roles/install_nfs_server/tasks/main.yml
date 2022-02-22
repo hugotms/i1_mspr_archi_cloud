@@ -24,9 +24,16 @@
   tags: nfs
   become: True
 
+- name: removing unwanted data
+  shell: tune2fs -m 0 /dev/sdb
+  args:
+    executable: /bin/bash
+  tags: nfs
+  become: True
+
 - name: mount partition on filesystem
   mount:
-    src: /dev/sdb1
+    src: /dev/sdb
     path: /data
     state: mounted
     fstype: ext4
