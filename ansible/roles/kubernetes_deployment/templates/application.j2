@@ -51,7 +51,7 @@ kind: Service
 metadata:
   name: {{ item.name }}-service
   labels:
-    service: {{ item.name }}
+    app: {{ item.name }}
 spec:
   selector:
     app: {{ item.name }}

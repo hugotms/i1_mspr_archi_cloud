@@ -4,7 +4,15 @@ kind: NetworkPolicy
 metadata:
   name: {{ item.name }}-policy
 spec:
-  selector: has(service) && service == '{{ item.name }}'
+{% if item.rules.ingressRules is defined and item.rules.egressRules is defined %}
+  selector: app == '{{ item.name }}'
+{% endif %}
+{% if item.rules.ingressRules is defined and item.rules.egressRules is not defined %}
+  selector: name == '{{ item.name }}-service'
+{% endif %}
+{% if item.rules.ingressRules is not defined and item.rules.egressRules is defined %}
+  selector: name == '{{ item.name }}-deployment'
+{% endif %}
   types:
 {% if item.rules.ingressRules is defined %}
   - Ingress
@@ -14,7 +22,7 @@ spec:
     protocol: {{ ingress.protocol | default('tcp') | upper }}
     source:
 {% if ingress.allowFrom is defined %}
-      name: {{ ingress.allowFrom }}
+      selector: name == '{{ ingress.allowFrom }}'
 {% endif %}
       ports: [{{ ingress.ports }}]
 {% endfor %}
@@ -27,7 +35,7 @@ spec:
     protocol: {{ egress.protocol | default('tcp') | upper }}
     source:
 {% if egress.allowTo is defined %}
-      name: {{ egress.allowTo }}
+      selector: name == '{{ egress.allowTo }}'
 {% endif %}
       ports: [{{ egress.ports }}]
 {% endfor %}
