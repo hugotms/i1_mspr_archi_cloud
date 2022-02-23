@@ -17,9 +17,5 @@ Une fois ceci fait, il conviendra de faire un `terraform init` afin d'initialise
 
 ```bash
 terraform apply -var="root_password=<template_root_password>" \
-    -var="ansible_private_key=<path_to_key>" \
-    -var="gateway_ip=<ip_address>" \
-    -var="master_ip=<ip_address>" \
-    -var="worker1_ip=<ip_address>" \
-    -var="worker2_ip=<ip_address>"
+    -var="ansible_private_key=<path_to_key>"
 ```

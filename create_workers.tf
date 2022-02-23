@@ -1,5 +1,5 @@
 resource "vsphere_virtual_machine" "worker1" {
-  name             = "${local.client_id}-${random_string.random1}-worker"
+  name             = "${random_string.new_client_id.result}-${random_string.random1.result}-worker"
   resource_pool_id = data.vsphere_compute_cluster.cluster.resource_pool_id
   datastore_id     = data.vsphere_datastore.datastore.id
 
@@ -10,37 +10,25 @@ resource "vsphere_virtual_machine" "worker1" {
 
   network_interface {
     network_id = data.vsphere_network.network.id
+    adapter_type = data.vsphere_virtual_machine.template.network_interface_types[0]
   }
 
   disk {
-    label = "${local.client_id}-${random_string.random1}-worker"
+    label = "worker-system"
+    datastore_id = data.vsphere_datastore.datastore.id
     size  = 20
     thin_provisioned = true
   }
 
   clone {
     template_uuid = data.vsphere_virtual_machine.template.id
-
-    customize {
-      linux_options {
-        host_name = "${local.client_id}-${random_string.random1}-worker"
-        domain    = "geronimo.com"
-      }
-
-      network_interface {
-        ipv4_address = var.worker1_ip
-        ipv4_netmask = 24
-      }
-
-      ipv4_gateway = var.gateway_ip
-    }
   }
 
   provisioner "remote-exec" {
     script = "./bash/init.sh"
 
     connection {
-      host        = var.worker1_ip
+      host        = self.default_ip_address
       type        = "ssh"
       user        = "root"
       password    = var.root_password
@@ -49,7 +37,7 @@ resource "vsphere_virtual_machine" "worker1" {
 }
 
 resource "vsphere_virtual_machine" "worker2" {
-  name             = "${local.client_id}-${random_string.random2}-worker"
+  name             = "${random_string.new_client_id.result}-${random_string.random2.result}-worker"
   resource_pool_id = data.vsphere_compute_cluster.cluster.resource_pool_id
   datastore_id     = data.vsphere_datastore.datastore.id
 
@@ -60,37 +48,25 @@ resource "vsphere_virtual_machine" "worker2" {
 
   network_interface {
     network_id = data.vsphere_network.network.id
+    adapter_type = data.vsphere_virtual_machine.template.network_interface_types[0]
   }
 
   disk {
-    label = "${local.client_id}-${random_string.random2}-worker"
+    label = "worker-system"
+    datastore_id = data.vsphere_datastore.datastore.id
     size  = 20
     thin_provisioned = true
   }
 
   clone {
     template_uuid = data.vsphere_virtual_machine.template.id
-
-    customize {
-      linux_options {
-        host_name = "${local.client_id}-${random_string.random2}-worker"
-        domain    = "geronimo.com"
-      }
-
-      network_interface {
-        ipv4_address = var.worker2_ip
-        ipv4_netmask = 24
-      }
-
-      ipv4_gateway = var.gateway_ip
-    }
   }
 
   provisioner "remote-exec" {
     script = "./bash/init.sh"
 
     connection {
-      host        = var.worker2_ip
+      host        = self.default_ip_address
       type        = "ssh"
       user        = "root"
       password    = var.root_password

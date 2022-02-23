@@ -13,12 +13,6 @@ resource "random_string" "random2" {
   special          = false
 }
 
-variable "client_id" {
-  type = string
-  description = "New client id (needed if cluster exists and you want to add workers)"
-  default = null
-}
-
 variable "root_password" {
   type = string
   description = "Template root password"
@@ -29,30 +23,6 @@ variable "ansible_private_key" {
   type = string
   description = "Path to ansible private key"
   default = "/tmp/dummy/private.key"
-}
-
-variable "master_ip" {
-  type = string
-  description = "Master ip address"
-}
-
-variable "worker1_ip" {
-  type = string
-  description = "Worker 1 ip address"
-}
-
-variable "worker2_ip" {
-  type = string
-  description = "Worker 2 ip address"
-}
-
-variable "gateway_ip" {
-  type = string
-  description = "Worker 2 ip address"
-}
-
-locals {
-  client_id = defaults(var.client_id, random_string.new_client_id.id)
 }
 
 data "vsphere_datacenter" "dc" {
@@ -75,6 +45,6 @@ data "vsphere_network" "network" {
 }
 
 data "vsphere_virtual_machine" "template" {
-  name          = "default_template"
+  name          = "ZUR-DEB-TEMPLATE"
   datacenter_id = data.vsphere_datacenter.dc.id
 }

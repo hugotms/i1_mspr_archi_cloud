@@ -17,12 +17,12 @@ resource "local_file" "inventory" {
 
 resource "null_resource" "ansible" {
   provisioner "local-exec" {
-    command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -u svcansible -e client_id=${local.client_id} -i ${local_file.inventory.filename} --private-key ${var.ansible_private_key} ./ansible/play_configure_cluster.yml"
+    command = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -u svcansible -e client_id=${random_string.new_client_id.result} -i ${local_file.inventory.filename} --private-key ${var.ansible_private_key} ./ansible/play_configure_cluster.yml"
   }
 }
 
-output "client_id" {
+output "client_ip" {
   depends_on = [null_resource.ansible]
   description = "Client informations"
-  value = "Cluster IP for client ${local.client_id} is ${vsphere_virtual_machine.master.default_ip_address}"
+  value = "IP for client ${random_string.new_client_id.result} is ${vsphere_virtual_machine.master.default_ip_address}"
 }

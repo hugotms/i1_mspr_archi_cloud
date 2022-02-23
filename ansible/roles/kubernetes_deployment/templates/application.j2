@@ -34,13 +34,13 @@ spec:
         volumeMounts:
 {% for volume in container.volumes %}
         - mountPath: {{ volume.path }}
-          name: {{ volume.name | default(client_id + '-' + item.name) }}
+          name: {{ volume.name | default(client_id | lower + '-' + item.name) }}
 {% endfor %}
       volumes:
 {% for volume in container.volumes %}
-      - name: {{ volume.name | default(client_id + '-' + item.name) }}
+      - name: {{ volume.name | default(client_id | lower + '-' + item.name) }}
         nfs:
-          server: {{ client_id }}-master
+          server: {{ client_id | lower }}-master
           path: /{{ item.name }}/
 {% endfor %} 
 {% endif %}

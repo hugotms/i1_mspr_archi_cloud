@@ -4,8 +4,8 @@
   shell: >-
     kubeadm init --apiserver-advertise-address={{ ansible_host }} \
     --apiserver-cert-extra-sans={{ ansible_host }}  \
-    --node-name {{ inventory_hostname }} \
-    --pod-network-cidr={{ ansible_host.split(".")[0] }}.{{ ansible_host.split(".")[1] }}.0.0/16
+    --node-name {{ inventory_hostname | lower }} \
+    --pod-network-cidr=192.168.0.0/16
   args:
     executable: /bin/bash
   when: cloud_function == "master"
@@ -38,9 +38,7 @@
   tags: cluster
 
 - name: install calico network
-  shell: >-
-    sed -i "s/192.168.0.0\/16/{{ ansible_host.split(".")[0] }}.{{ ansible_host.split(".")[1] }}.0.0\/16/g" /tmp/calico.yaml \
-    && kubectl create -f /tmp/calico.yaml
+  shell: kubectl create -f /tmp/calico.yaml
   args:
     executable: /bin/bash
   when: cloud_function == "master"
@@ -64,7 +62,7 @@
 
 - name: save command in temporary file
   lineinfile:
-    path: "/tmp/{{ client_id }}.sh"
+    path: "/tmp/{{ client_id | lower }}.sh"
     line: "{{ join_command.stdout }}"
     create: True
   delegate_to: localhost
@@ -81,14 +79,14 @@
 
 - name: copy join command on workers
   copy:
-    src: "/tmp/{{ client_id }}.sh"
+    src: "/tmp/{{ client_id | lower }}.sh"
     dest: /tmp/join_command.sh
   when: cloud_function == "worker"
   tags: cluster
   become: True
 
 - name: appen hostname to script
-  shell: "sed -i '/kubeadm/ s/$/ --node-name {{ inventory_hostname }}/' /tmp/join_command.sh"
+  shell: "sed -i '/kubeadm/ s/$/ --node-name {{ inventory_hostname | lower }}/' /tmp/join_command.sh"
   args:
     executable: /bin/bash
   when: cloud_function == "worker"
@@ -97,7 +95,7 @@
 
 - name: remove command file on localhost
   file:
-    path: "/tmp/{{ client_id }}.sh"
+    path: "/tmp/{{ client_id | lower }}.sh"
     state: absent
   delegate_to: localhost
   when: cloud_function == "master"
