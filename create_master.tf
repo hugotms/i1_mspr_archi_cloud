@@ -8,6 +8,11 @@ resource "vsphere_virtual_machine" "master" {
   memory   = 8192
   guest_id = "debian10_64Guest"
 
+  network_interface {
+    network_id = data.vsphere_network.network.id
+    adapter_type = data.vsphere_virtual_machine.template.network_interface_types[0]
+  }
+
   disk {
     label = "master-system"
     datastore_id = data.vsphere_datastore.datastore.id
@@ -32,10 +37,7 @@ resource "vsphere_virtual_machine" "master" {
         domain    = "geronimo.com"
       }
 
-      network_interface {
-        network_id = data.vsphere_network.network.id
-        adapter_type = data.vsphere_virtual_machine.template.network_interface_types[0]
-      }
+      network_interface {}
 
     /*
     Commented block as VMs will be in DHCP for testing purposes

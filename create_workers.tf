@@ -8,6 +8,11 @@ resource "vsphere_virtual_machine" "worker1" {
   memory   = 4096
   guest_id = "debian10_64Guest"
 
+  network_interface {
+    network_id = data.vsphere_network.network.id
+    adapter_type = data.vsphere_virtual_machine.template.network_interface_types[0]
+  }
+
   disk {
     label = "worker-label"
     datastore_id = data.vsphere_datastore.datastore.id
@@ -24,10 +29,7 @@ resource "vsphere_virtual_machine" "worker1" {
         domain    = "geronimo.com"
       }
 
-      network_interface {
-        network_id = data.vsphere_network.network.id
-        adapter_type = data.vsphere_virtual_machine.template.network_interface_types[0]
-      }
+      network_interface {}
 
     /*
     Commented block as VMs will be in DHCP for testing purposes
@@ -65,6 +67,11 @@ resource "vsphere_virtual_machine" "worker2" {
   memory   = 4096
   guest_id = "debian10_64Guest"
 
+  network_interface {
+    network_id = data.vsphere_network.network.id
+    adapter_type = data.vsphere_virtual_machine.template.network_interface_types[0]
+  }
+
   disk {
     label = "worker-system"
     datastore_id = data.vsphere_datastore.datastore.id
@@ -81,10 +88,7 @@ resource "vsphere_virtual_machine" "worker2" {
         domain    = "geronimo.com"
       }
 
-      network_interface {
-        network_id = data.vsphere_network.network.id
-        adapter_type = data.vsphere_virtual_machine.template.network_interface_types[0]
-      }
+      network_interface {}
 
     /*
     Commented block as VMs will be in DHCP for testing purposes
