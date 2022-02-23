@@ -88,7 +88,7 @@
   become: True
 
 - name: appen hostname to script
-  shell: "sed -i '/kubeadm/ s/$/ --node-name {{ inventory_hostname }}/' /tmp/join_command.sh"
+  shell: "sed -i '/kubeadm/ s/$/ --node-name {{ inventory_hostname | lower }}/' /tmp/join_command.sh"
   args:
     executable: /bin/bash
   when: cloud_function == "worker"
