@@ -12,13 +12,6 @@ resource "vsphere_virtual_machine" "worker1" {
     network_id = data.vsphere_network.network.id
   }
 
-  disk {
-    label = "${random_string.new_client_id.result}-${random_string.random1.result}-worker"
-    datastore_id = data.vsphere_datastore.datastore.id
-    size  = 20
-    thin_provisioned = true
-  }
-
   clone {
     template_uuid = data.vsphere_virtual_machine.template.id
 
@@ -66,13 +59,6 @@ resource "vsphere_virtual_machine" "worker2" {
 
   network_interface {
     network_id = data.vsphere_network.network.id
-  }
-
-  disk {
-    label = "${random_string.new_client_id.result}-${random_string.random2.result}-worker"
-    datastore_id = data.vsphere_datastore.datastore.id
-    size  = 20
-    thin_provisioned = true
   }
 
   clone {
