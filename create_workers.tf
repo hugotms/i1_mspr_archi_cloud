@@ -13,7 +13,7 @@ resource "vsphere_virtual_machine" "worker1" {
   }
 
   disk {
-    label = "${random_string.new_client_id.result}-${random_string.random1.result}-worker"
+    label = "worker-label"
     datastore_id = data.vsphere_datastore.datastore.id
     size  = 20
     thin_provisioned = true
@@ -69,7 +69,7 @@ resource "vsphere_virtual_machine" "worker2" {
   }
 
   disk {
-    label = "${random_string.new_client_id.result}-${random_string.random2.result}-worker"
+    label = "worker-system"
     datastore_id = data.vsphere_datastore.datastore.id
     size  = 20
     thin_provisioned = true
