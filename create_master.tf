@@ -13,7 +13,7 @@ resource "vsphere_virtual_machine" "master" {
   }
 
   disk {
-    label = "${random_string.new_client_id.result}-master-system"
+    label = "master-system"
     datastore_id = data.vsphere_datastore.datastore.id
     size  = 50
     unit_number = 0
