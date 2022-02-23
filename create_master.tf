@@ -6,7 +6,7 @@ resource "vsphere_virtual_machine" "master" {
   num_cpus = 4
   num_cores_per_socket = 4
   memory   = 8192
-  guest_id = "other3xLinux64Guest"
+  guest_id = "debian10_64Guest"
 
   network_interface {
     network_id = data.vsphere_network.network.id
