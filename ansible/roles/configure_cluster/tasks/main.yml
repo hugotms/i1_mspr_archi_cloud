@@ -4,7 +4,7 @@
   shell: >-
     kubeadm init --apiserver-advertise-address={{ ansible_host }} \
     --apiserver-cert-extra-sans={{ ansible_host }}  \
-    --node-name {{ inventory_hostname }} \
+    --node-name {{ inventory_hostname | lower }} \
     --pod-network-cidr={{ ansible_host.split(".")[0] }}.{{ ansible_host.split(".")[1] }}.0.0/16
   args:
     executable: /bin/bash
