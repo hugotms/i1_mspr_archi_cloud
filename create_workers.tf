@@ -27,12 +27,17 @@ resource "vsphere_virtual_machine" "worker1" {
         domain    = "geronimo.com"
       }
 
+    /*
+    Commented block as VMs will be in DHCP for testing purposes
+
       network_interface {
         ipv4_address = var.worker1_ip
         ipv4_netmask = 24
       }
 
       ipv4_gateway = var.gateway_ip
+
+    */
     }
   }
 
@@ -40,7 +45,7 @@ resource "vsphere_virtual_machine" "worker1" {
     script = "./bash/init.sh"
 
     connection {
-      host        = var.worker1_ip
+      host        = self.default_ip_address
       type        = "ssh"
       user        = "root"
       password    = var.root_password
@@ -77,12 +82,17 @@ resource "vsphere_virtual_machine" "worker2" {
         domain    = "geronimo.com"
       }
 
+    /*
+    Commented block as VMs will be in DHCP for testing purposes
+
       network_interface {
         ipv4_address = var.worker2_ip
         ipv4_netmask = 24
       }
 
       ipv4_gateway = var.gateway_ip
+
+    */
     }
   }
 
@@ -90,7 +100,7 @@ resource "vsphere_virtual_machine" "worker2" {
     script = "./bash/init.sh"
 
     connection {
-      host        = var.worker2_ip
+      host        = self.default_ip_address
       type        = "ssh"
       user        = "root"
       password    = var.root_password

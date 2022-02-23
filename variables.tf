@@ -31,6 +31,9 @@ variable "ansible_private_key" {
   default = "/tmp/dummy/private.key"
 }
 
+/*
+Commented block as VMs will be in DHCP for testing purposes
+
 variable "master_ip" {
   type = string
   description = "Master ip address"
@@ -50,6 +53,8 @@ variable "gateway_ip" {
   type = string
   description = "Worker 2 ip address"
 }
+
+*/
 
 locals {
   client_id = defaults(var.client_id, random_string.new_client_id.id)

@@ -32,12 +32,17 @@ resource "vsphere_virtual_machine" "master" {
         domain    = "geronimo.com"
       }
 
+    /*
+    Commented block as VMs will be in DHCP for testing purposes
+
       network_interface {
         ipv4_address = var.master_ip
         ipv4_netmask = 24
       }
 
       ipv4_gateway = var.gateway_ip
+
+    */
     }
   }
 
@@ -45,7 +50,7 @@ resource "vsphere_virtual_machine" "master" {
     script = "./bash/init.sh"
 
     connection {
-      host        = var.master_ip
+      host        = self.default_ip_address
       type        = "ssh"
       user        = "root"
       password    = var.root_password
