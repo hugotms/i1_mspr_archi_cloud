@@ -14,7 +14,7 @@ resource "vsphere_virtual_machine" "worker1" {
   }
 
   disk {
-    label = "worker-label"
+    label = "worker-system"
     datastore_id = data.vsphere_datastore.datastore.id
     size  = 20
     thin_provisioned = true
