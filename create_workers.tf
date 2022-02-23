@@ -6,7 +6,7 @@ resource "vsphere_virtual_machine" "worker1" {
   num_cpus = 2
   num_cores_per_socket = 2
   memory   = 4096
-  guest_id = "debian10_64Guest"
+  guest_id = "other3xLinux64Guest"
 
   network_interface {
     network_id = data.vsphere_network.network.id
@@ -65,7 +65,7 @@ resource "vsphere_virtual_machine" "worker2" {
   num_cpus = 2
   num_cores_per_socket = 2
   memory   = 4096
-  guest_id = "debian10_64Guest"
+  guest_id = "other3xLinux64Guest"
 
   network_interface {
     network_id = data.vsphere_network.network.id
