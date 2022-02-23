@@ -1,5 +1,5 @@
 resource "vsphere_virtual_machine" "master" {
-  name             = "${random_string.new_client_id}-master"
+  name             = "${random_string.new_client_id.result}-master"
   resource_pool_id = data.vsphere_compute_cluster.cluster.resource_pool_id
   datastore_id     = data.vsphere_datastore.datastore.id
 
@@ -13,12 +13,12 @@ resource "vsphere_virtual_machine" "master" {
   }
 
   disk {
-    label = "${random_string.new_client_id}-master-system"
+    label = "${random_string.new_client_id.result}-master-system"
     size  = 50
   }
 
   disk {
-    label = "${random_string.new_client_id}-master-data"
+    label = "${random_string.new_client_id.result}-master-data"
     size  = 256
     thin_provisioned = true
   }
@@ -28,7 +28,7 @@ resource "vsphere_virtual_machine" "master" {
 
     customize {
       linux_options {
-        host_name = "${random_string.new_client_id}-master"
+        host_name = "${random_string.new_client_id.result}-master"
         domain    = "geronimo.com"
       }
 
