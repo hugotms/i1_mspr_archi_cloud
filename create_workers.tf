@@ -10,7 +10,7 @@ resource "vsphere_virtual_machine" "worker1" {
 
   network_interface {
     network_id = data.vsphere_network.network.id
-    adapter_type = data.vsphere_virtual_machine.template.template.network_interface_types[0]
+    adapter_type = data.vsphere_virtual_machine.template.network_interface_types[0]
   }
 
   disk {
@@ -67,7 +67,7 @@ resource "vsphere_virtual_machine" "worker2" {
 
   network_interface {
     network_id = data.vsphere_network.network.id
-    adapter_type = data.vsphere_virtual_machine.template.template.network_interface_types[0]
+    adapter_type = data.vsphere_virtual_machine.template.network_interface_types[0]
   }
 
   disk {

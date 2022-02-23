@@ -10,7 +10,7 @@ resource "vsphere_virtual_machine" "master" {
 
   network_interface {
     network_id = data.vsphere_network.network.id
-    adapter_type = data.vsphere_virtual_machine.template.template.network_interface_types[0]
+    adapter_type = data.vsphere_virtual_machine.template.network_interface_types[0]
   }
 
   disk {
