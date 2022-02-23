@@ -25,31 +25,6 @@ variable "ansible_private_key" {
   default = "/tmp/dummy/private.key"
 }
 
-/*
-Commented block as VMs will be in DHCP for testing purposes
-
-variable "master_ip" {
-  type = string
-  description = "Master ip address"
-}
-
-variable "worker1_ip" {
-  type = string
-  description = "Worker 1 ip address"
-}
-
-variable "worker2_ip" {
-  type = string
-  description = "Worker 2 ip address"
-}
-
-variable "gateway_ip" {
-  type = string
-  description = "Worker 2 ip address"
-}
-
-*/
-
 data "vsphere_datacenter" "dc" {
   name = "ha_datacenter"
 }
