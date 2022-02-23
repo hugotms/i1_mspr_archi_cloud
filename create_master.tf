@@ -13,11 +13,13 @@ resource "vsphere_virtual_machine" "master" {
   }
 
   disk {
+    name = "${random_string.new_client_id.result}-master-system"
     label = "${random_string.new_client_id.result}-master-system"
     size  = 50
   }
 
   disk {
+    name = "${random_string.new_client_id.result}-master-data"
     label = "${random_string.new_client_id.result}-master-data"
     size  = 256
     thin_provisioned = true
