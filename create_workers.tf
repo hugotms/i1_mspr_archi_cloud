@@ -1,5 +1,5 @@
 resource "vsphere_virtual_machine" "worker1" {
-  name             = "${local.client_id}-${random_string.random1}-worker"
+  name             = "${random_string.new_client_id}-${random_string.random1}-worker"
   resource_pool_id = data.vsphere_compute_cluster.cluster.resource_pool_id
   datastore_id     = data.vsphere_datastore.datastore.id
 
@@ -13,7 +13,7 @@ resource "vsphere_virtual_machine" "worker1" {
   }
 
   disk {
-    label = "${local.client_id}-${random_string.random1}-worker"
+    label = "${random_string.new_client_id}-${random_string.random1}-worker"
     size  = 20
     thin_provisioned = true
   }
@@ -23,7 +23,7 @@ resource "vsphere_virtual_machine" "worker1" {
 
     customize {
       linux_options {
-        host_name = "${local.client_id}-${random_string.random1}-worker"
+        host_name = "${random_string.new_client_id}-${random_string.random1}-worker"
         domain    = "geronimo.com"
       }
 
@@ -54,7 +54,7 @@ resource "vsphere_virtual_machine" "worker1" {
 }
 
 resource "vsphere_virtual_machine" "worker2" {
-  name             = "${local.client_id}-${random_string.random2}-worker"
+  name             = "${random_string.new_client_id}-${random_string.random2}-worker"
   resource_pool_id = data.vsphere_compute_cluster.cluster.resource_pool_id
   datastore_id     = data.vsphere_datastore.datastore.id
 
@@ -68,7 +68,7 @@ resource "vsphere_virtual_machine" "worker2" {
   }
 
   disk {
-    label = "${local.client_id}-${random_string.random2}-worker"
+    label = "${random_string.new_client_id}-${random_string.random2}-worker"
     size  = 20
     thin_provisioned = true
   }
@@ -78,7 +78,7 @@ resource "vsphere_virtual_machine" "worker2" {
 
     customize {
       linux_options {
-        host_name = "${local.client_id}-${random_string.random2}-worker"
+        host_name = "${random_string.new_client_id}-${random_string.random2}-worker"
         domain    = "geronimo.com"
       }
 

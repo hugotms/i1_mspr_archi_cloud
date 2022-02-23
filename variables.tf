@@ -13,12 +13,6 @@ resource "random_string" "random2" {
   special          = false
 }
 
-variable "client_id" {
-  type = string
-  description = "New client id (needed if cluster exists and you want to add workers)"
-  default = null
-}
-
 variable "root_password" {
   type = string
   description = "Template root password"
@@ -55,10 +49,6 @@ variable "gateway_ip" {
 }
 
 */
-
-locals {
-  client_id = defaults(var.client_id, random_string.new_client_id.id)
-}
 
 data "vsphere_datacenter" "dc" {
   name = "ha_datacenter"
