@@ -30,27 +30,6 @@ resource "vsphere_virtual_machine" "master" {
 
   clone {
     template_uuid = data.vsphere_virtual_machine.template.id
-
-    customize {
-      linux_options {
-        host_name = "${random_string.new_client_id.result}-master"
-        domain    = "geronimo.com"
-      }
-
-      network_interface {}
-
-    /*
-    Commented block as VMs will be in DHCP for testing purposes
-
-      network_interface {
-        ipv4_address = var.master_ip
-        ipv4_netmask = 24
-      }
-
-      ipv4_gateway = var.gateway_ip
-
-    */
-    }
   }
 
   provisioner "remote-exec" {

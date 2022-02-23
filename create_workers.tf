@@ -22,27 +22,6 @@ resource "vsphere_virtual_machine" "worker1" {
 
   clone {
     template_uuid = data.vsphere_virtual_machine.template.id
-
-    customize {
-      linux_options {
-        host_name = "${random_string.new_client_id.result}-${random_string.random1.result}-worker"
-        domain    = "geronimo.com"
-      }
-
-      network_interface {}
-
-    /*
-    Commented block as VMs will be in DHCP for testing purposes
-
-      network_interface {
-        ipv4_address = var.worker1_ip
-        ipv4_netmask = 24
-      }
-
-      ipv4_gateway = var.gateway_ip
-
-    */
-    }
   }
 
   provisioner "remote-exec" {
@@ -81,27 +60,6 @@ resource "vsphere_virtual_machine" "worker2" {
 
   clone {
     template_uuid = data.vsphere_virtual_machine.template.id
-
-    customize {
-      linux_options {
-        host_name = "${random_string.new_client_id.result}-${random_string.random2.result}-worker"
-        domain    = "geronimo.com"
-      }
-
-      network_interface {}
-
-    /*
-    Commented block as VMs will be in DHCP for testing purposes
-
-      network_interface {
-        ipv4_address = var.worker2_ip
-        ipv4_netmask = 24
-      }
-
-      ipv4_gateway = var.gateway_ip
-
-    */
-    }
   }
 
   provisioner "remote-exec" {
