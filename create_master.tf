@@ -8,11 +8,6 @@ resource "vsphere_virtual_machine" "master" {
   memory   = 8192
   guest_id = "debian10_64Guest"
 
-  network_interface {
-    network_id = data.vsphere_network.network.id
-    adapter_type = data.vsphere_virtual_machine.template.network_interface_types[0]
-  }
-
   disk {
     label = "master-system"
     datastore_id = data.vsphere_datastore.datastore.id
@@ -35,6 +30,11 @@ resource "vsphere_virtual_machine" "master" {
       linux_options {
         host_name = "${random_string.new_client_id.result}-master"
         domain    = "geronimo.com"
+      }
+
+      network_interface {
+        network_id = data.vsphere_network.network.id
+        adapter_type = data.vsphere_virtual_machine.template.network_interface_types[0]
       }
 
     /*

@@ -8,11 +8,6 @@ resource "vsphere_virtual_machine" "worker1" {
   memory   = 4096
   guest_id = "debian10_64Guest"
 
-  network_interface {
-    network_id = data.vsphere_network.network.id
-    adapter_type = data.vsphere_virtual_machine.template.network_interface_types[0]
-  }
-
   disk {
     label = "worker-label"
     datastore_id = data.vsphere_datastore.datastore.id
@@ -27,6 +22,11 @@ resource "vsphere_virtual_machine" "worker1" {
       linux_options {
         host_name = "${random_string.new_client_id.result}-${random_string.random1.result}-worker"
         domain    = "geronimo.com"
+      }
+
+      network_interface {
+        network_id = data.vsphere_network.network.id
+        adapter_type = data.vsphere_virtual_machine.template.network_interface_types[0]
       }
 
     /*
@@ -65,11 +65,6 @@ resource "vsphere_virtual_machine" "worker2" {
   memory   = 4096
   guest_id = "debian10_64Guest"
 
-  network_interface {
-    network_id = data.vsphere_network.network.id
-    adapter_type = data.vsphere_virtual_machine.template.network_interface_types[0]
-  }
-
   disk {
     label = "worker-system"
     datastore_id = data.vsphere_datastore.datastore.id
@@ -84,6 +79,11 @@ resource "vsphere_virtual_machine" "worker2" {
       linux_options {
         host_name = "${random_string.new_client_id.result}-${random_string.random2.result}-worker"
         domain    = "geronimo.com"
+      }
+
+      network_interface {
+        network_id = data.vsphere_network.network.id
+        adapter_type = data.vsphere_virtual_machine.template.network_interface_types[0]
       }
 
     /*
