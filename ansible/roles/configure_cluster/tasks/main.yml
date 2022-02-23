@@ -64,7 +64,7 @@
 
 - name: save command in temporary file
   lineinfile:
-    path: "/tmp/{{ client_id }}.sh"
+    path: "/tmp/{{ client_id | lower }}.sh"
     line: "{{ join_command.stdout }}"
     create: True
   delegate_to: localhost
@@ -81,7 +81,7 @@
 
 - name: copy join command on workers
   copy:
-    src: "/tmp/{{ client_id }}.sh"
+    src: "/tmp/{{ client_id | lower }}.sh"
     dest: /tmp/join_command.sh
   when: cloud_function == "worker"
   tags: cluster
@@ -97,7 +97,7 @@
 
 - name: remove command file on localhost
   file:
-    path: "/tmp/{{ client_id }}.sh"
+    path: "/tmp/{{ client_id | lower }}.sh"
     state: absent
   delegate_to: localhost
   when: cloud_function == "master"
