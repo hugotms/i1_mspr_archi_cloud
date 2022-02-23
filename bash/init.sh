@@ -1,5 +1,6 @@
 #!/bin/bash
 
+sed -i "/cdrom/d" /etc/apt/sources.list
 apt update && apt -y install sudo
 groupadd ansible
 useradd -m -s /bin/bash -g ansible svcansible
@@ -16,3 +17,6 @@ cat > /etc/sudoers.d/svcansible << EOF
 svcansible  ALL=(ALL) NOPASSWD:ALL
 EOF
 chmod 644 /etc/sudoers.d/svcansible
+sed -i "s/PermitRootLogin yes/PermitRootLogin no/g" /etc/ssh/sshd_config
+sed -i "s/#PasswordAuthentication yes/PasswordAuthentication no/g" /etc/ssh/sshd_config
+systemctl restart sshd
