@@ -21,8 +21,8 @@ resource "null_resource" "ansible" {
   }
 }
 
-output "client_id" {
+output "client_ip" {
   depends_on = [null_resource.ansible]
   description = "Client informations"
-  value = "Cluster IP for client ${random_string.new_client_id.result} is ${vsphere_virtual_machine.master.default_ip_address}"
+  value = "IP for client ${random_string.new_client_id.result} is ${vsphere_virtual_machine.master.default_ip_address}"
 }
