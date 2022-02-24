@@ -47,6 +47,15 @@
     label: "{{ item.name }}"
   tags: deployment
 
+- name: create data directory for volumes
+  file:
+    path: "/data/{{ item.name }}"
+    state: directory
+  loop: "{{ _apps_deploying }}"
+  loop_control:
+    label: "{{ item.name }}"
+  tags: deployment
+
 - name: create policies configuration files
   template:
     src: network_policy.j2
