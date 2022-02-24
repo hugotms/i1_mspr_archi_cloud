@@ -58,7 +58,7 @@
   tags: deployment
 
 - name: create services on cluster
-  shell: "calicoctl create -f /tmp/k8s-configurations/app/{{ item.name }}.yml"
+  shell: "kubectl create -f /tmp/k8s-configurations/app/{{ item.name }}.yml"
   args:
     executable: /bin/bash
   loop: "{{ _apps_deploying }}"
