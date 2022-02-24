@@ -2,18 +2,31 @@
 apiVersion: projectcalico.org/v3
 kind: GlobalNetworkPolicy
 metadata:
-  name: allow-all
+  name: default-deny
 spec:
-  ingress:
-  - action: Allow
-    destination: {}
-    source: {}
-  egress:
-  - action: Allow
-    destination: {}
-    source: {}
-  order: 10
+  order: 1000
+  selector: all()
+  types:
+  - Ingress
+  - Egress
+---
+apiVersion: projectcalico.org/v3
+kind: GlobalNetworkPolicy
+metadata:
+  name: dns-allow
+spec:
+  order: 100
   selector: all()
   types:
   - Egress
-  - Ingress
+  egress:
+  - action: Allow
+    protocol: UDP
+    destination:
+      ports:
+      - 53
+  - action: Allow
+    protocol: TCP
+    destination:
+      ports:
+      - 53

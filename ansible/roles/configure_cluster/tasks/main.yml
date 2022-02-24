@@ -37,12 +37,12 @@
   when: cloud_function == "master"
   tags: cluster
 
-#- name: install calico network
-#  shell: kubectl create -f /tmp/calico.yaml
-#  args:
-#    executable: /bin/bash
-#  when: cloud_function == "master"
-#  tags: cluster, definitive
+- name: install calico network
+  shell: kubectl create -f /tmp/calico.yaml
+  args:
+    executable: /bin/bash
+  when: cloud_function == "master"
+  tags: cluster, definitive
 
 - name: removing calico configuration file
   file:

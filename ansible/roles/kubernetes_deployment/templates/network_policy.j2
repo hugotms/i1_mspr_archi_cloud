@@ -13,7 +13,9 @@ spec:
 {% if item.rules.ingressRules is not defined and item.rules.egressRules is defined %}
   selector: name == '{{ item.name }}-deployment'
 {% endif %}
+  types:
 {% if item.rules.ingressRules is defined %}
+  - Ingress
   ingress:
 {% for ingress in item.rules.ingressRules %}
   - action: Allow
@@ -26,6 +28,7 @@ spec:
 {% endfor %}
 {% endif %}
 {% if item.rules.egressRules is defined %}
+  - Egress
   egress:
 {% for egress in item.rules.egressRules %}
   - action: Allow
