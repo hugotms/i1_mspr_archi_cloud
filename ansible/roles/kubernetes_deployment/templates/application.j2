@@ -66,5 +66,8 @@ spec:
       protocol: {{ port.protocol | default('tcp') | upper }}
       port: {{ port.clusterPort | default(port.containerPort) }}
       targetPort: {{ port.containerPort }}
+{% if item.exposed is defined and item.exposed %}
+      nodePort: {{ port.nodePort }}
+{% endif %}
 {% endfor %}
 {% endfor %}
