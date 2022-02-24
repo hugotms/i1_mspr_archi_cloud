@@ -3,6 +3,7 @@
 - name: create nfs-group
   group:
     name: nfs-group
+    gid: 1200
     state: present
   tags: nfs
   become: True
@@ -14,6 +15,7 @@
     owner: root
     group: nfs-group
     mode: "2770"
+  when: cloud_function == "master"
   tags: nfs
   become: True
 
@@ -21,6 +23,7 @@
   filesystem:
     fstype: ext4
     dev: /dev/sdb
+  when: cloud_function == "master"
   tags: nfs
   become: True
 
@@ -28,6 +31,7 @@
   shell: tune2fs -m 0 /dev/sdb
   args:
     executable: /bin/bash
+  when: cloud_function == "master"
   tags: nfs
   become: True
 
@@ -37,13 +41,23 @@
     path: /data
     state: mounted
     fstype: ext4
+  when: cloud_function == "master"
   tags: nfs
   become: True
 
-- name: install nfs packages
+- name: install nfs packages on server
   apt:
     name: nfs-kernel-server
     state: present
+  when: cloud_function == "master"
+  tags: nfs
+  become: True
+
+- name: install nfs packages on worker
+  apt:
+    name: nfs-common
+    state: present
+  when: cloud_function == "worker"
   tags: nfs
   become: True
 
@@ -52,6 +66,7 @@
     line: "/data 192.168.0.0/16(rw,async,no_root_squash,no_subtree_check)"
     path: /etc/exports
     create: True
+  when: cloud_function == "master"
   tags: nfs
   become: True
 
@@ -60,5 +75,6 @@
     name: nfs-server
     enabled: True
     state: restarted
+  when: cloud_function == "master"
   tags: nfs
   become: True
