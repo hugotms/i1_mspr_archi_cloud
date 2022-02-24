@@ -1,9 +1,9 @@
 ---
 
 _apps_deploying:
-  - name: mysql
+  - name: mariadb
     containers:
-      - image: mysql:latest
+      - image: mariadb:10.3
         envVars:
           - name: MYSQL_ROOT_PASSWORD
             value: MotDePasseEnClair!
@@ -29,7 +29,7 @@ _apps_deploying:
       - image: wordpress:latest
         envVars:
           - name: WORDPRESS_DB_HOST
-            value: mysql-service
+            value: mariadb-service
           - name: WORDPRESS_DB_NAME
             value: wordpress
           - name: WORDPRESS_DB_USER
@@ -45,40 +45,6 @@ _apps_deploying:
     rules:
       ingressRules:
         - ports: 32001
-
-  - name: ipbx3cx
-    exposed: True
-    containers:
-      - image: farfui/3cx:18.0.2.314
-        volumes:
-          - path: /mnt/backup
-            name: 3cx-backup
-          - path: /mnt/recordings
-            name: 3cx-recordings
-          - path: /var/log
-            name: 3cx-log
-        ports:
-          - containerPort: 443
-            nodePort: 32002
-          - containerPort: 5015
-            nodePort: 32003
-          - containerPort: 5060
-            nodePort: 32004
-          - containerPort: 5060
-            nodePort: 32004
-            protocol: udp
-          - containerPort: 5061
-            nodePort: 32005
-          - containerPort: 5090
-            nodePort: 32006
-          - containerPort: 5090
-            nodePort: 32006
-            protocol: udp
-    rules:
-      ingressRules:
-        - ports: 32002, 32003, 32004, 32005, 32006
-        - ports: 32004, 32006
-          protocol: udp
     
   - name: wso2
     replicas: 2
