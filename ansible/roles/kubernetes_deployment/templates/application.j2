@@ -40,7 +40,7 @@ spec:
 {% for volume in container.volumes %}
       - name: {{ volume.name | default(client_id | lower + '-' + item.name) }}
         nfs:
-          server: {{ client_id | lower }}-master
+          server: {{ ansible_host }}
           path: /{{ item.name }}/
 {% endfor %} 
 {% endif %}

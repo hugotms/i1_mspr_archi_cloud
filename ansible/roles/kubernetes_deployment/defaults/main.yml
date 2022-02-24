@@ -13,6 +13,8 @@ _apps_deploying:
             value: wordpress
           - name: MYSQL_PASSWORD
             value: epsi2022
+        volumes:
+          - path: /var/lib/mysql
         ports:
           - containerPort: 3306
     rules:
@@ -34,6 +36,9 @@ _apps_deploying:
             value: wordpress
           - name: WORDPRESS_DB_PASSWORD
             value: epsi2022
+        volumes:
+          - name: wordpress-site
+            path: /var/www/html
         ports:
           - containerPort: 80
             nodePort: 32001

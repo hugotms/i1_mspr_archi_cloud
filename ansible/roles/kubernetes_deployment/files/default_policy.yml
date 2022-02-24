@@ -30,26 +30,3 @@ spec:
     destination:
       ports:
       - 53
----
-apiVersion: projectcalico.org/v3
-kind: GlobalNetworkPolicy
-metadata:
-  name: nfs-allow
-spec:
-  order: 110
-  selector: all()
-  types:
-  - Egress
-  egress:
-  - action: Allow
-    protocol: UDP
-    destination:
-      ports:
-      - 111
-      - 2049
-  - action: Allow
-    protocol: TCP
-    destination:
-      ports:
-      - 111
-      - 2049
