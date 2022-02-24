@@ -20,9 +20,14 @@
   file:
     path: /data
     state: directory
-    owner: root
-    group: "nfs-group"
-    mode: "02777"
+  when: cloud_function == "master"
+  tags: nfs
+  become: True
+
+- name: set permissions on data directory
+  shell: >-
+    chmod 2777 /data \
+    && chown svcansible:nfs-group /data
   when: cloud_function == "master"
   tags: nfs
   become: True
