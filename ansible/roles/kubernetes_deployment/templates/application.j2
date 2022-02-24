@@ -5,11 +5,13 @@ metadata:
   name: {{ item.name }}-deployment
   labels:
     app: {{ item.name }}
+    role: deployment
 spec:
   replicas: {{ item.replicas | default('1') }}
   selector:
     matchLabels:
       app: {{ item.name }}
+      role: pods
   template:
     metadata:
       labels:
