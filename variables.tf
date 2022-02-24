@@ -25,6 +25,12 @@ variable "ansible_private_key" {
   default = "/tmp/dummy/private.key"
 }
 
+variable "skip_tags" {
+  type = string
+  description = "Tags to skip"
+  default = ""
+}
+
 data "vsphere_datacenter" "dc" {
   name = "ha_datacenter"
 }
