@@ -24,6 +24,7 @@ _apps_deploying:
 
   - name: wordpress
     replicas: 2
+    exposed: True
     containers:
       - image: wordpress:latest
         envVars:
@@ -46,6 +47,7 @@ _apps_deploying:
         - ports: 8081
 
   - name: ipbx3cx
+    exposed: True
     containers:
       - image: farfui/3cx:18.0.2.314
         volumes:
@@ -74,6 +76,7 @@ _apps_deploying:
     
   - name: wso2
     replicas: 2
+    exposed: True
     containers:
       - image: wso2/wso2am:latest
         name: wso2am

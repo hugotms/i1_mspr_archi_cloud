@@ -52,7 +52,11 @@ metadata:
   name: {{ item.name }}-service
   labels:
     app: {{ item.name }}
+    role: service
 spec:
+{% if item.exposed is defined and item.exposed %}
+  type: NodePort
+{% endif %}
   selector:
     app: {{ item.name }}
   ports:
