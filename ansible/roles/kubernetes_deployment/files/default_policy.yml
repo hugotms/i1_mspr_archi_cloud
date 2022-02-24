@@ -50,6 +50,8 @@ spec:
   selector: has(kubernetes-host)
   preDNAT: true
   applyOnForward: true
+  types:
+  - Ingress
   ingress:
     - action: Allow
       destination:

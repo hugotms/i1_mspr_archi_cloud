@@ -24,14 +24,6 @@
   tags: nfs
   become: True
 
-- name: set permissions on data directory
-  shell: >-
-    chmod 2777 /data \
-    && chown svcansible:nfs-group /data
-  when: cloud_function == "master"
-  tags: nfs
-  become: True
-
 - name: create filesystem on seperate disk
   filesystem:
     fstype: ext4
@@ -54,6 +46,17 @@
     path: /data
     state: mounted
     fstype: ext4
+  when: cloud_function == "master"
+  tags: nfs
+  become: True
+
+- name: set permissions on data directory
+  file:
+    path: /data
+    state: directory
+    owner: svcansible
+    group: nfs-group
+    mode: "2777"
   when: cloud_function == "master"
   tags: nfs
   become: True
