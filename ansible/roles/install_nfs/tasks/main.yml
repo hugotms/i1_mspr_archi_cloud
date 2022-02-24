@@ -2,7 +2,7 @@
 
 - name: create nfs-group
   group:
-    name: nfs-group
+    name: "nfs-group"
     gid: 1200
     state: present
   tags: nfs
@@ -11,7 +11,7 @@
 - name: add svcansible to nfs-group
   user:
     name: svcansible
-    groups: nfs-group
+    groups: "nfs-group"
     append: True
   tags: nfs
   become: True
@@ -21,8 +21,8 @@
     path: /data
     state: directory
     owner: root
-    group: nfs-group
-    mode: "2777"
+    group: "nfs-group"
+    mode: "02777"
   when: cloud_function == "master"
   tags: nfs
   become: True
