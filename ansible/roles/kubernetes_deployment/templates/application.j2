@@ -16,6 +16,7 @@ spec:
     metadata:
       labels:
         app: {{ item.name }}
+        role: pods
     spec:
       containers:
 {% for container in item.containers %}
