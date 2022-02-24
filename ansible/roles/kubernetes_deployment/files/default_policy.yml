@@ -2,6 +2,17 @@
 apiVersion: projectcalico.org/v3
 kind: GlobalNetworkPolicy
 metadata:
+  name: default-deny
+spec:
+  order: 1000
+  selector: all()
+  types:
+  - Ingress
+  - Egress
+---
+apiVersion: projectcalico.org/v3
+kind: GlobalNetworkPolicy
+metadata:
   name: dns-allow
 spec:
   order: 100
@@ -21,6 +32,18 @@ spec:
 apiVersion: projectcalico.org/v3
 kind: GlobalNetworkPolicy
 metadata:
+  name: egress-allow-service
+spec:
+  order: 110
+  selector: role == "service"
+  types:
+  - Egress
+  egress:
+  - action: Allow
+---
+apiVersion: projectcalico.org/v3
+kind: GlobalNetworkPolicy
+metadata:
   name: allow-nodeport-ingress
 spec:
   order: 120
@@ -31,3 +54,4 @@ spec:
     - action: Allow
       destination:
         selector: role == "service"
+        ports: [30000:32767]

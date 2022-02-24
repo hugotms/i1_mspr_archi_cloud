@@ -7,11 +7,11 @@
   tags: deployment
   become: True
 
-- name: apply default network policy to cluster
-  shell: calicoctl apply -f /tmp/default-network-policy.yml
-  args:
-    executable: /bin/bash
-  tags: deployment
+#- name: apply default network policy to cluster
+#  shell: calicoctl apply -f /tmp/default-network-policy.yml
+#  args:
+#    executable: /bin/bash
+#  tags: deployment
 
 - name: delete policy configuration file
   file:
@@ -75,11 +75,11 @@
     label: "{{ item.name }}"
   tags: deployment
 
-- name: apply services network policies
-  shell: calicoctl apply -f /tmp/k8s-configurations/policies/
-  args:
-    executable: /bin/bash
-  tags: deployment
+#- name: apply services network policies
+#  shell: calicoctl apply -f /tmp/k8s-configurations/policies/
+#  args:
+#    executable: /bin/bash
+#  tags: deployment
 
 - name: delete configuration directory
   file:
