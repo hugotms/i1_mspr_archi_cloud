@@ -8,13 +8,21 @@
   tags: nfs
   become: True
 
+- name: add svcansible to nfs-group
+  user:
+    name: svcansible
+    groups: nfs-group
+    append: True
+  tags: nfs
+  become: True
+
 - name: create data directory
   file:
     path: /data
     state: directory
     owner: root
     group: nfs-group
-    mode: "2770"
+    mode: "2777"
   when: cloud_function == "master"
   tags: nfs
   become: True
