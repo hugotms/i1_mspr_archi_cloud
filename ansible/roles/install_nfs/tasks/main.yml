@@ -32,7 +32,7 @@
     fstype: ext4
     dev: /dev/sdb
   when: cloud_function == "master"
-  tags: nfs
+  tags: nfs, definitive
   become: True
 
 - name: removing unwanted data

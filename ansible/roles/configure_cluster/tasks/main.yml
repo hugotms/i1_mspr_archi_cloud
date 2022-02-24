@@ -9,7 +9,7 @@
   args:
     executable: /bin/bash
   when: cloud_function == "master"
-  tags: cluster
+  tags: cluster, definitive
   become: True
 
 - name: create svcansible kubernetes config folder
@@ -57,7 +57,7 @@
     executable: /bin/bash
   register: run_join_command
   when: cloud_function == "master"
-  tags: cluster
+  tags: cluster, definitive
   become: True
 
 - name: save command in temporary file
@@ -67,7 +67,7 @@
     create: True
   delegate_to: localhost
   when: cloud_function == "master"
-  tags: cluster
+  tags: cluster, definitive
   become: True
 
 - name: restart docker service
@@ -82,7 +82,7 @@
     src: "/tmp/{{ client_id | lower }}.sh"
     dest: /tmp/join_command.sh
   when: cloud_function == "worker"
-  tags: cluster
+  tags: cluster, definitive
   become: True
 
 - name: append hostname to script
@@ -90,7 +90,7 @@
   args:
     executable: /bin/bash
   when: cloud_function == "worker"
-  tags: cluster
+  tags: cluster, definitive
   become: True
 
 - name: remove command file on localhost
@@ -107,7 +107,7 @@
   args:
     executable: /bin/bash
   when: cloud_function == "worker"
-  tags: worker
+  tags: worker, definitive
   become: True
 
 - name: remove command file on workers
