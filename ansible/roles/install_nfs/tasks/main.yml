@@ -63,7 +63,7 @@
 
 - name: add network to exports
   lineinfile:
-    line: "/data 192.168.0.0/16(rw,async,no_root_squash,no_subtree_check)"
+    line: "/data {{ ansible_host.split('.')[0] }}.{{ ansible_host.split('.')[1] }}.0.0/16(rw,async,no_root_squash,no_subtree_check)"
     path: /etc/exports
     create: True
   when: cloud_function == "master"
