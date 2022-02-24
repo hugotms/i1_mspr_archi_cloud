@@ -17,8 +17,6 @@ metadata:
 spec:
   order: 100
   selector: all()
-  types:
-  - Egress
   egress:
   - action: Allow
     protocol: UDP
@@ -30,3 +28,17 @@ spec:
     destination:
       ports:
       - 53
+---
+apiVersion: projectcalico.org/v3
+kind: GlobalNetworkPolicy
+metadata:
+  name: allow-nodeport-ingress
+spec:
+  order: 120
+  selector: has(kubernetes-host)
+  preDNAT: true
+  applyOnForward: true
+  ingress:
+    - action: Allow
+      destination:
+        selector: role == "service"
