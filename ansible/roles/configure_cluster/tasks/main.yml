@@ -42,7 +42,7 @@
   args:
     executable: /bin/bash
   when: cloud_function == "master"
-  tags: cluster
+  tags: cluster, definitive
 
 - name: removing calico configuration file
   file:
