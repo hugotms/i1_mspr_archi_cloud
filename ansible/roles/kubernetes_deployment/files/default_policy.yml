@@ -45,12 +45,10 @@ spec:
     protocol: UDP
     destination:
       selector: role == "pods"
-      ports: {}
   - action: Allow
     protocol: TCP
     destination:
       selector: role == "pods"
-      ports: {}
 ---
 apiVersion: projectcalico.org/v3
 kind: GlobalNetworkPolicy
