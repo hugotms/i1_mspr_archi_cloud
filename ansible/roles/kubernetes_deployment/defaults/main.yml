@@ -73,3 +73,49 @@ _apps_deploying:
     rules:
       ingressRules:
         - ports: 32007, 32008, 32009, 32010, 32011, 32012, 32013
+  
+  - name: ipbx3cx
+    exposed: True
+    containers:
+      - image: farfui/3cx:18.0.2.314
+        volumes:
+          - path: /var/log
+            name: 3cx-log
+        ports:
+          - containerPort: 443
+            nodePort: 32014
+          - containerPort: 5015
+            nodePort: 32015
+          - containerPort: 5060
+            nodePort: 32016
+          - containerPort: 5060
+            nodePort: 32017
+            protocol: udp
+          - containerPort: 5061
+            nodePort: 32018
+          - containerPort: 5090
+            nodePort: 32019
+          - containerPort: 5090
+            nodePort: 32019
+            protocol: udp
+    rules:
+      ingressRules:
+        - ports: 32014, 32015, 32016, 32018, 32019
+        - ports: 32017, 32019
+          protocol: udp
+
+  - name: vpn
+    exposed: True
+    containers:
+      - image: linuxserver/openvpn-as:latest
+        envVars:
+          - name: TZ
+            value: Europe/Paris
+        ports:
+          - containerPort: 943
+            nodePort: 32020
+          - containerPort: 9443
+            nodePort: 32021
+          - containerPort: 1194
+            nodePort: 32022
+            protocol: udp
