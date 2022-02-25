@@ -8,9 +8,7 @@
     - install_docker
     - install_kubernetes
     - configure_cluster
-
-    - role: install_nfs_server
-      when: cloud_function == "master"
+    - install_nfs
 
     - role: kubernetes_deployment
       when: cloud_function == "master"

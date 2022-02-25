@@ -5,15 +5,18 @@ metadata:
   name: {{ item.name }}-deployment
   labels:
     app: {{ item.name }}
+    role: deployment
 spec:
   replicas: {{ item.replicas | default('1') }}
   selector:
     matchLabels:
       app: {{ item.name }}
+      role: pods
   template:
     metadata:
       labels:
         app: {{ item.name }}
+        role: pods
     spec:
       containers:
 {% for container in item.containers %}
@@ -40,8 +43,8 @@ spec:
 {% for volume in container.volumes %}
       - name: {{ volume.name | default(client_id | lower + '-' + item.name) }}
         nfs:
-          server: {{ client_id | lower }}-master
-          path: /{{ item.name }}/
+          server: {{ ansible_host }}
+          path: /data/{{ item.name }}/
 {% endfor %} 
 {% endif %}
 {% endfor %}

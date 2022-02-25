@@ -19,3 +19,11 @@ Une fois ceci fait, il conviendra de faire un `terraform init` afin d'initialise
 terraform apply -var="root_password=<template_root_password>" \
     -var="ansible_private_key=<path_to_key>"
 ```
+
+Optionnellement, il est possible de définir une liste de tags à ne pas exécuter (séparés par une virgule). Ils sont à spécifier de la sorte :
+
+```bash
+terraform apply -var="root_password=<template_root_password>" \
+    -var="ansible_private_key=<path_to_key>" \
+    -var="skip_tags=tag1,tag2"
+```
