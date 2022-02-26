@@ -41,10 +41,10 @@ _apps_deploying:
             path: /var/www/html
         ports:
           - containerPort: 80
-            nodePort: 32001
+            nodePort: 30000
     rules:
       ingressRules:
-        - ports: 32001
+        - ports: 30000
     
   - name: wso2
     replicas: 2
@@ -54,25 +54,25 @@ _apps_deploying:
         name: wso2am
         ports:
           - containerPort: 8280
-            nodePort: 32007
+            nodePort: 30001
           - containerPort: 8243
-            nodePort: 32008
+            nodePort: 30002
           - containerPort: 9443
-            nodePort: 32009
+            nodePort: 30003
           - containerPort: 5005
-            nodePort: 32010
+            nodePort: 30004
       - image: wso2/wso2mi:latest
         name: wso2mi
         ports:
           - containerPort: 8290
-            nodePort: 32011
+            nodePort: 30005
           - containerPort: 8253
-            nodePort: 32012
+            nodePort: 30006
           - containerPort: 9164
-            nodePort: 32013
+            nodePort: 30007
     rules:
       ingressRules:
-        - ports: 32007, 32008, 32009, 32010, 32011, 32012, 32013
+        - ports: 30001, 30002, 30003, 30004, 30005, 30006, 30007
   
   - name: ipbx3cx
     exposed: True
@@ -83,25 +83,25 @@ _apps_deploying:
             name: 3cx-log
         ports:
           - containerPort: 443
-            nodePort: 32014
+            nodePort: 30008
           - containerPort: 5015
-            nodePort: 32015
+            nodePort: 30009
           - containerPort: 5060
-            nodePort: 32016
+            nodePort: 30010
           - containerPort: 5060
-            nodePort: 32017
+            nodePort: 30010
             protocol: udp
           - containerPort: 5061
-            nodePort: 32018
+            nodePort: 30011
           - containerPort: 5090
-            nodePort: 32019
+            nodePort: 30012
           - containerPort: 5090
-            nodePort: 32019
+            nodePort: 30012
             protocol: udp
     rules:
       ingressRules:
-        - ports: 32014, 32015, 32016, 32018, 32019
-        - ports: 32017, 32019
+        - ports: 30008, 30009, 30010, 30011, 30012
+        - ports: 30010, 30012
           protocol: udp
 
   - name: vpn
@@ -113,9 +113,14 @@ _apps_deploying:
             value: Europe/Paris
         ports:
           - containerPort: 943
-            nodePort: 32020
+            nodePort: 30013
           - containerPort: 9443
-            nodePort: 32021
+            nodePort: 30014
           - containerPort: 1194
-            nodePort: 32022
+            nodePort: 30015
             protocol: udp
+    rules:
+      ingressRules:
+        - ports: 30013, 30014
+        - ports: 30015
+          protocol: udp
