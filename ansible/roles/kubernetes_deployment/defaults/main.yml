@@ -73,36 +73,6 @@ _apps_deploying:
     rules:
       ingressRules:
         - ports: 30001, 30002, 30003, 30004, 30005, 30006, 30007
-  
-  - name: ipbx3cx
-    exposed: True
-    containers:
-      - image: farfui/3cx:18.0.2.314
-        volumes:
-          - path: /var/log
-            name: 3cx-log
-        ports:
-          - containerPort: 443
-            nodePort: 30008
-          - containerPort: 5015
-            nodePort: 30009
-          - containerPort: 5060
-            nodePort: 30010
-          - containerPort: 5060
-            nodePort: 30010
-            protocol: udp
-          - containerPort: 5061
-            nodePort: 30011
-          - containerPort: 5090
-            nodePort: 30012
-          - containerPort: 5090
-            nodePort: 30012
-            protocol: udp
-    rules:
-      ingressRules:
-        - ports: 30008, 30009, 30010, 30011, 30012
-        - ports: 30010, 30012
-          protocol: udp
 
   - name: vpn
     exposed: True

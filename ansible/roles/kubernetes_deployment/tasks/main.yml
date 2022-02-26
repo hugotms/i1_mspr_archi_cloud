@@ -47,13 +47,27 @@
     label: "{{ item.name }}"
   tags: deployment
 
+- name: create variable data directories
+  set_fact:
+    run_directories: "{{ run_directories | default([]) + [{ 'name': item.0.name, 'volumes': item.1.volumes }] }}"
+  with_subelements:
+    - "{{ _apps_deploying }}"
+    - containers
+  loop_control:
+    label: "{{ item.0.name }}"
+  when: item.1.volumes is defined
+  tags: deployment
+
 - name: create data directory for volumes
   file:
-    path: "/data/{{ item.name }}"
+    path: "/data/{{ item.0.name }}/{{ item.1.name | default(item.1.path | replace('/', '')) | lower }}"
     state: directory
-  loop: "{{ _apps_deploying }}"
+    recurse: True
+  with_subelements:
+    - "{{ run_directories }}"
+    - volumes
   loop_control:
-    label: "{{ item.name }}"
+    label: "{{ item.0.name }}/{{ item.1.name | default(item.1.path | replace('/', '')) | lower }}"
   tags: deployment
 
 - name: create policies configuration files

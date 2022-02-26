@@ -37,14 +37,14 @@ spec:
         volumeMounts:
 {% for volume in container.volumes %}
         - mountPath: {{ volume.path }}
-          name: {{ volume.name | default(client_id | lower + '-' + item.name) }}
+          name: {{ volume.name | default(volume.path | replace("/", "")) | lower }}
 {% endfor %}
       volumes:
 {% for volume in container.volumes %}
-      - name: {{ volume.name | default(client_id | lower + '-' + item.name) }}
+      - name: {{ volume.name | default(volume.path | replace("/", "")) | lower }}
         nfs:
           server: {{ ansible_host }}
-          path: /data/{{ item.name }}/
+          path: /data/{{ item.name }}/{{ volume.name | default(volume.path | replace("/", "")) | lower }}/
 {% endfor %} 
 {% endif %}
 {% endfor %}
