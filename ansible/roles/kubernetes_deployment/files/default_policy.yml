@@ -5,7 +5,7 @@ metadata:
   name: default-deny
 spec:
   order: 1000
-  selector: all()
+  selector: projectcalico.org/namespace != "kube-system"
   types:
   - Ingress
   - Egress
@@ -15,7 +15,7 @@ kind: GlobalNetworkPolicy
 metadata:
   name: dns-allow
 spec:
-  order: 110
+  order: 100
   selector: all()
   types:
   - Egress
@@ -30,45 +30,3 @@ spec:
     destination:
       ports:
       - 53
----
-apiVersion: projectcalico.org/v3
-kind: GlobalNetworkPolicy
-metadata:
-  name: service-to-pod-allow
-spec:
-  order: 120
-  selector: role == "service"
-  types:
-  - Ingress
-  ingress:
-  - action: Allow
-    protocol: UDP
-    destination:
-      selector: role == "pods"
-  - action: Allow
-    protocol: TCP
-    destination:
-      selector: role == "pods"
----
-apiVersion: projectcalico.org/v3
-kind: GlobalNetworkPolicy
-metadata:
-  name: nodeport-allow
-spec:
-  preDNAT: True
-  applyOnForward: True
-  order: 100
-  selector: has(kubernetes-host)
-  types:
-  - Ingress
-  ingress:
-  - action: Allow
-    protocol: TCP
-    destination:
-      selector: has(kubernetes-host)
-      ports: [30000:32767]
-  - action: Allow
-    protocol: UDP
-    destination:
-      selector: has(kubernetes-host)
-      ports: [30000:32767]

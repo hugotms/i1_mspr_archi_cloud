@@ -3,9 +3,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ item.name }}-deployment
-  labels:
-    app: {{ item.name }}
-    role: deployment
 spec:
   replicas: {{ item.replicas | default('1') }}
   selector:

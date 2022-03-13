@@ -5,7 +5,7 @@
     kubeadm init --apiserver-advertise-address={{ ansible_host }} \
     --apiserver-cert-extra-sans={{ ansible_host }}  \
     --node-name {{ inventory_hostname | lower }} \
-    --pod-network-cidr=192.168.0.0/16
+    --pod-network-cidr=172.16.0.0/16
   args:
     executable: /bin/bash
   when: cloud_function == "master"
@@ -38,7 +38,9 @@
   tags: cluster
 
 - name: install calico network
-  shell: kubectl create -f /tmp/calico.yaml
+  shell: >-
+    sed -i "s/192.168./172.16./g" /tmp/calico.yaml \
+    && kubectl create -f /tmp/calico.yaml
   args:
     executable: /bin/bash
   when: cloud_function == "master"

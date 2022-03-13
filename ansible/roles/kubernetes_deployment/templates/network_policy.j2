@@ -2,41 +2,65 @@
 apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
 metadata:
-  name: {{ item.name }}-policy
+  name: {{ item.name }}-internal-ingress-policy
 spec:
-{% if item.rules.ingressRules is defined and item.rules.egressRules is defined %}
-  selector: app == '{{ item.name }}'
-{% endif %}
-{% if item.rules.ingressRules is defined and item.rules.egressRules is not defined %}
   selector: name == '{{ item.name }}-service'
-{% endif %}
-{% if item.rules.ingressRules is not defined and item.rules.egressRules is defined %}
-  selector: name == '{{ item.name }}-deployment'
-{% endif %}
   types:
-{% if item.rules.ingressRules is defined %}
   - Ingress
   ingress:
-{% for ingress in item.rules.ingressRules %}
+{% for container in item.containers %}
+{% for port in container.ports %}
   - action: Allow
-    protocol: {{ ingress.protocol | default('tcp') | upper }}
+    protocol: {{ port.protocol | default('tcp') | upper }}
     source:
-{% if ingress.allowFrom is defined %}
-      selector: name == '{{ ingress.allowFrom }}'
-{% endif %}
-      ports: [{{ ingress.ports }}]
+      ports: [{{ port.clusterPort | default(port.containerPort) }}]
+    destination:
+      selector: name == '{{ item.name }}-deployment'
+      ports: [{{ port.containerPort }}]
 {% endfor %}
-{% endif %}
+{% endfor %}
 {% if item.rules.egressRules is defined %}
+---
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: {{ item.name }}-internal-egress-policy
+spec:
+  selector: name == '{{ item.name }}-deployment'
+  types:
   - Egress
   egress:
 {% for egress in item.rules.egressRules %}
   - action: Allow
     protocol: {{ egress.protocol | default('tcp') | upper }}
-    source:
+    destination:
 {% if egress.allowTo is defined %}
       selector: name == '{{ egress.allowTo }}'
 {% endif %}
       ports: [{{ egress.ports }}]
+{% endfor %}
+{% endif %}
+{% if item.exposed is defined and item.exposed %}
+---
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: {{ item.name }}-exposed-policy
+spec:
+  selector: has(kubernetes-host)
+  types:
+  - Ingress
+  ingress:
+{% for container in item.containers %}
+{% for port in container.ports %}
+  - action: Allow
+    protocol: {{ port.protocol | default('tcp') | upper }}
+    source:
+      selector: has(kubernetes-host)
+      ports: [{{ port.nodePort }}]
+    destination:
+      selector: name == '{{ item.name }}-service'
+      ports: [{{ port.clusterPort | default(port.containerPort) }}]
+{% endfor %}
 {% endfor %}
 {% endif %}

@@ -17,10 +17,6 @@ _apps_deploying:
           - path: /var/lib/mysql
         ports:
           - containerPort: 3306
-    rules:
-      ingressRules:
-        - ports: 3306
-          allowFrom: wordpress-deployment
 
   - name: wordpress
     replicas: 2
@@ -43,8 +39,9 @@ _apps_deploying:
           - containerPort: 80
             nodePort: 30000
     rules:
-      ingressRules:
-        - ports: 30000
+      egressRules:
+        - ports: 3306
+          allowTo: mariadb-service
     
   - name: wso2
     replicas: 2
@@ -70,9 +67,6 @@ _apps_deploying:
             nodePort: 30006
           - containerPort: 9164
             nodePort: 30007
-    rules:
-      ingressRules:
-        - ports: 30001, 30002, 30003, 30004, 30005, 30006, 30007
 
   - name: vpn
     exposed: True
@@ -89,8 +83,3 @@ _apps_deploying:
           - containerPort: 1194
             nodePort: 30015
             protocol: udp
-    rules:
-      ingressRules:
-        - ports: 30013, 30014
-        - ports: 30015
-          protocol: udp
