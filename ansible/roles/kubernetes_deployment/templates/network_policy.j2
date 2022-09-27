@@ -3,6 +3,7 @@ apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
 metadata:
   name: {{ item.name }}-internal-ingress-policy
+  namespace: {{ item.namespace | default('app-namespace') }}
 spec:
   selector: name == '{{ item.name }}-service'
   types:
@@ -25,6 +26,7 @@ apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
 metadata:
   name: {{ item.name }}-internal-egress-policy
+  namespace: {{ item.namespace | default('app-namespace') }}
 spec:
   selector: name == '{{ item.name }}-deployment'
   types:
@@ -46,6 +48,7 @@ apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
 metadata:
   name: {{ item.name }}-exposed-policy
+  namespace: {{ item.namespace | default('app-namespace') }}
 spec:
   selector: has(kubernetes-host)
   types:
