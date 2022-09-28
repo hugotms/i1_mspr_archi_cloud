@@ -31,7 +31,7 @@
 
 - name: install calicoctl
   get_url:
-    url: https://github.com/projectcalico/calico/releases/download/v3.22.0/calicoctl-linux-amd64
+    url: "https://github.com/projectcalico/calico/releases/download/{{ calico_version }}/calicoctl-linux-amd64"
     dest: /usr/local/bin
     mode: "0555"
   tags: kubernetes
