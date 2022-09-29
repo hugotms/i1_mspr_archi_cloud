@@ -29,7 +29,10 @@
     fstype: ext4
     dev: /dev/sdb
   when: cloud_function == "master"
-  tags: nfs, definitive
+  tags:
+    - nfs
+    - partitions
+    - definitive
   become: True
 
 - name: removing unwanted data
@@ -37,7 +40,9 @@
   args:
     executable: /bin/bash
   when: cloud_function == "master"
-  tags: nfs
+  tags:
+    - nfs
+    - partitions
   become: True
 
 - name: mount partition on filesystem
@@ -47,7 +52,9 @@
     state: mounted
     fstype: ext4
   when: cloud_function == "master"
-  tags: nfs
+  tags:
+    - nfs
+    - partitions
   become: True
 
 - name: set permissions on data directory

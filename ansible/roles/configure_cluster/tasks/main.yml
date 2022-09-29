@@ -8,12 +8,11 @@
     --pod-network-cidr=172.16.0.0/16
   args:
     executable: /bin/bash
-  register: result
-  until: result.stdout.find("Your Kubernetes master has initialized successfully!") != -1
-  retries: 5
-  delay: 10
   when: cloud_function == "master"
-  tags: cluster, definitive
+  tags:
+    - cluster
+    - init
+    - definitive
   become: True
 
 - name: create svcansible kubernetes config folder
@@ -48,7 +47,10 @@
   args:
     executable: /bin/bash
   when: cloud_function == "master"
-  tags: cluster, definitive
+  tags:
+    - cluster
+    - calico
+    - definitive
 
 - name: removing calico configuration file
   file:
@@ -63,7 +65,10 @@
     executable: /bin/bash
   register: run_join_command
   when: cloud_function == "master"
-  tags: cluster, definitive
+  tags:
+    - cluster
+    - join
+    - definitive
   become: True
 
 - name: save command in temporary file
@@ -73,7 +78,10 @@
     create: True
   delegate_to: localhost
   when: cloud_function == "master"
-  tags: cluster, definitive
+  tags:
+    - cluster
+    - join
+    - definitive
   become: True
 
 - name: restart docker service
@@ -88,7 +96,10 @@
     src: "/tmp/{{ client_id | lower }}.sh"
     dest: /tmp/join_command.sh
   when: cloud_function == "worker"
-  tags: cluster, definitive
+  tags:
+    - cluster
+    - join
+    - definitive
   become: True
 
 - name: append hostname to script
@@ -96,7 +107,10 @@
   args:
     executable: /bin/bash
   when: cloud_function == "worker"
-  tags: cluster, definitive
+  tags:
+    - cluster
+    - join
+    - definitive
   become: True
 
 - name: remove command file on localhost
@@ -113,7 +127,10 @@
   args:
     executable: /bin/bash
   when: cloud_function == "worker"
-  tags: worker, definitive
+  tags:
+    - worker
+    - join
+    - definitive
   become: True
 
 - name: remove command file on workers
