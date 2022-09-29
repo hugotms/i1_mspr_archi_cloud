@@ -11,7 +11,10 @@
   shell: calicoctl apply -f /tmp/default-network-policy.yml
   args:
     executable: /bin/bash
-  tags: deployment
+  tags:
+    - deployment
+    - default-policy
+    - definitive
 
 - name: delete policy configuration file
   file:
