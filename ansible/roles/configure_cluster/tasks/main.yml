@@ -5,7 +5,8 @@
     kubeadm init --apiserver-advertise-address={{ ansible_host }} \
     --apiserver-cert-extra-sans={{ ansible_host }}  \
     --node-name {{ inventory_hostname | lower }} \
-    --pod-network-cidr=172.16.0.0/16
+    --pod-network-cidr=172.16.0.0/16 \
+    --cri-socket /var/run/docker.sock
   args:
     executable: /bin/bash
   when: cloud_function == "master"
