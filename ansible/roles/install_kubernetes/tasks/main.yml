@@ -1,5 +1,27 @@
 ---
 
+- name: install containerd on hosts
+  apt:
+    name: containerd
+    state: present
+  tags: kubernetes
+  become: True
+
+- name: enabling cri plugins in containerd
+  lineinfile:
+    path: /etc/containerd/config.toml
+    search_string: 'disabled_plugins = ["cri"]'
+    line: '#disabled_plugins = ["cri"]'
+  tags: kubernetes
+  become: True
+
+- name: restart containerd
+  service:
+    name: containerd
+    state: restarted
+  tags: kubernetes
+  become: True
+
 - name: add kubernetes key
   apt_key:
     url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
