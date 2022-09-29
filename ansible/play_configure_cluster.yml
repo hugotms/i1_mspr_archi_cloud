@@ -6,6 +6,8 @@
   roles:
     - role: install_kubernetes_requirements
 
+    - role: install_docker
+
     - role: install_kubernetes
       calico_version: "{{ play_calico_version }}"
 
