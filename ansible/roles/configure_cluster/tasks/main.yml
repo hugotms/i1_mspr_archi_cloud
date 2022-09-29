@@ -36,7 +36,7 @@
 - name: wait for cluster availability
   command: kubectl cluster-info
   register: result
-  until: result.stdout.find("Kubernetes master is running") != -1
+  until: result.stdout.find("Kubernetes control plane is running") != -1
   retries: 12
   delay: 10
   when: cloud_function == "master"
