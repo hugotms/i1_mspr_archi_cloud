@@ -30,18 +30,3 @@
     group: docker
   tags: docker
   become: True
-
-- name: enabling cri plugins in containerd
-  lineinfile:
-    path: /etc/containerd/config.toml
-    search_string: 'disabled_plugins = ["cri"]'
-    line: '#disabled_plugins = ["cri"]'
-  tags: docker
-  become: True
-
-- name: restart containerd
-  service:
-    name: containerd
-    state: restarted
-  tags: docker
-  become: True

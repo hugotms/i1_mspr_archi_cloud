@@ -25,3 +25,10 @@
   loop: "{{ _swap_fs }}"
   tags: system
   become: True
+
+- name: install containerd
+  apt:
+    name: containerd
+    state: present
+  tags: system
+  become: True
