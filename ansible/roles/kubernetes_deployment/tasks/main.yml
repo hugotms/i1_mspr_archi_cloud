@@ -14,6 +14,7 @@
   tags:
     - deployment
     - default-policy
+    - network
     - definitive
 
 - name: delete policy configuration file
@@ -96,7 +97,9 @@
   shell: calicoctl apply -f /tmp/k8s-configurations/policies/
   args:
     executable: /bin/bash
-  tags: deployment
+  tags:
+    - deployment
+    - network
 
 - name: delete configuration directory
   file:

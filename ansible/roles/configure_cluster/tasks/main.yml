@@ -73,7 +73,7 @@
   when: cloud_function == "master"
   tags:
     - cluster
-    - calico
+    - network
     - definitive
 
 - name: removing calico configuration file
