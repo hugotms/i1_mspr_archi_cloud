@@ -1,0 +1,47 @@
+---
+
+- name: add docker key
+  apt_key:
+    url: https://download.docker.com/linux/debian/gpg
+    state: present
+  tags: docker
+  become: True
+
+- name: add docker repository
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/debian bullseye stable
+    state: present
+    filename: docker.list
+  tags: docker
+  become: True
+
+- name: install docker packages
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: True
+  loop: "{{ _docker_packages }}"
+  tags: docker
+  become: True
+
+- name: add ansible user to docker group
+  user:
+    name: svcansible
+    group: docker
+  tags: docker
+  become: True
+
+- name: enabling cri plugins in containerd
+  lineinfile:
+    path: /etc/containerd/config.toml
+    search_string: 'disabled_plugins = ["cri"]'
+    line: '#disabled_plugins = ["cri"]'
+  tags: docker
+  become: True
+
+- name: restart containerd
+  service:
+    name: containerd
+    state: restarted
+  tags: docker
+  become: True
