@@ -36,7 +36,7 @@
 - name: add modules for containerd
   blockinfile:
     path: /etc/modules-load.d/containerd.conf
-    block: >
+    block: |
       overlay
       br_netfilter
     create: True
@@ -55,7 +55,7 @@
 - name: add system configuration for kubernetes
   blockinfile:
     path: /etc/sysctl.d/99-kubernetes-cri.conf
-    block: >
+    block: |
       net.bridge.bridge-nf-call-iptables = 1
       net.ipv4.ip_forward = 1
       net.bridge.bridge-nf-call-ip6tables = 1
