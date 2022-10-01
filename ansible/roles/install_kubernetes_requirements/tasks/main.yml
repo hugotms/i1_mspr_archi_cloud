@@ -79,6 +79,15 @@
   tags: system
   become: True
 
+- name: add cgroups configuration for containerd
+  lineinfile:
+    path: /etc/containerd/config.toml
+    insertafter: '[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]'
+    line: '            SystemdCgroup = true'
+    firstmatch: True
+  tags: system
+  become: True
+
 - name: restart containerd service
   service:
     name: containerd
