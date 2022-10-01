@@ -32,3 +32,56 @@
     state: present
   tags: system
   become: True
+
+- name: add modules for containerd
+  blockinfile:
+    path: /etc/modules-load.d/containerd.conf
+    block: >
+      overlay
+      br_netfilter
+    create: True
+    user: root
+    group: root
+  tags: system
+  become: True
+
+- name: modprobe additionnal modules
+  shell: modprobe overlay && modprobe br_netfilter
+  args:
+    executable: /bin/bash
+  tags: system
+  become: True
+
+- name: add system configuration for kubernetes
+  blockinfile:
+    path: /etc/sysctl.d/99-kubernetes-cri.conf
+    block: >
+      net.bridge.bridge-nf-call-iptables = 1
+      net.ipv4.ip_forward = 1
+      net.bridge.bridge-nf-call-ip6tables = 1
+    create: True
+    user: root
+    group: root
+  tags: system
+  become: True
+
+- name: apply system configuration
+  shell: sysctl --system
+  args:
+    executable: /bin/bash
+  tags: system
+  become: True
+
+- name: set default containerd config
+  shell: containerd config default > /etc/containerd/config.toml
+  args:
+    executable: /bin/bash
+  tags: system
+  become: True
+
+- name: restart containerd service
+  service:
+    name: containerd
+    state: restarted
+  tags: system
+  become: True

@@ -1,19 +1,5 @@
 ---
 
-- name: set default containerd config
-  shell: containerd config default > /etc/containerd/config.toml
-  args:
-    executable: /bin/bash
-  tags: cluster
-  become: True
-
-- name: restart containerd service
-  service:
-    name: containerd
-    state: restarted
-  tags: cluster
-  become: True
-
 - name: initialize kubernetes cluster
   shell: >-
     kubeadm init --apiserver-advertise-address={{ ansible_host }} \
@@ -106,13 +92,6 @@
     - cluster
     - join
     - definitive
-  become: True
-
-- name: restart docker service
-  service:
-    name: docker
-    state: restarted
-  tags: docker
   become: True
 
 - name: copy join command on workers
