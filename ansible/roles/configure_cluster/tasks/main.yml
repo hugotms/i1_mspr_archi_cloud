@@ -43,17 +43,8 @@
   changed_when: False
   tags: cluster
 
-- name: get calico manifest
-  get_url:
-    url: "https://raw.githubusercontent.com/projectcalico/calico/{{ calico_version }}/manifests/calico.yaml"
-    dest: /tmp
-  when: cloud_function == "master"
-  tags: cluster
-
-- name: install calico network
-  shell: >-
-    sed -i "s/192.168./172.16./g" /tmp/calico.yaml \
-    && kubectl create -f /tmp/calico.yaml
+- name: install calico operator
+  shell: "kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/{{ calico_version }}/manifests/tigera-operator.yaml"
   args:
     executable: /bin/bash
   when: cloud_function == "master"
@@ -61,13 +52,6 @@
     - cluster
     - network
     - definitive
-
-- name: removing calico configuration file
-  file:
-    path: /tmp/calico.yaml
-    state: absent
-  when: cloud_function == "master"
-  tags: cluster
 
 - name: join cluster command
   shell: kubeadm token create --print-join-command
