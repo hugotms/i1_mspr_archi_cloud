@@ -15,14 +15,14 @@
     - definitive
   become: True
 
-- name: create svcansible kubernetes config folder
+- name: create svcansible kubernetes config folder on master
   file:
     path: /home/svcansible/.kube
     state: directory
   when: cloud_function == "master"
   tags: cluster
 
-- name: copy kubernetes config in svcansible config folder
+- name: copy kubernetes admin config in svcansible config folder
   copy:
     remote_src: True
     src: /etc/kubernetes/admin.conf
@@ -139,6 +139,24 @@
   file:
     path: /tmp/join_command.sh
     state: absent
+  when: cloud_function == "worker"
+  tags: worker
+  become: True
+
+- name: create svcansible kubernetes config folder on worker
+  file:
+    path: /home/svcansible/.kube
+    state: directory
+  when: cloud_function == "worker"
+  tags: worker
+
+- name: copy kubernetes config in svcansible config folder
+  copy:
+    remote_src: True
+    src: /etc/kubernetes/kubelet.conf
+    dest: /home/svcansible/.kube/config
+    owner: svcansible
+    group: ansible
   when: cloud_function == "worker"
   tags: worker
   become: True
