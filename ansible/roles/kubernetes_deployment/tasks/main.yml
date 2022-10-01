@@ -15,7 +15,6 @@
     - deployment
     - default-policy
     - network
-    - definitive
 
 - name: delete policy configuration file
   file:
@@ -85,7 +84,7 @@
   tags: deployment
 
 - name: create services on cluster
-  shell: "kubectl create -f /tmp/k8s-configurations/app/{{ item.name }}.yml"
+  shell: "kubectl apply -f /tmp/k8s-configurations/app/{{ item.name }}.yml"
   args:
     executable: /bin/bash
   loop: "{{ _apps_deploying }}"
