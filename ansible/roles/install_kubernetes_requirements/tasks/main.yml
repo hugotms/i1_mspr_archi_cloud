@@ -40,7 +40,7 @@
       overlay
       br_netfilter
     create: True
-    user: root
+    owner: root
     group: root
   tags: system
   become: True
@@ -60,7 +60,7 @@
       net.ipv4.ip_forward = 1
       net.bridge.bridge-nf-call-ip6tables = 1
     create: True
-    user: root
+    owner: root
     group: root
   tags: system
   become: True
