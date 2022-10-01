@@ -4,7 +4,6 @@
   copy:
     src: default_policy.yml
     dest: /tmp/default-network-policy.yml
-  when: cloud_function == "master"
   tags: deployment
   become: True
 
@@ -12,7 +11,6 @@
   shell: calicoctl apply -f /tmp/default-network-policy.yml
   args:
     executable: /bin/bash
-  when: cloud_function == "master"
   tags:
     - deployment
     - default-policy
@@ -22,7 +20,6 @@
   file:
     path: /tmp/default-network-policy.yml
     state: absent
-  when: cloud_function == "master"
   tags: deployment
   become: True
 
@@ -32,7 +29,6 @@
     state: directory
     owner: svcansible
     group: ansible
-  when: cloud_function == "master"
   tags: deployment
   become: True
 
@@ -42,7 +38,6 @@
     state: directory
     owner: svcansible
     group: ansible
-  when: cloud_function == "master"
   tags: deployment
   become: True
 
@@ -73,7 +68,6 @@
   loop: "{{ _apps_deploying }}"
   loop_control:
     label: "{{ item.name }}"
-  when: cloud_function == "master"
   tags: deployment
 
 - name: create variable data directories
@@ -84,7 +78,7 @@
     - containers
   loop_control:
     label: "{{ item.0.name }}"
-  when: cloud_function == "master" and item.1.volumes is defined
+  when: item.1.volumes is defined
   tags: deployment
 
 - name: create data directory for volumes
@@ -97,7 +91,6 @@
     - volumes
   loop_control:
     label: "{{ item.0.name }}/{{ item.1.name | default(item.1.path | replace('/', '')) | lower }}"
-  when: cloud_function == "master"
   tags: deployment
 
 - name: create policies configuration files
@@ -107,7 +100,7 @@
   loop: "{{ _apps_deploying }}"
   loop_control:
     label: "{{ item.name }}"
-  when: cloud_function == "master" and item.rules is defined
+  when: item.rules is defined
   tags: deployment
 
 - name: create services on cluster
@@ -117,14 +110,12 @@
   loop: "{{ _apps_deploying }}"
   loop_control:
     label: "{{ item.name }}"
-  when: cloud_function == "master"
   tags: deployment
 
 - name: apply services network policies
   shell: calicoctl apply -f /tmp/k8s-configurations/policies/
   args:
     executable: /bin/bash
-  when: cloud_function == "master"
   tags:
     - deployment
     - network
@@ -133,6 +124,5 @@
   file:
     path: /tmp/k8s-configurations
     state: absent
-  when: cloud_function == "master"
   tags: deployment
   become: True
