@@ -82,8 +82,8 @@
 - name: add cgroups configuration for containerd
   lineinfile:
     path: /etc/containerd/config.toml
-    insertafter: '[plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]'
-    line: '            SystemdCgroup = true'
+    search_string: "[plugins.\"io.containerd.grpc.v1.cri\".containerd.runtimes.runc.options]"
+    line: "          [plugins.\"io.containerd.grpc.v1.cri\".containerd.runtimes.runc.options]\n            SystemdCgroup = true"
     firstmatch: True
   tags: system
   become: True
