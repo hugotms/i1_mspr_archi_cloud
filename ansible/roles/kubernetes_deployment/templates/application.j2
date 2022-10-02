@@ -23,6 +23,7 @@ spec:
         ports:
 {% for port in container.ports %}
         - containerPort: {{ port.containerPort }}
+          protocol: {{ port.protocol | default('tcp') | upper }}
 {% endfor %}
 {% if container.envVars is defined %}
         env:
