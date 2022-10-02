@@ -24,3 +24,28 @@ spec:
   - action: Allow
     source:
       selector: has(kubernetes-host)
+---
+apiVersion: projectcalico.org/v3
+kind: GlobalNetworkPolicy
+metadata:
+  name: kubernetes-host-ingress
+spec:
+  selector: has(kubernetes-host)
+  types:
+  - Ingress
+  ingress:
+  - action: Allow
+    protocol: UDP
+    destination:
+      selector: has(kubernetes-host)
+      ports:
+      - 111
+      - 2049
+  - action: Allow
+    protocol: TCP
+    destination:
+      selector: has(kubernetes-host)
+      ports:
+      - 22
+      - 111
+      - 2049
