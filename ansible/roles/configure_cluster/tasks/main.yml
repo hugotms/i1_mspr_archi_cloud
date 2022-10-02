@@ -5,21 +5,24 @@
     kubeadm init --apiserver-advertise-address={{ ansible_host }} \
     --apiserver-cert-extra-sans={{ ansible_host }}  \
     --node-name {{ inventory_hostname | lower }} \
-    --pod-network-cidr=192.168.0.0/16
+    --pod-network-cidr=172.16.0.0/16
   args:
     executable: /bin/bash
   when: cloud_function == "master"
-  tags: cluster, definitive
+  tags:
+    - cluster
+    - init
+    - definitive
   become: True
 
-- name: create svcansible kubernetes config folder
+- name: create svcansible kubernetes config folder on master
   file:
     path: /home/svcansible/.kube
     state: directory
   when: cloud_function == "master"
   tags: cluster
 
-- name: copy kubernetes config in svcansible config folder
+- name: copy kubernetes admin config in svcansible config folder
   copy:
     remote_src: True
     src: /etc/kubernetes/admin.conf
@@ -30,19 +33,33 @@
   tags: cluster
   become: True
 
+- name: wait for cluster availability
+  command: kubectl cluster-info
+  register: result
+  until: result.stdout.find("is running at") != -1
+  retries: 12
+  delay: 10
+  when: cloud_function == "master"
+  changed_when: False
+  tags: cluster
+
 - name: get calico manifest
   get_url:
-    url: https://docs.projectcalico.org/v3.22/manifests/calico.yaml
+    url: "https://raw.githubusercontent.com/projectcalico/calico/{{ calico_version }}/manifests/calico.yaml"
     dest: /tmp
   when: cloud_function == "master"
   tags: cluster
 
 - name: install calico network
-  shell: kubectl create -f /tmp/calico.yaml
+  shell: >-
+    sed -i "s/192.168./172.16./g" /tmp/calico.yaml \
+    && kubectl apply -f /tmp/calico.yaml
   args:
     executable: /bin/bash
   when: cloud_function == "master"
-  tags: cluster, definitive
+  tags:
+    - cluster
+    - network
 
 - name: removing calico configuration file
   file:
@@ -57,7 +74,10 @@
     executable: /bin/bash
   register: run_join_command
   when: cloud_function == "master"
-  tags: cluster, definitive
+  tags:
+    - cluster
+    - join
+    - definitive
   become: True
 
 - name: save command in temporary file
@@ -67,14 +87,10 @@
     create: True
   delegate_to: localhost
   when: cloud_function == "master"
-  tags: cluster, definitive
-  become: True
-
-- name: restart docker service
-  service:
-    name: docker
-    state: restarted
-  tags: docker
+  tags:
+    - cluster
+    - join
+    - definitive
   become: True
 
 - name: copy join command on workers
@@ -82,7 +98,10 @@
     src: "/tmp/{{ client_id | lower }}.sh"
     dest: /tmp/join_command.sh
   when: cloud_function == "worker"
-  tags: cluster, definitive
+  tags:
+    - cluster
+    - join
+    - definitive
   become: True
 
 - name: append hostname to script
@@ -90,7 +109,10 @@
   args:
     executable: /bin/bash
   when: cloud_function == "worker"
-  tags: cluster, definitive
+  tags:
+    - cluster
+    - join
+    - definitive
   become: True
 
 - name: remove command file on localhost
@@ -107,7 +129,10 @@
   args:
     executable: /bin/bash
   when: cloud_function == "worker"
-  tags: worker, definitive
+  tags:
+    - worker
+    - join
+    - definitive
   become: True
 
 - name: remove command file on workers

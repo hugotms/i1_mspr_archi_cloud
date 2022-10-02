@@ -2,31 +2,25 @@
 apiVersion: projectcalico.org/v3
 kind: GlobalNetworkPolicy
 metadata:
-  name: default-deny
+  name: default-deny-but-dns
 spec:
-  order: 1000
-  selector: all()
+  namespaceSelector: has(projectcalico.org/name) && projectcalico.org/name not in {"kube-system", "calico-system", "calico-apiserver"}
   types:
   - Ingress
-  - Egress
----
-apiVersion: projectcalico.org/v3
-kind: GlobalNetworkPolicy
-metadata:
-  name: dns-allow
-spec:
-  order: 100
-  selector: all()
-  types:
   - Egress
   egress:
   - action: Allow
     protocol: UDP
     destination:
+      selector: k8s-app == "kube-dns"
       ports:
       - 53
   - action: Allow
     protocol: TCP
     destination:
+      selector: k8s-app == "kube-dns"
       ports:
       - 53
+  - action: Allow
+    source:
+      selector: has(kubernetes-host)

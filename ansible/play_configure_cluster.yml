@@ -4,11 +4,15 @@
   hosts: all
 
   roles:
-    - kubernetes_system_requirements
-    - install_docker
-    - install_kubernetes
-    - configure_cluster
-    - install_nfs
+    - role: install_kubernetes_requirements
+
+    - role: install_kubernetes
+      calico_version: "{{ play_calico_version }}"
+
+    - role: configure_cluster
+      calico_version: "{{ play_calico_version }}"
+
+    - role: install_nfs
 
     - role: kubernetes_deployment
       when: cloud_function == "master"

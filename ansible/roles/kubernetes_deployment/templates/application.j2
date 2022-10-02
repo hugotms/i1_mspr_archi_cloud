@@ -3,9 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ item.name }}-deployment
-  labels:
-    app: {{ item.name }}
-    role: deployment
+  namespace: {{ item.namespace | default('default') }}
 spec:
   replicas: {{ item.replicas | default('1') }}
   selector:
@@ -37,14 +35,14 @@ spec:
         volumeMounts:
 {% for volume in container.volumes %}
         - mountPath: {{ volume.path }}
-          name: {{ volume.name | default(client_id | lower + '-' + item.name) }}
+          name: {{ volume.name | default(volume.path | replace("/", "")) | lower }}
 {% endfor %}
       volumes:
 {% for volume in container.volumes %}
-      - name: {{ volume.name | default(client_id | lower + '-' + item.name) }}
+      - name: {{ volume.name | default(volume.path | replace("/", "")) | lower }}
         nfs:
           server: {{ ansible_host }}
-          path: /data/{{ item.name }}/
+          path: /data/{{ item.name }}/{{ volume.name | default(volume.path | replace("/", "")) | lower }}/
 {% endfor %} 
 {% endif %}
 {% endfor %}
@@ -53,6 +51,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ item.name }}-service
+  namespace: {{ item.namespace | default('default') }}
   labels:
     app: {{ item.name }}
     role: service

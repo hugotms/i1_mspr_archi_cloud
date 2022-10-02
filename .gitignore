@@ -5,3 +5,5 @@ ansible/inventories/
 .terraform.*
 
 terraform.*
+
+.vscode/

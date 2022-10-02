@@ -15,23 +15,18 @@
   tags: kubernetes
   become: True
 
-- name: reload apt cache
-  apt:
-    update_cache: yes
-  tags: kubernetes
-  become: True
-
 - name: install kubernetes packages
   apt:
     name: "{{ item }}"
     state: present
+    update_cache: True
   loop: "{{ _kubernetes_packages }}"
   tags: kubernetes
   become: True
 
 - name: install calicoctl
   get_url:
-    url: https://github.com/projectcalico/calico/releases/download/v3.22.0/calicoctl-linux-amd64
+    url: "https://github.com/projectcalico/calico/releases/download/{{ calico_version }}/calicoctl-linux-amd64"
     dest: /usr/local/bin
     mode: "0555"
   tags: kubernetes
@@ -47,7 +42,7 @@
 - name: Configure node ip
   lineinfile:
     path: /etc/default/kubelet
-    line: "KUBELET_EXTRA_ARGS=--node-ip={{ ansible_host }}"
+    line: "KUBELET_EXTRA_ARGS=--node-ip={{ ansible_host }} --cgroup-driver=systemd"
     create: True
   tags: kubernetes
   become: True

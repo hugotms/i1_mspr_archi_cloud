@@ -11,7 +11,10 @@
   shell: calicoctl apply -f /tmp/default-network-policy.yml
   args:
     executable: /bin/bash
-  tags: deployment
+  tags:
+    - deployment
+    - default-policy
+    - network
 
 - name: delete policy configuration file
   file:
@@ -38,6 +41,26 @@
   tags: deployment
   become: True
 
+- name: create endpoints configuration files
+  template:
+    src: endpoint.j2
+    dest: /tmp/endpoint.yml
+  tags: deployment
+
+- name: create endpoints on cluster
+  shell: calicoctl apply -f /tmp/endpoint.yml
+  args:
+    executable: /bin/bash
+  tags:
+    - deployment
+    - network
+
+- name: delete endpoint configuration files
+  file:
+    path: /tmp/endpoint.yml
+    state: absent
+  tags: deployment
+
 - name: create services configuration files
   template:
     src: application.j2
@@ -47,13 +70,27 @@
     label: "{{ item.name }}"
   tags: deployment
 
+- name: create variable data directories
+  set_fact:
+    run_directories: "{{ run_directories | default([]) + [{ 'name': item.0.name, 'volumes': item.1.volumes }] }}"
+  with_subelements:
+    - "{{ _apps_deploying }}"
+    - containers
+  loop_control:
+    label: "{{ item.0.name }}"
+  when: item.1.volumes is defined
+  tags: deployment
+
 - name: create data directory for volumes
   file:
-    path: "/data/{{ item.name }}"
+    path: "/data/{{ item.0.name }}/{{ item.1.name | default(item.1.path | replace('/', '')) | lower }}"
     state: directory
-  loop: "{{ _apps_deploying }}"
+    recurse: True
+  with_subelements:
+    - "{{ run_directories }}"
+    - volumes
   loop_control:
-    label: "{{ item.name }}"
+    label: "{{ item.0.name }}/{{ item.1.name | default(item.1.path | replace('/', '')) | lower }}"
   tags: deployment
 
 - name: create policies configuration files
@@ -67,7 +104,7 @@
   tags: deployment
 
 - name: create services on cluster
-  shell: "kubectl create -f /tmp/k8s-configurations/app/{{ item.name }}.yml"
+  shell: "kubectl apply -f /tmp/k8s-configurations/app/{{ item.name }}.yml"
   args:
     executable: /bin/bash
   loop: "{{ _apps_deploying }}"
@@ -79,7 +116,9 @@
   shell: calicoctl apply -f /tmp/k8s-configurations/policies/
   args:
     executable: /bin/bash
-  tags: deployment
+  tags:
+    - deployment
+    - network
 
 - name: delete configuration directory
   file:
