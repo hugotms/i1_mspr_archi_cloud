@@ -21,18 +21,16 @@ spec:
       selector: k8s-app == "kube-dns"
       ports:
       - 53
-  - action: Allow
-    source:
-      selector: has(kubernetes-host)
 ---
 apiVersion: projectcalico.org/v3
 kind: GlobalNetworkPolicy
 metadata:
-  name: kubernetes-host-ingress
+  name: kubernetes-host-policy
 spec:
   selector: has(kubernetes-host)
   types:
   - Ingress
+  - Egress
   ingress:
   - action: Allow
     protocol: UDP
@@ -49,3 +47,7 @@ spec:
       - 22
       - 111
       - 2049
+  egress:
+  - action: Allow
+    source:
+      selector: has(kubernetes-host)

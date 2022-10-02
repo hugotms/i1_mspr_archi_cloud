@@ -33,7 +33,12 @@ spec:
   types:
   - Ingress
   ingress:
+{% for container in item.containers %}
+{% for port in container.ports %}
   - action: Allow
+    protocol: {{ port.protocol | default('tcp') | upper }}
+{% endfor %}
+{% endfor %}
 {% endif %}
 {% if item.rules.egressRules is defined %}
 ---
@@ -51,11 +56,11 @@ spec:
 {% for egress in item.rules.egressRules %}
   - action: Allow
     protocol: {{ egress.protocol | default('tcp') | upper }}
-    destination:
 {% if egress.allowTo is defined %}
+    destination:
       selector: app == '{{ egress.allowTo }}'
-{% endif %}
       ports: [{{ egress.ports }}]
+{% endif %}
 {% endfor %}
 {% for egress in item.rules.egressRules %}
 {% if egress.allowTo is defined %}
