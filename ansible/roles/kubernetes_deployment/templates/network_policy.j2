@@ -1,11 +1,14 @@
+{% if item.exposed is defined and item.exposed %}
 ---
 apiVersion: projectcalico.org/v3
-kind: NetworkPolicy
+kind: GlobalNetworkPolicy
 metadata:
-  name: {{ item.name }}-internal-ingress-policy
-  namespace: {{ item.namespace | default('default') }}
+  name: {{ item.name }}-exposed-policy
 spec:
-  selector: name == '{{ item.name }}-service'
+  selector: has(kubernetes-host)
+  preDNAT: true
+  applyOnForward: true
+  order: 10
   types:
   - Ingress
   ingress:
@@ -13,13 +16,25 @@ spec:
 {% for port in container.ports %}
   - action: Allow
     protocol: {{ port.protocol | default('tcp') | upper }}
-    source:
-      ports: [{{ port.clusterPort | default(port.containerPort) }}]
     destination:
-      selector: name == '{{ item.name }}-deployment'
-      ports: [{{ port.containerPort }}]
+      selector: has(kubernetes-host)
+      ports: [{{ port.nodePort }}]
 {% endfor %}
 {% endfor %}
+---
+apiVersion: projectcalico.org/v3
+kind: NetworkPolicy
+metadata:
+  name: {{ item.name }}-internal-ingress-policy
+  namespace: {{ item.namespace | default('default') }}
+spec:
+  selector: app == '{{ item.name }}'
+  order: 20
+  types:
+  - Ingress
+  ingress:
+  - action: Allow
+{% endif %}
 {% if item.rules.egressRules is defined %}
 ---
 apiVersion: projectcalico.org/v3
@@ -28,7 +43,8 @@ metadata:
   name: {{ item.name }}-internal-egress-policy
   namespace: {{ item.namespace | default('default') }}
 spec:
-  selector: name == '{{ item.name }}-deployment'
+  selector: app == '{{ item.name }}'
+  order: 30
   types:
   - Egress
   egress:
@@ -37,33 +53,30 @@ spec:
     protocol: {{ egress.protocol | default('tcp') | upper }}
     destination:
 {% if egress.allowTo is defined %}
-      selector: name == '{{ egress.allowTo }}'
+      selector: app == '{{ egress.allowTo }}'
 {% endif %}
       ports: [{{ egress.ports }}]
 {% endfor %}
-{% endif %}
-{% if item.exposed is defined and item.exposed %}
+{% for egress in item.rules.egressRules %}
+{% if egress.allowTo is defined %}
 ---
 apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
 metadata:
-  name: {{ item.name }}-exposed-policy
+  name: {{ egress.allowTo }}-internal-ingress-from-{{ item.name }}-policy
   namespace: {{ item.namespace | default('default') }}
 spec:
-  selector: has(kubernetes-host)
+  selector: app == '{{ egress.allowTo }}'
+  order: 40
   types:
   - Ingress
   ingress:
-{% for container in item.containers %}
-{% for port in container.ports %}
   - action: Allow
-    protocol: {{ port.protocol | default('tcp') | upper }}
+    protocol: {{ egress.protocol | default('tcp') | upper }}
     source:
-      selector: has(kubernetes-host)
-      ports: [{{ port.nodePort }}]
+      selector: app == '{{ item.name }}'
     destination:
-      selector: name == '{{ item.name }}-service'
-      ports: [{{ port.clusterPort | default(port.containerPort) }}]
-{% endfor %}
+      ports: [{{ egress.ports }}]
+{% endif %}
 {% endfor %}
 {% endif %}

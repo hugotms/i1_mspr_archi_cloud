@@ -41,4 +41,4 @@ _apps_deploying:
     rules:
       egressRules:
         - ports: 3306
-          allowTo: mariadb-service
+          allowTo: mariadb
