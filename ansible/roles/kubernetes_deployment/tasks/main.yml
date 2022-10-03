@@ -100,7 +100,7 @@
   loop: "{{ _apps_deploying }}"
   loop_control:
     label: "{{ item.name }}"
-  when: item.rules is defined
+  when: item.rules is defined or (item.exposed is defined and item.exposed)
   tags: deployment
 
 - name: create services on cluster
