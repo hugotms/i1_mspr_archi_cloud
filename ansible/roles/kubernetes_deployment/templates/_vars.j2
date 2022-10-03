@@ -8,7 +8,12 @@
     {
         "namespace": "{{ item.namespace }}",
         "app": "{{ app.name }}",
-        "volume": "{{ volume.name | default(volume.path | replace('/', '')) | lower }}"
+        "volume": "{{ volume.name | default(volume.path | replace('/', '')) | lower }}",
+{% if item.delete is defined and item.delete %}
+        "delete": "true"
+{% else %}
+        "delete": "false"
+{% endif %}
     },
 {% endfor%}
 {% endif %}

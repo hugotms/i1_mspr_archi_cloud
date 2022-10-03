@@ -78,19 +78,19 @@
 - name: create services configuration files
   ansible.builtin.template:
     src: application.j2
-    dest: "/tmp/k8s-configurations/deployments/{{ item.1.name }}.yml"
+    dest: "/tmp/k8s-configurations/deployments/{{ item.0.namespace }}-{{ item.1.name }}.yml"
   loop: "{{ kubernetes_deployment_conf | subelements('apps', skip_missing=True) }}"
   loop_control:
-    label: "{{ item.1.name }}"
+    label: "{{ item.0.namespace }}-{{ item.1.name }}"
   tags: deployment
 
 - name: create policies configuration files
   ansible.builtin.template:
     src: network_policy.j2
-    dest: "/tmp/k8s-configurations/policies/{{ item.1.name }}.yml"
+    dest: "/tmp/k8s-configurations/policies/{{ item.0.namespace }}-{{ item.1.name }}.yml"
   loop: "{{ kubernetes_deployment_conf | subelements('apps', skip_missing=True) }}"
   loop_control:
-    label: "{{ item.1.name }}"
+    label: "{{ item.0.namespace }}-{{ item.1.name }}"
   when: item.1.rules is defined or (item.1.exposed is defined and item.1.exposed)
   tags: deployment
 
@@ -123,6 +123,7 @@
   loop: "{{ _templated_directories.stdout | from_json }}"
   loop_control:
     label: "{{ item.namespace }}-{{ item.app }}/{{ item.volume }}"
+  when: item.delete == "false"
   tags: deployment
 
 - name: create namespaces on cluster
@@ -130,23 +131,62 @@
   loop: "{{ kubernetes_deployment_conf }}"
   loop_control:
     label: "{{ item.namespace }}"
+  when: item.delete | default(False) != True
   tags: deployment
 
 - name: create services on cluster
-  ansible.builtin.command: "kubectl apply -f /tmp/k8s-configurations/deployments/{{ item.1.name }}.yml"
+  ansible.builtin.command: "kubectl apply -f /tmp/k8s-configurations/deployments/{{ item.0.namespace }}-{{ item.1.name }}.yml"
   loop: "{{ kubernetes_deployment_conf | subelements('apps', skip_missing=True) }}"
   loop_control:
-    label: "{{ item.1.name }}"
+    label: "{{ item.0.namespace }}-{{ item.1.name }}"
+  when: item.0.delete | default(False) != True and item.1.delete | default(False) != True
   tags: deployment
 
 - name: apply services network policies
-  ansible.builtin.command: "calicoctl apply -f /tmp/k8s-configurations/policies/{{ item.1.name }}.yml"
+  ansible.builtin.command: "calicoctl apply -f /tmp/k8s-configurations/policies/{{ item.0.namespace }}-{{ item.1.name }}.yml"
   loop: "{{ kubernetes_deployment_conf | subelements('apps', skip_missing=True) }}"
   loop_control:
-    label: "{{ item.1.name }}"
+    label: "{{ item.0.namespace }}-{{ item.1.name }}"
+  when: item.0.delete | default(False) != True and item.1.delete | default(False) != True
   tags:
     - deployment
     - network
+
+- name: delete services network policies
+  ansible.builtin.command: "calicoctl delete --skip-not-exists -f /tmp/k8s-configurations/policies/{{ item.0.namespace }}-{{ item.1.name }}.yml"
+  loop: "{{ kubernetes_deployment_conf | subelements('apps', skip_missing=True) }}"
+  loop_control:
+    label: "{{ item.0.namespace }}-{{ item.1.name }}"
+  when: item.0.delete | default(False) or item.1.delete | default(False)
+  tags:
+    - deployment
+    - network
+
+- name: delete services on cluster
+  ansible.builtin.command: "kubectl delete --ignore-not-found -f /tmp/k8s-configurations/deployments/{{ item.0.namespace }}-{{ item.1.name }}.yml"
+  loop: "{{ kubernetes_deployment_conf | subelements('apps', skip_missing=True) }}"
+  loop_control:
+    label: "{{ item.0.namespace }}-{{ item.1.name }}"
+  when: item.1.delete | default(False)
+  tags: deployment
+
+- name: delete namespaces on cluster
+  ansible.builtin.command: "kubectl delete --ignore-not-found -f /tmp/k8s-configurations/namespaces/{{ item.namespace }}.yml"
+  loop: "{{ kubernetes_deployment_conf }}"
+  loop_control:
+    label: "{{ item.namespace }}"
+  when: item.delete | default(False)
+  tags: deployment
+
+- name: delete data directory for volumes
+  ansible.builtin.file:
+    path: "/data/{{ item.namespace }}-{{ item.app }}/{{ item.volume }}"
+    state: absent
+  loop: "{{ _templated_directories.stdout | from_json }}"
+  loop_control:
+    label: "{{ item.namespace }}-{{ item.app }}/{{ item.volume }}"
+  when: item.delete == "true"
+  tags: deployment
 
 - name: delete configuration directory
   ansible.builtin.file:
