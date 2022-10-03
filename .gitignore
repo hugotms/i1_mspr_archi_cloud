@@ -1,6 +1,6 @@
 ansible/inventories/
 
-ansible/group_vars/all/deployments.yml
+ansible/group_vars/control-plane/
 
 .terraform/
 

@@ -1,7 +1,7 @@
 ---
 
 - name: create nfs-group
-  group:
+  ansible.builtin.group:
     name: "nfs-group"
     gid: 1200
     state: present
@@ -9,7 +9,7 @@
   become: True
 
 - name: add svcansible to nfs-group
-  user:
+  ansible.builtin.user:
     name: svcansible
     groups: "nfs-group"
     append: True
@@ -17,7 +17,7 @@
   become: True
 
 - name: create data directory
-  file:
+  ansible.builtin.file:
     path: /data
     state: directory
   when: cloud_function == "master"
@@ -25,7 +25,7 @@
   become: True
 
 - name: create filesystem on seperate disk
-  filesystem:
+  ansible.builtin.filesystem:
     fstype: ext4
     dev: /dev/sdb
   when: cloud_function == "master"
@@ -36,9 +36,7 @@
   become: True
 
 - name: removing unwanted data
-  shell: tune2fs -m 0 /dev/sdb
-  args:
-    executable: /bin/bash
+  ansible.builtin.command: tune2fs -m 0 /dev/sdb
   when: cloud_function == "master"
   tags:
     - nfs
@@ -46,7 +44,7 @@
   become: True
 
 - name: mount partition on filesystem
-  mount:
+  ansible.builtin.mount:
     src: /dev/sdb
     path: /data
     state: mounted
@@ -58,7 +56,7 @@
   become: True
 
 - name: set permissions on data directory
-  file:
+  ansible.builtin.file:
     path: /data
     state: directory
     owner: svcansible
@@ -69,7 +67,7 @@
   become: True
 
 - name: install nfs packages on server
-  apt:
+  ansible.builtin.apt:
     name: nfs-kernel-server
     state: present
   when: cloud_function == "master"
@@ -77,7 +75,7 @@
   become: True
 
 - name: install nfs packages on worker
-  apt:
+  ansible.builtin.apt:
     name: nfs-common
     state: present
   when: cloud_function == "worker"
@@ -85,7 +83,7 @@
   become: True
 
 - name: add network to exports
-  lineinfile:
+  ansible.builtin.lineinfile:
     line: "/data {{ ansible_host.split('.')[0] }}.{{ ansible_host.split('.')[1] }}.0.0/16(rw,async,no_root_squash,no_subtree_check)"
     path: /etc/exports
     create: True
@@ -94,7 +92,7 @@
   become: True
 
 - name: start nfs server
-  service:
+  ansible.builtin.service:
     name: nfs-server
     enabled: True
     state: restarted

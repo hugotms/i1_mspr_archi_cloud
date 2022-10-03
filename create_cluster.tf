@@ -12,6 +12,10 @@ resource "local_file" "inventory" {
         ${vsphere_virtual_machine.worker2.name}:
           ansible_host: ${vsphere_virtual_machine.worker2.default_ip_address}
           cloud_function: worker
+      children:
+        control-plane:
+          hosts:
+            ${vsphere_virtual_machine.master.name}:
   EOF
 }
 
