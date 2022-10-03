@@ -37,7 +37,7 @@
   tags: kubernetes
   become: True
 
-- name: Configure node ip
+- name: configure node ip
   ansible.builtin.lineinfile:
     path: /etc/default/kubelet
     line: "KUBELET_EXTRA_ARGS=--node-ip={{ ansible_host }} --cgroup-driver=systemd"
@@ -45,7 +45,7 @@
   tags: kubernetes
   become: True
 
-- name: Restart kubelet
+- name: restart kubelet
   ansible.builtin.service:
     name: kubelet
     daemon_reload: True

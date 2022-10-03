@@ -1,9 +1,9 @@
-{% if item.exposed is defined and item.exposed %}
+{% if item.1.exposed is defined and item.1.exposed %}
 ---
 apiVersion: projectcalico.org/v3
 kind: GlobalNetworkPolicy
 metadata:
-  name: {{ item.name }}-exposed-policy
+  name: {{ item.0.namespace }}-{{ item.1.name }}-exposed-policy
 spec:
   selector: has(kubernetes-host)
   preDNAT: true
@@ -12,7 +12,7 @@ spec:
   types:
   - Ingress
   ingress:
-{% for container in item.containers %}
+{% for container in item.1.containers %}
 {% for port in container.ports %}
   - action: Allow
     protocol: {{ port.protocol | default('tcp') | upper }}
@@ -25,35 +25,35 @@ spec:
 apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
 metadata:
-  name: {{ item.name }}-internal-ingress-policy
-  namespace: {{ item.namespace | default('default') }}
+  name: {{ item.1.name }}-internal-ingress-policy
+  namespace: {{ item.0.namespace }}
 spec:
-  selector: app == '{{ item.name }}'
+  selector: app == '{{ item.1.name }}'
   order: 20
   types:
   - Ingress
   ingress:
-{% for container in item.containers %}
+{% for container in item.1.containers %}
 {% for port in container.ports %}
   - action: Allow
     protocol: {{ port.protocol | default('tcp') | upper }}
 {% endfor %}
 {% endfor %}
 {% endif %}
-{% if item.rules.egressRules is defined %}
+{% if item.1.rules.egressRules is defined %}
 ---
 apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
 metadata:
-  name: {{ item.name }}-internal-egress-policy
-  namespace: {{ item.namespace | default('default') }}
+  name: {{ item.1.name }}-internal-egress-policy
+  namespace: {{ item.0.namespace }}
 spec:
-  selector: app == '{{ item.name }}'
+  selector: app == '{{ item.1.name }}'
   order: 30
   types:
   - Egress
   egress:
-{% for egress in item.rules.egressRules %}
+{% for egress in item.1.rules.egressRules %}
   - action: Allow
     protocol: {{ egress.protocol | default('tcp') | upper }}
 {% if egress.allowTo is defined %}
@@ -62,14 +62,14 @@ spec:
       ports: [{{ egress.ports }}]
 {% endif %}
 {% endfor %}
-{% for egress in item.rules.egressRules %}
+{% for egress in item.1.rules.egressRules %}
 {% if egress.allowTo is defined %}
 ---
 apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
 metadata:
-  name: {{ egress.allowTo }}-internal-ingress-from-{{ item.name }}-policy
-  namespace: {{ item.namespace | default('default') }}
+  name: {{ egress.allowTo }}-internal-ingress-from-{{ item.1.name }}-policy
+  namespace: {{ item.0.namespace }}
 spec:
   selector: app == '{{ egress.allowTo }}'
   order: 40
@@ -79,7 +79,7 @@ spec:
   - action: Allow
     protocol: {{ egress.protocol | default('tcp') | upper }}
     source:
-      selector: app == '{{ item.name }}'
+      selector: app == '{{ item.1.name }}'
     destination:
       ports: [{{ egress.ports }}]
 {% endif %}

@@ -21,9 +21,18 @@
   tags: deployment
   become: True
 
+- name: create namespaces configuration directory
+  ansible.builtin.file:
+    path: /tmp/k8s-configurations/namespaces
+    state: directory
+    owner: svcansible
+    group: ansible
+  tags: deployment
+  become: True
+
 - name: create services configuration directory
   ansible.builtin.file:
-    path: /tmp/k8s-configurations/app
+    path: /tmp/k8s-configurations/deployments
     state: directory
     owner: svcansible
     group: ansible
@@ -57,57 +66,84 @@
     state: absent
   tags: deployment
 
+- name: create namespaces configuration files
+  ansible.builtin.template:
+    src: namespace.j2
+    dest: "/tmp/k8s-configurations/namespaces/{{ item.namespace }}.yml"
+  loop: "{{ kubernetes_deployment_conf }}"
+  loop_control:
+    label: "{{ item.namespace }}"
+  tags: deployment
+
 - name: create services configuration files
   ansible.builtin.template:
     src: application.j2
-    dest: "/tmp/k8s-configurations/app/{{ item.name }}.yml"
-  loop: "{{ apps_deploying }}"
+    dest: "/tmp/k8s-configurations/deployments/{{ item.1.name }}.yml"
+  loop: "{{ kubernetes_deployment_conf | subelements('apps', skip_missing=True) }}"
   loop_control:
-    label: "{{ item.name }}"
-  tags: deployment
-
-- name: create variable data directories
-  ansible.builtin.set_fact:
-    run_directories: "{{ run_directories | default([]) + [{ 'name': item.0.name, 'volumes': item.1.volumes }] }}"
-  with_subelements:
-    - "{{ apps_deploying }}"
-    - containers
-  loop_control:
-    label: "{{ item.0.name }}"
-  when: item.1.volumes is defined
-  tags: deployment
-
-- name: create data directory for volumes
-  ansible.builtin.file:
-    path: "/data/{{ item.0.name }}/{{ item.1.name | default(item.1.path | replace('/', '')) | lower }}"
-    state: directory
-    recurse: True
-  with_subelements:
-    - "{{ run_directories }}"
-    - volumes
-  loop_control:
-    label: "{{ item.0.name }}/{{ item.1.name | default(item.1.path | replace('/', '')) | lower }}"
+    label: "{{ item.1.name }}"
   tags: deployment
 
 - name: create policies configuration files
   ansible.builtin.template:
     src: network_policy.j2
-    dest: "/tmp/k8s-configurations/policies/{{ item.name }}.yml"
-  loop: "{{ apps_deploying }}"
+    dest: "/tmp/k8s-configurations/policies/{{ item.1.name }}.yml"
+  loop: "{{ kubernetes_deployment_conf | subelements('apps', skip_missing=True) }}"
   loop_control:
-    label: "{{ item.name }}"
-  when: item.rules is defined or (item.exposed is defined and item.exposed)
+    label: "{{ item.1.name }}"
+  when: item.1.rules is defined or (item.1.exposed is defined and item.1.exposed)
+  tags: deployment
+
+- name: create directories configuration file
+  ansible.builtin.template:
+    src: _vars.j2
+    dest: /tmp/templated_directories.json
+  tags: deployment
+
+- name: read variable from directories configuration file
+  ansible.builtin.shell: tac /tmp/templated_directories.json | sed '2 s/},/}/' | tac
+  args:
+    executable: /bin/bash
+  changed_when: False
+  register: _templated_directories
+  tags: deployment
+
+- name: delete directories configuration files
+  ansible.builtin.file:
+    path: /tmp/templated_directories.json
+    state: absent
+  tags: deployment
+  become: True
+
+- name: create data directory for volumes
+  ansible.builtin.file:
+    path: "/data/{{ item.namespace }}-{{ item.app }}/{{ item.volume }}"
+    state: directory
+    recurse: True
+  loop: "{{ _templated_directories.stdout | from_json }}"
+  loop_control:
+    label: "{{ item.namespace }}-{{ item.app }}/{{ item.volume }}"
+  tags: deployment
+
+- name: create namespaces on cluster
+  ansible.builtin.command: "kubectl apply -f /tmp/k8s-configurations/namespaces/{{ item.namespace }}.yml"
+  loop: "{{ kubernetes_deployment_conf }}"
+  loop_control:
+    label: "{{ item.namespace }}"
   tags: deployment
 
 - name: create services on cluster
-  ansible.builtin.command: "kubectl apply -f /tmp/k8s-configurations/app/{{ item.name }}.yml"
-  loop: "{{ apps_deploying }}"
+  ansible.builtin.command: "kubectl apply -f /tmp/k8s-configurations/deployments/{{ item.1.name }}.yml"
+  loop: "{{ kubernetes_deployment_conf | subelements('apps', skip_missing=True) }}"
   loop_control:
-    label: "{{ item.name }}"
+    label: "{{ item.1.name }}"
   tags: deployment
 
 - name: apply services network policies
-  ansible.builtin.command: calicoctl apply -f /tmp/k8s-configurations/policies/
+  ansible.builtin.command: "calicoctl apply -f /tmp/k8s-configurations/policies/{{ item.1.name }}.yml"
+  loop: "{{ kubernetes_deployment_conf | subelements('apps', skip_missing=True) }}"
+  loop_control:
+    label: "{{ item.1.name }}"
   tags:
     - deployment
     - network

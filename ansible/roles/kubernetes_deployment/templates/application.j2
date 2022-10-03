@@ -2,23 +2,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ item.name }}-deployment
-  namespace: {{ item.namespace | default('default') }}
+  name: {{ item.1.name }}-deployment
+  namespace: {{ item.0.namespace }}
 spec:
-  replicas: {{ item.replicas | default('1') }}
+  replicas: {{ item.1.replicas | default('1') }}
   selector:
     matchLabels:
-      app: {{ item.name }}
+      app: {{ item.1.name }}
       role: pods
   template:
     metadata:
       labels:
-        app: {{ item.name }}
+        app: {{ item.1.name }}
         role: pods
     spec:
       containers:
-{% for container in item.containers %}
-      - name: {{ container.name | default(item.name) }}
+{% for container in item.1.containers %}
+      - name: {{ container.name | default(item.1.name) }}
         image: {{ container.image }}
         ports:
 {% for port in container.ports %}
@@ -43,7 +43,7 @@ spec:
       - name: {{ volume.name | default(volume.path | replace("/", "")) | lower }}
         nfs:
           server: {{ ansible_host }}
-          path: /data/{{ item.name }}/{{ volume.name | default(volume.path | replace("/", "")) | lower }}/
+          path: /data/{{ item.0.namespace }}-{{ item.1.name }}/{{ volume.name | default(volume.path | replace("/", "")) | lower }}/
 {% endfor %} 
 {% endif %}
 {% endfor %}
@@ -51,25 +51,25 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ item.name }}-service
-  namespace: {{ item.namespace | default('default') }}
+  name: {{ item.1.name }}-service
+  namespace: {{ item.0.namespace }}
   labels:
-    app: {{ item.name }}
+    app: {{ item.1.name }}
     role: service
 spec:
-{% if item.exposed is defined and item.exposed %}
+{% if item.1.exposed is defined and item.1.exposed %}
   type: NodePort
 {% endif %}
   selector:
-    app: {{ item.name }}
+    app: {{ item.1.name }}
   ports:
-{% for container in item.containers %}
+{% for container in item.1.containers %}
 {% for port in container.ports %}
     - name: port-{{ port.clusterPort | default(port.containerPort) }}-{{ port.protocol | default('tcp') | lower }}
       protocol: {{ port.protocol | default('tcp') | upper }}
       port: {{ port.clusterPort | default(port.containerPort) }}
       targetPort: {{ port.containerPort }}
-{% if item.exposed is defined and item.exposed %}
+{% if item.1.exposed is defined and item.1.exposed %}
       nodePort: {{ port.nodePort }}
 {% endif %}
 {% endfor %}

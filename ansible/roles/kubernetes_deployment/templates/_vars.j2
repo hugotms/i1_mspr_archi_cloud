@@ -1,0 +1,19 @@
+[
+{% for item in kubernetes_deployment_conf %}
+{% if item.apps is defined %}
+{% for app in item.apps%}
+{% for container in app.containers %}
+{% if container.volumes is defined %}
+{% for volume in container.volumes %}
+    {
+        "namespace": "{{ item.namespace }}",
+        "app": "{{ app.name }}",
+        "volume": "{{ volume.name | default(volume.path | replace('/', '')) | lower }}"
+    },
+{% endfor%}
+{% endif %}
+{% endfor %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+]
