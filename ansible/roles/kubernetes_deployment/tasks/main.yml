@@ -65,7 +65,7 @@
   template:
     src: application.j2
     dest: "/tmp/k8s-configurations/app/{{ item.name }}.yml"
-  loop: "{{ _apps_deploying }}"
+  loop: "{{ apps_deploying }}"
   loop_control:
     label: "{{ item.name }}"
   tags: deployment
@@ -74,7 +74,7 @@
   set_fact:
     run_directories: "{{ run_directories | default([]) + [{ 'name': item.0.name, 'volumes': item.1.volumes }] }}"
   with_subelements:
-    - "{{ _apps_deploying }}"
+    - "{{ apps_deploying }}"
     - containers
   loop_control:
     label: "{{ item.0.name }}"
@@ -97,7 +97,7 @@
   template:
     src: network_policy.j2
     dest: "/tmp/k8s-configurations/policies/{{ item.name }}.yml"
-  loop: "{{ _apps_deploying }}"
+  loop: "{{ apps_deploying }}"
   loop_control:
     label: "{{ item.name }}"
   when: item.rules is defined or (item.exposed is defined and item.exposed)
@@ -107,7 +107,7 @@
   shell: "kubectl apply -f /tmp/k8s-configurations/app/{{ item.name }}.yml"
   args:
     executable: /bin/bash
-  loop: "{{ _apps_deploying }}"
+  loop: "{{ apps_deploying }}"
   loop_control:
     label: "{{ item.name }}"
   tags: deployment

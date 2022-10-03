@@ -5,4 +5,5 @@
 
   roles:
     - role: kubernetes_deployment
+      apps_deploying: "{{ run_apps_deploying }}"
       when: cloud_function == "master"

@@ -1,5 +1,7 @@
 ansible/inventories/
 
+ansible/group_vars/all/deployments.yml
+
 .terraform/
 
 .terraform.*
