@@ -13,6 +13,3 @@
       calico_version: "{{ play_calico_version }}"
 
     - role: install_nfs
-
-    - role: kubernetes_deployment
-      when: cloud_function == "master"
