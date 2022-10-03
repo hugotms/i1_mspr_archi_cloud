@@ -10,9 +10,7 @@
   become: True
 
 - name: disable swap
-  shell: swapoff -a
-  args:
-    executable: /bin/bash
+  command: swapoff -a
   when: ansible_swaptotal_mb > 0
   tags: system
   become: True
@@ -43,12 +41,14 @@
     owner: root
     group: root
   tags: system
+  register: _containerd_modules
   become: True
 
 - name: modprobe additionnal modules
   shell: modprobe overlay && modprobe br_netfilter
   args:
     executable: /bin/bash
+  when: _containerd_modules.changed
   tags: system
   become: True
 
@@ -63,12 +63,14 @@
     owner: root
     group: root
   tags: system
+  register: _sys_config
   become: True
 
 - name: apply system configuration
   shell: sysctl --system
   args:
     executable: /bin/bash
+  when: _sys_config.changed
   tags: system
   become: True
 
