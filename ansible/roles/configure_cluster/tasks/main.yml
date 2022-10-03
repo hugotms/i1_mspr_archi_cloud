@@ -1,13 +1,11 @@
 ---
 
 - name: initialize kubernetes cluster
-  ansible.builtin.shell: >-
+  ansible.builtin.command: >-
     kubeadm init --apiserver-advertise-address={{ ansible_host }} \
     --apiserver-cert-extra-sans={{ ansible_host }}  \
     --node-name {{ inventory_hostname | lower }} \
     --pod-network-cidr=172.16.0.0/16
-  args:
-    executable: /bin/bash
   when: cloud_function == "master"
   tags:
     - cluster
@@ -69,9 +67,7 @@
   tags: cluster
 
 - name: join cluster command
-  ansible.builtin.shell: kubeadm token create --print-join-command
-  args:
-    executable: /bin/bash
+  ansible.builtin.command: kubeadm token create --print-join-command
   register: run_join_command
   when: cloud_function == "master"
   tags:
@@ -105,9 +101,7 @@
   become: True
 
 - name: append hostname to script
-  ansible.builtin.shell: "sed -i '/kubeadm/ s/$/ --node-name {{ inventory_hostname | lower }}/' /tmp/join_command.sh"
-  args:
-    executable: /bin/bash
+  ansible.builtin.command: "sed -i '/kubeadm/ s/$/ --node-name {{ inventory_hostname | lower }}/' /tmp/join_command.sh"
   when: cloud_function == "worker"
   tags:
     - cluster
@@ -125,9 +119,7 @@
   become: True
 
 - name: launch joining command on workers
-  ansible.builtin.shell: bash /tmp/join_command.sh
-  args:
-    executable: /bin/bash
+  ansible.builtin.command: bash /tmp/join_command.sh
   when: cloud_function == "worker"
   tags:
     - worker
