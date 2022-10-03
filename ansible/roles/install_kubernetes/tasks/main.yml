@@ -1,14 +1,14 @@
 ---
 
 - name: add kubernetes key
-  apt_key:
+  ansible.builtin.apt_key:
     url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
     state: present
   tags: kubernetes
   become: True
 
 - name: add kubernetes repository
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
     state: present
     filename: kubernetes.list
@@ -16,7 +16,7 @@
   become: True
 
 - name: install kubernetes packages
-  apt:
+  ansible.builtin.apt:
     name: "{{ item }}"
     state: present
     update_cache: True
@@ -25,7 +25,7 @@
   become: True
 
 - name: install calicoctl
-  get_url:
+  ansible.builtin.get_url:
     url: "https://github.com/projectcalico/calico/releases/download/{{ calico_version }}/calicoctl-linux-amd64"
     dest: /usr/local/bin
     mode: "0555"
@@ -33,14 +33,12 @@
   become: True
 
 - name: renaming calico binaries
-  shell: mv /usr/local/bin/calicoctl-linux-amd64 /usr/local/bin/calicoctl
-  args:
-    executable: /bin/bash
+  ansible.builtin.command: mv /usr/local/bin/calicoctl-linux-amd64 /usr/local/bin/calicoctl
   tags: kubernetes
   become: True
 
 - name: Configure node ip
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/default/kubelet
     line: "KUBELET_EXTRA_ARGS=--node-ip={{ ansible_host }} --cgroup-driver=systemd"
     create: True
@@ -48,7 +46,7 @@
   become: True
 
 - name: Restart kubelet
-  service:
+  ansible.builtin.service:
     name: kubelet
     daemon_reload: True
     state: restarted

@@ -1,7 +1,7 @@
 ---
 
 - name: initialize kubernetes cluster
-  shell: >-
+  ansible.builtin.shell: >-
     kubeadm init --apiserver-advertise-address={{ ansible_host }} \
     --apiserver-cert-extra-sans={{ ansible_host }}  \
     --node-name {{ inventory_hostname | lower }} \
@@ -16,14 +16,14 @@
   become: True
 
 - name: create svcansible kubernetes config folder on master
-  file:
+  ansible.builtin.file:
     path: /home/svcansible/.kube
     state: directory
   when: cloud_function == "master"
   tags: cluster
 
 - name: copy kubernetes admin config in svcansible config folder
-  copy:
+  ansible.builtin.copy:
     remote_src: True
     src: /etc/kubernetes/admin.conf
     dest: /home/svcansible/.kube/config
@@ -34,7 +34,7 @@
   become: True
 
 - name: wait for cluster availability
-  command: kubectl cluster-info
+  ansible.builtin.command: kubectl cluster-info
   register: result
   until: result.stdout.find("is running at") != -1
   retries: 12
@@ -44,14 +44,14 @@
   tags: cluster
 
 - name: get calico manifest
-  get_url:
+  ansible.builtin.get_url:
     url: "https://raw.githubusercontent.com/projectcalico/calico/{{ calico_version }}/manifests/calico.yaml"
     dest: /tmp
   when: cloud_function == "master"
   tags: cluster
 
 - name: install calico network
-  shell: >-
+  ansible.builtin.shell: >-
     sed -i "s/192.168./172.16./g" /tmp/calico.yaml \
     && kubectl apply -f /tmp/calico.yaml
   args:
@@ -62,14 +62,14 @@
     - network
 
 - name: removing calico configuration file
-  file:
+  ansible.builtin.file:
     path: /tmp/calico.yaml
     state: absent
   when: cloud_function == "master"
   tags: cluster
 
 - name: join cluster command
-  shell: kubeadm token create --print-join-command
+  ansible.builtin.shell: kubeadm token create --print-join-command
   args:
     executable: /bin/bash
   register: run_join_command
@@ -81,7 +81,7 @@
   become: True
 
 - name: save command in temporary file
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "/tmp/{{ client_id | lower }}.sh"
     line: "{{ run_join_command.stdout }}"
     create: True
@@ -94,7 +94,7 @@
   become: True
 
 - name: copy join command on workers
-  copy:
+  ansible.builtin.copy:
     src: "/tmp/{{ client_id | lower }}.sh"
     dest: /tmp/join_command.sh
   when: cloud_function == "worker"
@@ -105,7 +105,7 @@
   become: True
 
 - name: append hostname to script
-  shell: "sed -i '/kubeadm/ s/$/ --node-name {{ inventory_hostname | lower }}/' /tmp/join_command.sh"
+  ansible.builtin.shell: "sed -i '/kubeadm/ s/$/ --node-name {{ inventory_hostname | lower }}/' /tmp/join_command.sh"
   args:
     executable: /bin/bash
   when: cloud_function == "worker"
@@ -116,7 +116,7 @@
   become: True
 
 - name: remove command file on localhost
-  file:
+  ansible.builtin.file:
     path: "/tmp/{{ client_id | lower }}.sh"
     state: absent
   delegate_to: localhost
@@ -125,7 +125,7 @@
   become: True
 
 - name: launch joining command on workers
-  shell: bash /tmp/join_command.sh
+  ansible.builtin.shell: bash /tmp/join_command.sh
   args:
     executable: /bin/bash
   when: cloud_function == "worker"
@@ -136,7 +136,7 @@
   become: True
 
 - name: remove command file on workers
-  file:
+  ansible.builtin.file:
     path: /tmp/join_command.sh
     state: absent
   when: cloud_function == "worker"

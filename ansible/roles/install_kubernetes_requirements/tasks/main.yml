@@ -1,7 +1,7 @@
 ---
 
 - name: install apt dependencies
-  apt:
+  ansible.builtin.apt:
     name: "{{ item }}"
     state: present
     update_cache: True
@@ -10,13 +10,13 @@
   become: True
 
 - name: disable swap
-  command: swapoff -a
+  ansible.builtin.command: swapoff -a
   when: ansible_swaptotal_mb > 0
   tags: system
   become: True
 
 - name: remove swap fs
-  mount:
+  ansible.builtin.mount:
     name: "{{ item }}"
     fstype: swap
     state: absent
@@ -25,14 +25,14 @@
   become: True
 
 - name: install containerd
-  apt:
+  ansible.builtin.apt:
     name: containerd
     state: present
   tags: system
   become: True
 
 - name: add modules for containerd
-  blockinfile:
+  ansible.builtin.blockinfile:
     path: /etc/modules-load.d/containerd.conf
     block: |
       overlay
@@ -45,7 +45,7 @@
   become: True
 
 - name: modprobe additionnal modules
-  shell: modprobe overlay && modprobe br_netfilter
+  ansible.builtin.shell: modprobe overlay && modprobe br_netfilter
   args:
     executable: /bin/bash
   when: _containerd_modules.changed
@@ -53,7 +53,7 @@
   become: True
 
 - name: add system configuration for kubernetes
-  blockinfile:
+  ansible.builtin.blockinfile:
     path: /etc/sysctl.d/99-kubernetes-cri.conf
     block: |
       net.bridge.bridge-nf-call-iptables = 1
@@ -67,7 +67,7 @@
   become: True
 
 - name: apply system configuration
-  shell: sysctl --system
+  ansible.builtin.shell: sysctl --system
   args:
     executable: /bin/bash
   when: _sys_config.changed
@@ -75,14 +75,14 @@
   become: True
 
 - name: set default containerd config
-  shell: containerd config default > /etc/containerd/config.toml
+  ansible.builtin.shell: containerd config default > /etc/containerd/config.toml
   args:
     executable: /bin/bash
   tags: system
   become: True
 
 - name: add cgroups configuration for containerd
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/containerd/config.toml
     search_string: "[plugins.\"io.containerd.grpc.v1.cri\".containerd.runtimes.runc.options]"
     line: "          [plugins.\"io.containerd.grpc.v1.cri\".containerd.runtimes.runc.options]\n            SystemdCgroup = true"
@@ -91,7 +91,7 @@
   become: True
 
 - name: restart containerd service
-  service:
+  ansible.builtin.service:
     name: containerd
     state: restarted
   tags: system
