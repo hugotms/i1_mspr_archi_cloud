@@ -1,88 +1,35 @@
 ---
 
+- name: create policies configuration directory
+  ansible.builtin.file:
+    path: /tmp/k8s-configurations/policies
+    state: directory
+  tags: deployment
+
 - name: copy default network policy on master
   ansible.builtin.copy:
     src: default_policy.yml
-    dest: /tmp/default-network-policy.yml
+    dest: /tmp/k8s-configurations/default-network-policy.yml
   tags: deployment
-  become: True
 
 - name: apply default network policy to cluster
-  ansible.builtin.command: calicoctl apply -f /tmp/default-network-policy.yml
+  ansible.builtin.command: calicoctl apply -f /tmp/k8s-configurations/default-network-policy.yml
   tags:
     - deployment
     - default-policy
     - network
 
-- name: delete policy configuration file
-  ansible.builtin.file:
-    path: /tmp/default-network-policy.yml
-    state: absent
-  tags: deployment
-  become: True
-
-- name: create namespaces configuration directory
-  ansible.builtin.file:
-    path: /tmp/k8s-configurations/namespaces
-    state: directory
-    owner: svcansible
-    group: ansible
-  tags: deployment
-  become: True
-
-- name: create services configuration directory
-  ansible.builtin.file:
-    path: /tmp/k8s-configurations/deployments
-    state: directory
-    owner: svcansible
-    group: ansible
-  tags: deployment
-  become: True
-
-- name: create policies configuration directory
-  ansible.builtin.file:
-    path: /tmp/k8s-configurations/policies
-    state: directory
-    owner: svcansible
-    group: ansible
-  tags: deployment
-  become: True
-
 - name: create endpoints configuration files
   ansible.builtin.template:
     src: endpoint.j2
-    dest: /tmp/endpoint.yml
+    dest: /tmp/k8s-configurations/endpoint.yml
   tags: deployment
 
 - name: create endpoints on cluster
-  ansible.builtin.command: calicoctl apply -f /tmp/endpoint.yml
+  ansible.builtin.command: calicoctl apply -f /tmp/k8s-configurations/endpoint.yml
   tags:
     - deployment
     - network
-
-- name: delete endpoint configuration files
-  ansible.builtin.file:
-    path: /tmp/endpoint.yml
-    state: absent
-  tags: deployment
-
-- name: create namespaces configuration files
-  ansible.builtin.template:
-    src: namespace.j2
-    dest: "/tmp/k8s-configurations/namespaces/{{ item.namespace }}.yml"
-  loop: "{{ kubernetes_deployment_conf }}"
-  loop_control:
-    label: "{{ item.namespace }}"
-  tags: deployment
-
-- name: create services configuration files
-  ansible.builtin.template:
-    src: application.j2
-    dest: "/tmp/k8s-configurations/deployments/{{ item.0.namespace }}-{{ item.1.name }}.yml"
-  loop: "{{ kubernetes_deployment_conf | subelements('apps', skip_missing=True) }}"
-  loop_control:
-    label: "{{ item.0.namespace }}-{{ item.1.name }}"
-  tags: deployment
 
 - name: create policies configuration files
   ansible.builtin.template:
@@ -97,23 +44,16 @@
 - name: create directories configuration file
   ansible.builtin.template:
     src: _vars.j2
-    dest: /tmp/templated_directories.json
+    dest: /tmp/k8s-configurations/templated_directories.json
   tags: deployment
 
 - name: read variable from directories configuration file
-  ansible.builtin.shell: tac /tmp/templated_directories.json | sed '2 s/},/}/' | tac
+  ansible.builtin.shell: tac /tmp/k8s-configurations/templated_directories.json | sed '2 s/},/}/' | tac
   args:
     executable: /bin/bash
   changed_when: False
   register: _templated_directories
   tags: deployment
-
-- name: delete directories configuration files
-  ansible.builtin.file:
-    path: /tmp/templated_directories.json
-    state: absent
-  tags: deployment
-  become: True
 
 - name: create data directory for volumes
   ansible.builtin.file:
@@ -126,59 +66,46 @@
   when: item.delete == "false"
   tags: deployment
 
-- name: create namespaces on cluster
-  ansible.builtin.command: "kubectl apply -f /tmp/k8s-configurations/namespaces/{{ item.namespace }}.yml"
+- name: manage namespaces on cluster
+  kubernetes.core.k8s:
+    state: "{{ item.state | default('present') }}"
+    template: "namespace.j2"
   loop: "{{ kubernetes_deployment_conf }}"
   loop_control:
     label: "{{ item.namespace }}"
-  when: item.delete | default(False) != True
   tags: deployment
 
-- name: create services on cluster
-  ansible.builtin.command: "kubectl apply -f /tmp/k8s-configurations/deployments/{{ item.0.namespace }}-{{ item.1.name }}.yml"
+- name: manage services on cluster
+  kubernetes.core.k8s:
+    state: "{{ item.1.state | default('present') }}"
+    template: "application.j2"
   loop: "{{ kubernetes_deployment_conf | subelements('apps', skip_missing=True) }}"
   loop_control:
     label: "{{ item.0.namespace }}-{{ item.1.name }}"
-  when: item.0.delete | default(False) != True and item.1.delete | default(False) != True
+  when: item.0.state | default('present') != 'absent'
   tags: deployment
 
-- name: apply services network policies
+- name: apply network policies on cluster
   ansible.builtin.command: "calicoctl apply -f /tmp/k8s-configurations/policies/{{ item.0.namespace }}-{{ item.1.name }}.yml"
   loop: "{{ kubernetes_deployment_conf | subelements('apps', skip_missing=True) }}"
   loop_control:
     label: "{{ item.0.namespace }}-{{ item.1.name }}"
-  when: item.0.delete | default(False) != True and item.1.delete | default(False) != True
+  when: item.0.state | default('present') != 'absent' and item.1.state | default('present') != 'absent'
   tags:
     - deployment
     - network
 
-- name: delete services network policies
+- name: delete network policies on cluster
   ansible.builtin.command: "calicoctl delete --skip-not-exists -f /tmp/k8s-configurations/policies/{{ item.0.namespace }}-{{ item.1.name }}.yml"
   loop: "{{ kubernetes_deployment_conf | subelements('apps', skip_missing=True) }}"
   loop_control:
     label: "{{ item.0.namespace }}-{{ item.1.name }}"
-  when: item.0.delete | default(False) or item.1.delete | default(False)
+  when: item.0.state | default('present') == 'absent' or item.1.state | default('present') == 'absent'
   tags:
     - deployment
     - network
 
-- name: delete services on cluster
-  ansible.builtin.command: "kubectl delete --ignore-not-found -f /tmp/k8s-configurations/deployments/{{ item.0.namespace }}-{{ item.1.name }}.yml"
-  loop: "{{ kubernetes_deployment_conf | subelements('apps', skip_missing=True) }}"
-  loop_control:
-    label: "{{ item.0.namespace }}-{{ item.1.name }}"
-  when: item.1.delete | default(False)
-  tags: deployment
-
-- name: delete namespaces on cluster
-  ansible.builtin.command: "kubectl delete --ignore-not-found -f /tmp/k8s-configurations/namespaces/{{ item.namespace }}.yml"
-  loop: "{{ kubernetes_deployment_conf }}"
-  loop_control:
-    label: "{{ item.namespace }}"
-  when: item.delete | default(False)
-  tags: deployment
-
-- name: delete data directory for volumes
+- name: delete volumes directories
   ansible.builtin.file:
     path: "/data/{{ item.namespace }}-{{ item.app }}/{{ item.volume }}"
     state: absent
@@ -193,4 +120,3 @@
     path: /tmp/k8s-configurations
     state: absent
   tags: deployment
-  become: True
