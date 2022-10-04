@@ -9,7 +9,7 @@
         "namespace": "{{ item.namespace }}",
         "app": "{{ app.name }}",
         "volume": "{{ volume.name | default(volume.path | replace('/', '')) | lower }}",
-{% if item.delete is defined and item.delete %}
+{% if item.state is defined and item.state == "absent" %}
         "delete": "true"
 {% else %}
         "delete": "false"

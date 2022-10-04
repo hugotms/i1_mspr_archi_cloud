@@ -94,3 +94,9 @@
     state: restarted
   tags: system
   become: True
+
+- name: install kubernetes python package
+  ansible.builtin.pip:
+    name: kubernetes
+  tags: system
+  become: True
