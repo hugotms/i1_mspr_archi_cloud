@@ -6,19 +6,6 @@
     state: directory
   tags: deployment
 
-- name: copy default network policy on master
-  ansible.builtin.copy:
-    src: default_policy.yml
-    dest: /tmp/k8s-configurations/default-network-policy.yml
-  tags: deployment
-
-- name: apply default network policy to cluster
-  ansible.builtin.command: calicoctl apply -f /tmp/k8s-configurations/default-network-policy.yml
-  tags:
-    - deployment
-    - default-policy
-    - network
-
 - name: create policies configuration files
   ansible.builtin.template:
     src: network_policy.j2

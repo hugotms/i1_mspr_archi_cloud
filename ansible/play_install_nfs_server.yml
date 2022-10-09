@@ -4,5 +4,5 @@
   hosts: nfs-server
 
   roles:
-    - role: install_nfs_server
+    - role: nfs_server
       nfs_configuration: "{{ play_nfs_configuration }}"

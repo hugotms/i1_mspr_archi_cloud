@@ -1,7 +1,7 @@
 ---
 
 - name: start a kubernetes cluster
-  import_tasks: _cluster_init.yml
+  ansible.builtin.import_tasks: _cluster_init.yml
   when: "'control-plane' in group_names"
 
 - name: copy join command on workers
@@ -51,22 +51,5 @@
   become: True
 
 - name: create endpoints configuration files
-  ansible.builtin.template:
-    src: endpoint.j2
-    dest: /tmp/endpoints.yml
+  ansible.builtin.import_tasks: _endpoints_config.yml
   when: "'control-plane' in group_names"
-  tags: cluster
-
-- name: create endpoints on cluster
-  ansible.builtin.command: calicoctl apply -f /tmp/endpoints.yml
-  when: "'control-plane' in group_names"
-  tags:
-    - cluster
-    - network
-
-- name: remove endpoint file on nodes
-  ansible.builtin.file:
-    path: /tmp/endpoint.yml
-    state: absent
-  when: "'control-plane' in group_names"
-  tags: cluster
