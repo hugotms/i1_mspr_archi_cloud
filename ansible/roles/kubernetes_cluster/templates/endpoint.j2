@@ -1,0 +1,14 @@
+{% for endpoint in groups['kubernetes'] %}
+---
+apiVersion: projectcalico.org/v3
+kind: HostEndpoint
+metadata:
+  name: {{ hostvars[endpoint].inventory_hostname | lower }}-{{ hostvars[endpoint].ansible_default_ipv4.interface }}
+  labels:
+    kubernetes-host: ingress
+spec:
+  interfaceName: {{ hostvars[endpoint].ansible_default_ipv4.interface }}
+  node: {{ hostvars[endpoint].inventory_hostname | lower }}
+  expectedIPs:
+  - {{ hostvars[endpoint].ansible_host }}
+{% endfor %}

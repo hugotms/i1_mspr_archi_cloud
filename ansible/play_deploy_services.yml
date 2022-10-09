@@ -6,3 +6,4 @@
   roles:
     - role: kubernetes_deployment
       kubernetes_deployment_conf: "{{ run_kubernetes_deployment_conf }}"
+      kubernetes_deployment_nfs: "{{ play_nfs_configuration }}"

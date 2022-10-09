@@ -1,15 +1,11 @@
 ---
 
 - name: configure kubernetes cluster
-  hosts: all
+  hosts: kubernetes
+  vars:
+    calico_version: "{{ play_calico_version }}"
 
   roles:
-    - role: install_kubernetes_requirements
+    - role: kubernetes_install
 
-    - role: install_kubernetes
-      calico_version: "{{ play_calico_version }}"
-
-    - role: configure_cluster
-      calico_version: "{{ play_calico_version }}"
-
-    - role: install_nfs
+    - role: kubernetes_cluster

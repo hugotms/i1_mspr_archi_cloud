@@ -6,7 +6,6 @@
     --apiserver-cert-extra-sans={{ ansible_host }}  \
     --node-name {{ inventory_hostname | lower }} \
     --pod-network-cidr=172.16.0.0/16
-  when: cloud_function == "master"
   tags:
     - cluster
     - init
@@ -17,7 +16,6 @@
   ansible.builtin.file:
     path: /home/svcansible/.kube
     state: directory
-  when: cloud_function == "master"
   tags: cluster
 
 - name: copy kubernetes admin config in svcansible config folder
@@ -27,7 +25,6 @@
     dest: /home/svcansible/.kube/config
     owner: svcansible
     group: ansible
-  when: cloud_function == "master"
   tags: cluster
   become: True
 
@@ -37,7 +34,6 @@
   until: result.stdout.find("is running at") != -1
   retries: 12
   delay: 10
-  when: cloud_function == "master"
   changed_when: False
   tags: cluster
 
@@ -45,7 +41,6 @@
   ansible.builtin.get_url:
     url: "https://raw.githubusercontent.com/projectcalico/calico/{{ calico_version }}/manifests/calico.yaml"
     dest: /tmp
-  when: cloud_function == "master"
   tags: cluster
 
 - name: install calico network
@@ -54,7 +49,6 @@
     && kubectl apply -f /tmp/calico.yaml
   args:
     executable: /bin/bash
-  when: cloud_function == "master"
   tags:
     - cluster
     - network
@@ -63,13 +57,11 @@
   ansible.builtin.file:
     path: /tmp/calico.yaml
     state: absent
-  when: cloud_function == "master"
   tags: cluster
 
 - name: join cluster command
   ansible.builtin.command: kubeadm token create --print-join-command
   register: run_join_command
-  when: cloud_function == "master"
   tags:
     - cluster
     - join
@@ -82,55 +74,8 @@
     line: "{{ run_join_command.stdout }}"
     create: True
   delegate_to: localhost
-  when: cloud_function == "master"
   tags:
     - cluster
     - join
     - definitive
-  become: True
-
-- name: copy join command on workers
-  ansible.builtin.copy:
-    src: "/tmp/{{ client_id | lower }}.sh"
-    dest: /tmp/join_command.sh
-  when: cloud_function == "worker"
-  tags:
-    - cluster
-    - join
-    - definitive
-  become: True
-
-- name: append hostname to script
-  ansible.builtin.command: "sed -i '/kubeadm/ s/$/ --node-name {{ inventory_hostname | lower }}/' /tmp/join_command.sh"
-  when: cloud_function == "worker"
-  tags:
-    - cluster
-    - join
-    - definitive
-  become: True
-
-- name: remove command file on localhost
-  ansible.builtin.file:
-    path: "/tmp/{{ client_id | lower }}.sh"
-    state: absent
-  delegate_to: localhost
-  when: cloud_function == "master"
-  tags: worker
-  become: True
-
-- name: launch joining command on workers
-  ansible.builtin.command: bash /tmp/join_command.sh
-  when: cloud_function == "worker"
-  tags:
-    - worker
-    - join
-    - definitive
-  become: True
-
-- name: remove command file on workers
-  ansible.builtin.file:
-    path: /tmp/join_command.sh
-    state: absent
-  when: cloud_function == "worker"
-  tags: worker
   become: True

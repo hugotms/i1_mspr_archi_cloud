@@ -12,3 +12,8 @@ _apt_dependencies:
 _swap_fs:
   - swap
   - none
+
+_kubernetes_packages:
+  - kubelet 
+  - kubeadm 
+  - kubectl
