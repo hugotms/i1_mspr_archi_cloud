@@ -33,20 +33,11 @@ spec:
   - Egress
   ingress:
   - action: Allow
-    protocol: UDP
-    destination:
-      selector: has(kubernetes-host)
-      ports:
-      - 111
-      - 2049
-  - action: Allow
     protocol: TCP
     destination:
       selector: has(kubernetes-host)
       ports:
       - 22
-      - 111
-      - 2049
   egress:
   - action: Allow
     source:

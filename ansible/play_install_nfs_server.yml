@@ -1,0 +1,8 @@
+---
+
+- name: install nfs server
+  hosts: nfs-server
+
+  roles:
+    - role: nfs_server
+      nfs_configuration: "{{ play_nfs_configuration }}"

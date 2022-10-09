@@ -1,5 +1,7 @@
 ansible/inventories/
 
+ansible/group_vars/all/nfs-server.yml
+
 ansible/group_vars/control-plane/
 
 .terraform/

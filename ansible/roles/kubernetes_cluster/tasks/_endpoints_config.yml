@@ -1,0 +1,38 @@
+---
+
+- name: create configuration directory
+  ansible.builtin.file:
+    path: /tmp/k8s-configurations
+    state: directory
+  tags: cluster
+
+- name: copy default network policy on master
+  ansible.builtin.copy:
+    src: default_policy.yml
+    dest: /tmp/k8s-configurations/default-network-policy.yml
+  tags: cluster
+
+- name: apply default network policy to cluster
+  ansible.builtin.command: calicoctl apply -f /tmp/k8s-configurations/default-network-policy.yml
+  tags:
+    - cluster
+    - default-policy
+    - network
+
+- name: create endpoints configuration files
+  ansible.builtin.template:
+    src: endpoint.j2
+    dest: /tmp/k8s-configurations/endpoints.yml
+  tags: cluster
+
+- name: create endpoints on cluster
+  ansible.builtin.command: calicoctl apply -f /tmp/k8s-configurations/endpoints.yml
+  tags:
+    - cluster
+    - network
+
+- name: remove configuration files on node
+  ansible.builtin.file:
+    path: /tmp/k8s-configurations
+    state: absent
+  tags: cluster

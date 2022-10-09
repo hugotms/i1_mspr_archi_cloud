@@ -1,0 +1,7 @@
+---
+
+- name: install and configure kubernetes system requirements
+  ansible.builtin.import_tasks: _kubernetes_requirements.yml
+
+- name: install kubernetes packages
+  ansible.builtin.import_tasks: _installation.yml

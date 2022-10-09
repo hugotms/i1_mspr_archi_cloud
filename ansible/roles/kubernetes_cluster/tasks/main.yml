@@ -1,0 +1,55 @@
+---
+
+- name: start a kubernetes cluster
+  ansible.builtin.import_tasks: _cluster_init.yml
+  when: "'control-plane' in group_names"
+
+- name: copy join command on workers
+  ansible.builtin.copy:
+    src: "/tmp/{{ client_id | lower }}.sh"
+    dest: /tmp/join_command.sh
+  when: "'nodes' in group_names"
+  tags:
+    - cluster
+    - join
+    - definitive
+  become: True
+
+- name: append hostname to script
+  ansible.builtin.command: "sed -i '/kubeadm/ s/$/ --node-name {{ inventory_hostname | lower }}/' /tmp/join_command.sh"
+  when: "'nodes' in group_names"
+  tags:
+    - cluster
+    - join
+    - definitive
+  become: True
+
+- name: remove command file on localhost
+  ansible.builtin.file:
+    path: "/tmp/{{ client_id | lower }}.sh"
+    state: absent
+  delegate_to: localhost
+  when: "'control-plane' in group_names"
+  tags: worker
+  become: True
+
+- name: launch joining command on workers
+  ansible.builtin.command: bash /tmp/join_command.sh
+  when: "'nodes' in group_names"
+  tags:
+    - worker
+    - join
+    - definitive
+  become: True
+
+- name: remove command file on workers
+  ansible.builtin.file:
+    path: /tmp/join_command.sh
+    state: absent
+  when: "'nodes' in group_names"
+  tags: worker
+  become: True
+
+- name: create endpoints configuration files
+  ansible.builtin.import_tasks: _endpoints_config.yml
+  when: "'control-plane' in group_names"

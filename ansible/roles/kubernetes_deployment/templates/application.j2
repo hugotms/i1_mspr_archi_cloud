@@ -42,8 +42,8 @@ spec:
 {% for volume in container.volumes %}
       - name: {{ volume.name | default(volume.path | replace("/", "")) | lower }}
         nfs:
-          server: {{ ansible_host }}
-          path: /data/{{ item.0.namespace }}-{{ item.1.name }}/{{ volume.name | default(volume.path | replace("/", "")) | lower }}/
+          server: {{ kubernetes_deployment_nfs.server }}
+          path: {{ kubernetes_deployment_nfs.root }}/{{ item.0.namespace }}-{{ item.1.name }}/{{ volume.name | default(volume.path | replace("/", "")) | lower }}/
 {% endfor %} 
 {% endif %}
 {% endfor %}

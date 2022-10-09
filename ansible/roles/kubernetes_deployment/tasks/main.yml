@@ -6,31 +6,6 @@
     state: directory
   tags: deployment
 
-- name: copy default network policy on master
-  ansible.builtin.copy:
-    src: default_policy.yml
-    dest: /tmp/k8s-configurations/default-network-policy.yml
-  tags: deployment
-
-- name: apply default network policy to cluster
-  ansible.builtin.command: calicoctl apply -f /tmp/k8s-configurations/default-network-policy.yml
-  tags:
-    - deployment
-    - default-policy
-    - network
-
-- name: create endpoints configuration files
-  ansible.builtin.template:
-    src: endpoint.j2
-    dest: /tmp/k8s-configurations/endpoint.yml
-  tags: deployment
-
-- name: create endpoints on cluster
-  ansible.builtin.command: calicoctl apply -f /tmp/k8s-configurations/endpoint.yml
-  tags:
-    - deployment
-    - network
-
 - name: create policies configuration files
   ansible.builtin.template:
     src: network_policy.j2
@@ -57,7 +32,7 @@
 
 - name: create data directory for volumes
   ansible.builtin.file:
-    path: "/data/{{ item.namespace }}-{{ item.app }}/{{ item.volume }}"
+    path: "{{ kubernetes_deployment_nfs.root }}/{{ item.namespace }}-{{ item.app }}/{{ item.volume }}"
     state: directory
     recurse: True
   loop: "{{ _templated_directories.stdout | from_json }}"
@@ -107,7 +82,7 @@
 
 - name: delete volumes directories
   ansible.builtin.file:
-    path: "/data/{{ item.namespace }}-{{ item.app }}/{{ item.volume }}"
+    path: "{{ kubernetes_deployment_nfs.root }}/{{ item.namespace }}-{{ item.app }}/{{ item.volume }}"
     state: absent
   loop: "{{ _templated_directories.stdout | from_json }}"
   loop_control:
