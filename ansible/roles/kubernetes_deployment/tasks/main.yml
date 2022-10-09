@@ -65,7 +65,10 @@
   loop: "{{ kubernetes_deployment_conf | subelements('apps', skip_missing=True) }}"
   loop_control:
     label: "{{ item.0.namespace }}-{{ item.1.name }}"
-  when: item.0.state | default('present') != 'absent' and item.1.state | default('present') != 'absent'
+  when:
+    - item.0.state | default('present') != 'absent'
+    - item.1.state | default('present') != 'absent'
+    - item.1.exposed is defined or item.1.rules is defined
   tags:
     - deployment
     - network
@@ -75,7 +78,9 @@
   loop: "{{ kubernetes_deployment_conf | subelements('apps', skip_missing=True) }}"
   loop_control:
     label: "{{ item.0.namespace }}-{{ item.1.name }}"
-  when: item.0.state | default('present') == 'absent' or item.1.state | default('present') == 'absent'
+  when:
+    - item.0.state | default('present') == 'absent' or item.1.state | default('present') == 'absent'
+    - item.1.exposed is defined or item.1.rules is defined
   tags:
     - deployment
     - network

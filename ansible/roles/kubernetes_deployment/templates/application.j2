@@ -20,11 +20,25 @@ spec:
 {% for container in item.1.containers %}
       - name: {{ container.name | default(item.1.name) }}
         image: {{ container.image }}
+{% if container.commands is defined %}
+        command:
+{% for command in container.commands %}
+        - "{{ command }}"
+{% endfor %}
+{% endif %}
+{% if container.args is defined %}
+        args:
+{% for arg in container.args %}
+        - "{{ arg }}"
+{% endfor %}
+{% endif %}
+{% if container.ports is defined %}
         ports:
 {% for port in container.ports %}
         - containerPort: {{ port.containerPort }}
           protocol: {{ port.protocol | default('tcp') | upper }}
 {% endfor %}
+{% endif %}
 {% if container.envVars is defined %}
         env:
 {% for env in container.envVars %}
@@ -47,11 +61,13 @@ spec:
 {% endfor %} 
 {% endif %}
 {% endfor %}
+{% for container in item.1.containers %}
+{% if container.ports is defined %}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ item.1.name }}-service
+  name: {{ item.1.name }}-{{ container.name | default(item.1.name) }}-service
   namespace: {{ item.0.namespace }}
   labels:
     app: {{ item.1.name }}
@@ -63,7 +79,6 @@ spec:
   selector:
     app: {{ item.1.name }}
   ports:
-{% for container in item.1.containers %}
 {% for port in container.ports %}
     - name: port-{{ port.clusterPort | default(port.containerPort) }}-{{ port.protocol | default('tcp') | lower }}
       protocol: {{ port.protocol | default('tcp') | upper }}
@@ -73,4 +88,5 @@ spec:
       nodePort: {{ port.nodePort }}
 {% endif %}
 {% endfor %}
+{% endif %}
 {% endfor %}
