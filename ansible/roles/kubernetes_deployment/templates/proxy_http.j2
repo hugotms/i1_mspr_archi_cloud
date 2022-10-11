@@ -9,7 +9,7 @@
 {% if port.protocol | default('tcp') | upper == 'HTTP' %}
 {{ app.name | lower }}-{{ container.name | default(app.name) | lower }}-service.{{ namespace.namespace | lower }}.{{ ansible_domain | lower }}    {{ namespace.namespace }}_{{ app.name }}_{{ container.name | default(app.name) }}_{{ port.nodePort }}_{{ port.protocol }}_backend
 {% if port.url is defined %}
-{{ url | lower }}    {{ namespace.namespace }}_{{ app.name }}_{{ container.name | default(app.name) }}_{{ port.nodePort }}_{{ port.protocol }}_backend
+{{ port.url | lower }}    {{ namespace.namespace }}_{{ app.name }}_{{ container.name | default(app.name) }}_{{ port.nodePort }}_{{ port.protocol }}_backend
 {% endif %}
 
 {% endif %}
