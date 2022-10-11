@@ -1,9 +1,11 @@
-{% if item.1.exposed is defined and item.1.exposed %}
+{% for container in item.1.containers %}
+{% for port in container.ports %}
+{% if port.protocol | default('tcp') | upper == 'HTTP' or port.lbPort is defined %}
 ---
 apiVersion: projectcalico.org/v3
 kind: GlobalNetworkPolicy
 metadata:
-  name: {{ item.0.namespace }}-{{ item.1.name }}-exposed-policy
+  name: {{ item.0.namespace }}-{{ item.1.name }}-{{ container.name | default(item.1.name) }}-{{ port.nodePort }}-exposed-policy
 spec:
   selector: has(kubernetes-host)
   preDNAT: true
@@ -12,20 +14,22 @@ spec:
   types:
   - Ingress
   ingress:
-{% for container in item.1.containers %}
-{% for port in container.ports %}
   - action: Allow
-    protocol: {{ port.protocol | default('tcp') | upper }}
+    protocol: {{ (port.protocol | default('tcp') | upper == 'HTTP') | ternary('TCP', port.protocol | default('tcp') | upper) }}
+    source:
+      nets: [{{ ansible_host.split('.')[0] }}.{{ ansible_host.split('.')[1] }}.0.0/16]
     destination:
       selector: has(kubernetes-host)
-      ports: [{{ port.nodePort }}]
-{% endfor %}
-{% endfor %}
+      ports:
+      - {{ port.nodePort }}
+{% if port.lbPort is defined %}
+      - {{ port.lbPort }}
+{% endif %}
 ---
 apiVersion: projectcalico.org/v3
 kind: NetworkPolicy
 metadata:
-  name: {{ item.1.name }}-internal-ingress-policy
+  name: {{ item.1.name }}-{{ container.name | default(item.1.name) }}-{{ port.nodePort }}-internal-ingress-policy
   namespace: {{ item.0.namespace }}
 spec:
   selector: app == '{{ item.1.name }}'
@@ -33,13 +37,13 @@ spec:
   types:
   - Ingress
   ingress:
-{% for container in item.1.containers %}
-{% for port in container.ports %}
   - action: Allow
-    protocol: {{ port.protocol | default('tcp') | upper }}
-{% endfor %}
-{% endfor %}
+    protocol: {{ (port.protocol | default('tcp') | upper == 'HTTP') | ternary('TCP', port.protocol | default('tcp') | upper) }}
+    source:
+      nets: [{{ ansible_host.split('.')[0] }}.{{ ansible_host.split('.')[1] }}.0.0/16]
 {% endif %}
+{% endfor %}
+{% endfor %}
 {% if item.1.rules is defined %}
 ---
 apiVersion: projectcalico.org/v3

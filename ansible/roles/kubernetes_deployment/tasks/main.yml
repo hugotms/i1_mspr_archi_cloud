@@ -13,8 +13,25 @@
   loop: "{{ kubernetes_deployment_conf | subelements('apps', skip_missing=True) }}"
   loop_control:
     label: "{{ item.0.namespace }}-{{ item.1.name }}"
-  when: item.1.rules is defined or (item.1.exposed is defined and item.1.exposed)
   tags: deployment
+
+- name: create http map proxy file
+  ansible.builtin.template:
+    src: proxy_http.j2
+    dest: /data/kube-system/haproxy/urls.map
+    owner: root
+    mode: '0644'
+  tags: deployment
+  become: True
+
+- name: create haproxy configuration file
+  ansible.builtin.template:
+    src: proxy_config.j2
+    dest: /data/kube-system/haproxy/haproxy.cfg
+    owner: root
+    mode: '0644'
+  tags: deployment
+  become: True
 
 - name: create directories configuration file
   ansible.builtin.template:
@@ -61,26 +78,24 @@
   tags: deployment
 
 - name: apply network policies on cluster
-  ansible.builtin.command: "calicoctl apply -f /tmp/k8s-configurations/policies/{{ item.0.namespace }}-{{ item.1.name }}.yml"
+  ansible.builtin.command: "calicoctl apply --skip-empty -f /tmp/k8s-configurations/policies/{{ item.0.namespace }}-{{ item.1.name }}.yml"
   loop: "{{ kubernetes_deployment_conf | subelements('apps', skip_missing=True) }}"
   loop_control:
     label: "{{ item.0.namespace }}-{{ item.1.name }}"
   when:
     - item.0.state | default('present') != 'absent'
     - item.1.state | default('present') != 'absent'
-    - item.1.exposed is defined or item.1.rules is defined
   tags:
     - deployment
     - network
 
 - name: delete network policies on cluster
-  ansible.builtin.command: "calicoctl delete --skip-not-exists -f /tmp/k8s-configurations/policies/{{ item.0.namespace }}-{{ item.1.name }}.yml"
+  ansible.builtin.command: "calicoctl delete --skip-not-exists --skip-empty -f /tmp/k8s-configurations/policies/{{ item.0.namespace }}-{{ item.1.name }}.yml"
   loop: "{{ kubernetes_deployment_conf | subelements('apps', skip_missing=True) }}"
   loop_control:
     label: "{{ item.0.namespace }}-{{ item.1.name }}"
   when:
     - item.0.state | default('present') == 'absent' or item.1.state | default('present') == 'absent'
-    - item.1.exposed is defined or item.1.rules is defined
   tags:
     - deployment
     - network
