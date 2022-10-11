@@ -32,7 +32,7 @@
 
 - name: create data directory for volumes
   ansible.builtin.file:
-    path: "{{ kubernetes_deployment_nfs.root }}/{{ item.namespace }}-{{ item.app }}/{{ item.volume }}"
+    path: "/data/{{ item.namespace }}-{{ item.app }}/{{ item.volume }}"
     state: directory
     recurse: True
   loop: "{{ _templated_directories.stdout | from_json }}"
@@ -87,7 +87,7 @@
 
 - name: delete volumes directories
   ansible.builtin.file:
-    path: "{{ kubernetes_deployment_nfs.root }}/{{ item.namespace }}-{{ item.app }}/{{ item.volume }}"
+    path: "/data/{{ item.namespace }}-{{ item.app }}/{{ item.volume }}"
     state: absent
   loop: "{{ _templated_directories.stdout | from_json }}"
   loop_control:

@@ -1,0 +1,20 @@
+---
+apiVersion: projectcalico.org/v3
+kind: GlobalNetworkPolicy
+metadata:
+  name: kubernetes-proxy-keepalived-policy
+spec:
+  selector: has(kubernetes-host)
+  ingress:
+  - action: Allow
+    protocol: TCP
+    destination:
+      selector: has(kubernetes-host)
+      ports:
+      - 80
+      - 443
+      - 8181
+  - action: Allow
+    protocol: VRRP
+    destination:
+      selector: has(kubernetes-host)

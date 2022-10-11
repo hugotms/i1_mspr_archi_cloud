@@ -11,4 +11,5 @@ spec:
   node: {{ hostvars[endpoint].inventory_hostname | lower }}
   expectedIPs:
   - {{ hostvars[endpoint].ansible_host }}
+  - {{ proxy_floating_ip }}
 {% endfor %}

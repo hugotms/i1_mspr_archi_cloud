@@ -1,0 +1,44 @@
+---
+
+- name: create shared nfs directories
+  ansible.builtin.file:
+    path: "/data/{{ item.path }}"
+    state: directory
+    recurse: True
+  loop: "{{ nfs_mount }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when:
+    - item.state is not defined or item.state != "absent"
+    - "'nfs-server' in group_names"
+  tags: mount
+  become: True
+
+- name: delete shared nfs directories
+  ansible.builtin.file:
+    path: "/data/{{ item.path }}"
+    state: absent
+  loop: "{{ nfs_mount }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when:
+    - item.state is defined and item.state == "absent"
+    - "'nfs-server' in group_names"
+  tags: mount
+  become: True
+
+- name: mount nfs volume for haproxy.cfg
+  ansible.posix.mount:
+    src: "{{ hostvars[groups['nfs-server'][0]].ansible_host }}:/data/{{ item.path }}"
+    path: "{{ item.mount }}"
+    opts: rw,auto,soft
+    state: "{{ item.state | default('mounted') }}"
+    fstype: nfs
+  loop: "{{ nfs_mount }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when: "'nodes' in group_names"
+  tags:
+    - mount
+    - partitions
+  become: True

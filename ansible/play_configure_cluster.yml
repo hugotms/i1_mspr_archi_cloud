@@ -4,8 +4,15 @@
   hosts: kubernetes
   vars:
     calico_version: "{{ play_calico_version }}"
+    proxy_floating_ip: "{{ run_proxy_floating_ip }}"
 
   roles:
     - role: kubernetes_install
 
     - role: kubernetes_cluster
+      kubernetes_data_dev: "{{ run_data_dev }}"
+
+    - role: nfs_mount
+      nfs_mount: "{{ play_nfs_configuration }}"
+
+    - role: haproxy_install
