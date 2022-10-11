@@ -5,12 +5,12 @@ global_defs {
 }
 
 vrrp_script check_haproxy {
-    script "/usr/bin/systemctl --state=active --type=service | grep haproxy.service"
+    script "/usr/bin/systemctl is-active --quiet haproxy.service"
     interval 2
     weight 2
 }
 
-vrrp_instance VI_{{ groups.nodes.index(inventory_hostname) }} {
+vrrp_instance VI_01 }} {
 {% if groups.nodes.index(inventory_hostname) | int == 0 %}
     state MASTER
 {% else %}
@@ -18,7 +18,7 @@ vrrp_instance VI_{{ groups.nodes.index(inventory_hostname) }} {
 {% endif %}
     interface {{ ansible_default_ipv4.interface }}
     virtual_router_id 51
-    priority {{ 500 - groups.nodes.index(inventory_hostname) | int }}
+    priority {{ 250 - groups.nodes.index(inventory_hostname) | int }}
     virtual_ipaddress {
         {{ proxy_floating_ip }}
     }
