@@ -1,6 +1,7 @@
 {% for container in item.1.containers %}
+{% if container.ports is defined %}
 {% for port in container.ports %}
-{% if port.protocol | default('tcp') | upper == 'HTTP' or port.lbPort is defined %}
+{% if port.nodePort is defined %}
 ---
 apiVersion: projectcalico.org/v3
 kind: GlobalNetworkPolicy
@@ -22,7 +23,7 @@ spec:
       selector: has(kubernetes-host)
       ports:
       - {{ port.nodePort }}
-{% if port.lbPort is defined %}
+{% if port.protocol | default('tcp') | upper == 'TCP' and port.lbPort is defined %}
       - {{ port.lbPort }}
 {% endif %}
 ---
@@ -43,6 +44,7 @@ spec:
       nets: [{{ ansible_host.split('.')[0] }}.{{ ansible_host.split('.')[1] }}.0.0/16]
 {% endif %}
 {% endfor %}
+{% endif %}
 {% endfor %}
 {% if item.1.rules is defined %}
 ---

@@ -5,6 +5,9 @@ metadata:
   name: kubernetes-proxy-keepalived-policy
 spec:
   selector: has(kubernetes-host)
+  types:
+  - Ingress
+  - Egress
   ingress:
   - action: Allow
     protocol: TCP
@@ -14,6 +17,11 @@ spec:
       - 80
       - 443
       - 8181
+  - action: Allow
+    protocol: 112
+    destination:
+      selector: has(kubernetes-host)
+  egress:
   - action: Allow
     protocol: 112
     destination:

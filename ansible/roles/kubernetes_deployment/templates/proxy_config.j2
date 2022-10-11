@@ -47,7 +47,7 @@ frontend http_front
 {% if container.ports is defined %}
 {% for port in container.ports %}
 {% if port.protocol | default('tcp') | upper == 'HTTP' %}
-backend {{ namespace.namespace }}_{{ app.name }}_{{ container.name | default(app.name) }}_{{ port.nodePort }}_{{ port.protocol }}_backend
+backend {{ namespace.namespace }}_{{ app.name }}_{{ container.name | default(app.name) }}_{{ port.nodePort }}_{{ port.protocol | default('tcp') | lower }}_backend
     balance leastconn
     mode http
 {% for server in groups['nodes'] %}
@@ -68,11 +68,11 @@ backend {{ namespace.namespace }}_{{ app.name }}_{{ container.name | default(app
 {% for container in app.containers %}
 {% if container.ports is defined %}
 {% for port in container.ports %}
-{% if port.lbPort is defined %}
-listen {{ namespace.namespace }}_{{ app.name }}_{{ container.name | default(app.name) }}_{{ port.nodePort }}_{{ port.protocol }}_port
+{% if port.protocol | default('tcp') | upper == 'TCP' and port.lbPort is defined %}
+listen {{ namespace.namespace }}_{{ app.name }}_{{ container.name | default(app.name) }}_{{ port.nodePort }}_{{ port.protocol | default('tcp') | lower }}_port
     bind {{ kubernetes_deployment_proxy }}:{{ port.lbPort }}
     balance leastconn
-    mode {{ port.protocol | default('tcp') | lower }}
+    mode tcp
 {% for server in groups['nodes'] %}
     server {{ hostvars[server].inventory_hostname | lower }} {{ hostvars[server].ansible_host }}:{{ port.nodePort }} check
 {% endfor %}
