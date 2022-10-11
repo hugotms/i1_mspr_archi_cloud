@@ -17,8 +17,6 @@ spec:
   ingress:
   - action: Allow
     protocol: {{ (port.protocol | default('tcp') | upper == 'HTTP') | ternary('TCP', port.protocol | default('tcp') | upper) }}
-    source:
-      nets: [{{ ansible_host.split('.')[0] }}.{{ ansible_host.split('.')[1] }}.0.0/16]
     destination:
       selector: has(kubernetes-host)
       ports:
