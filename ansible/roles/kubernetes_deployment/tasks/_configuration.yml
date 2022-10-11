@@ -1,0 +1,117 @@
+---
+
+- name: create policies configuration directory
+  ansible.builtin.file:
+    path: /tmp/k8s-configurations/policies
+    state: directory
+  tags: deployment
+
+- name: create policies configuration files
+  ansible.builtin.template:
+    src: network_policy.j2
+    dest: "/tmp/k8s-configurations/policies/{{ item.0.namespace }}-{{ item.1.name }}.yml"
+  loop: "{{ kubernetes_deployment_conf | subelements('apps', skip_missing=True) }}"
+  loop_control:
+    label: "{{ item.0.namespace }}-{{ item.1.name }}"
+  tags: deployment
+
+- name: create http map proxy file
+  ansible.builtin.template:
+    src: proxy_http.j2
+    dest: /data/kube-system/haproxy/urls.map
+    owner: root
+    mode: '0644'
+  tags: deployment
+  become: True
+
+- name: create haproxy configuration file
+  ansible.builtin.template:
+    src: proxy_config.j2
+    dest: /data/kube-system/haproxy/haproxy.cfg
+    owner: root
+    mode: '0644'
+  tags: deployment
+  become: True
+
+- name: create directories configuration file
+  ansible.builtin.template:
+    src: _vars.j2
+    dest: /tmp/k8s-configurations/templated_directories.json
+  tags: deployment
+
+- name: read variable from directories configuration file
+  ansible.builtin.shell: tac /tmp/k8s-configurations/templated_directories.json | sed '2 s/},/}/' | tac
+  args:
+    executable: /bin/bash
+  changed_when: False
+  register: _templated_directories
+  tags: deployment
+
+- name: create data directory for volumes
+  ansible.builtin.file:
+    path: "/data/{{ item.namespace }}-{{ item.app }}/{{ item.volume }}"
+    state: directory
+    recurse: True
+  loop: "{{ _templated_directories.stdout | from_json }}"
+  loop_control:
+    label: "{{ item.namespace }}-{{ item.app }}/{{ item.volume }}"
+  when: item.delete == "false"
+  tags: deployment
+
+- name: manage namespaces on cluster
+  kubernetes.core.k8s:
+    state: "{{ item.state | default('present') }}"
+    template: "namespace.j2"
+  loop: "{{ kubernetes_deployment_conf }}"
+  loop_control:
+    label: "{{ item.namespace }}"
+  tags: deployment
+
+- name: manage services on cluster
+  kubernetes.core.k8s:
+    state: "{{ item.1.state | default('present') }}"
+    template: "application.j2"
+  loop: "{{ kubernetes_deployment_conf | subelements('apps', skip_missing=True) }}"
+  loop_control:
+    label: "{{ item.0.namespace }}-{{ item.1.name }}"
+  when: item.0.state | default('present') != 'absent'
+  tags: deployment
+
+- name: apply network policies on cluster
+  ansible.builtin.command: "calicoctl apply --skip-empty -f /tmp/k8s-configurations/policies/{{ item.0.namespace }}-{{ item.1.name }}.yml"
+  loop: "{{ kubernetes_deployment_conf | subelements('apps', skip_missing=True) }}"
+  loop_control:
+    label: "{{ item.0.namespace }}-{{ item.1.name }}"
+  when:
+    - item.0.state | default('present') != 'absent'
+    - item.1.state | default('present') != 'absent'
+  tags:
+    - deployment
+    - network
+
+- name: delete network policies on cluster
+  ansible.builtin.command: "calicoctl delete --skip-not-exists --skip-empty -f /tmp/k8s-configurations/policies/{{ item.0.namespace }}-{{ item.1.name }}.yml"
+  loop: "{{ kubernetes_deployment_conf | subelements('apps', skip_missing=True) }}"
+  loop_control:
+    label: "{{ item.0.namespace }}-{{ item.1.name }}"
+  when:
+    - item.0.state | default('present') == 'absent' or item.1.state | default('present') == 'absent'
+  tags:
+    - deployment
+    - network
+
+- name: delete volumes directories
+  ansible.builtin.file:
+    path: "/data/{{ item.namespace }}-{{ item.app }}/{{ item.volume }}"
+    state: absent
+  loop: "{{ _templated_directories.stdout | from_json }}"
+  loop_control:
+    label: "{{ item.namespace }}-{{ item.app }}/{{ item.volume }}"
+  when: item.delete == "true"
+  tags: deployment
+
+- name: delete configuration directory
+  ansible.builtin.file:
+    path: /tmp/k8s-configurations
+    state: absent
+  tags: deployment

@@ -1,7 +1,7 @@
 ---
 
 - name: deploy services on cluster
-  hosts: control-plane:&nfs-server
+  hosts: kubernetes
 
   roles:
     - role: kubernetes_deployment
