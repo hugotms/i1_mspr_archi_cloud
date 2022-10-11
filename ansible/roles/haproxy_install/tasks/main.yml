@@ -1,7 +1,7 @@
 ---
 
 - name: install haproxy
-  ansible.buitin.import_tasks: _install_proxy.yml
+  ansible.builtin.import_tasks: _install_proxy.yml
   when: "'nodes' in group_names"
 
 - name: deploy keepalived

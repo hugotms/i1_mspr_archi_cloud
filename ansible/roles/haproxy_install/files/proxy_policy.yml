@@ -15,6 +15,6 @@ spec:
       - 443
       - 8181
   - action: Allow
-    protocol: VRRP
+    protocol: 112
     destination:
       selector: has(kubernetes-host)

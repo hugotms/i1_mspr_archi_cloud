@@ -4,6 +4,7 @@
   ansible.builtin.apt:
     name: haproxy
     state: present
+  throttle: 1
   tags: proxy
   become: True
 
