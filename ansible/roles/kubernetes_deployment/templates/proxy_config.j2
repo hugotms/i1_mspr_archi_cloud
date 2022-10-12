@@ -25,7 +25,7 @@ defaults
     maxconn                 3000
 
 listen stats 
-    bind {{ kubernetes_deployment_proxy }}:8181
+    bind {{ proxy_floating_ip }}:8181
     stats enable
     stats hide-version
     stats refresh 30s
@@ -33,8 +33,8 @@ listen stats
     stats uri /stats
 
 frontend http_front
-    bind {{ kubernetes_deployment_proxy }}:80
-    #bind {{ kubernetes_deployment_proxy }}:443 ssl crt /etc/ssl/private/haproxy.pem
+    bind {{ proxy_floating_ip }}:80
+    #bind {{ proxy_floating_ip }}:443 ssl crt /etc/haproxy/haproxy.pem
     #redirect scheme https unless { ssl_fc }
     use_backend %[req.hdr(host),lower,map(/etc/haproxy/urls.map,be_static)]
     #default_backend default_http_backend
@@ -70,7 +70,7 @@ backend {{ namespace.namespace }}_{{ app.name }}_{{ container.name | default(app
 {% for port in container.ports %}
 {% if port.protocol | default('tcp') | upper == 'TCP' and port.lbPort is defined %}
 listen {{ namespace.namespace }}_{{ app.name }}_{{ container.name | default(app.name) }}_{{ port.nodePort }}_{{ port.protocol | default('tcp') | lower }}_port
-    bind {{ kubernetes_deployment_proxy }}:{{ port.lbPort }}
+    bind {{ proxy_floating_ip }}:{{ port.lbPort }}
     balance leastconn
     mode tcp
 {% for server in groups['nodes'] %}

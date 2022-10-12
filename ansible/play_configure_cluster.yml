@@ -16,3 +16,6 @@
       nfs_mount: "{{ play_nfs_configuration }}"
 
     - role: haproxy_install
+
+    - role: kubernetes_deployment
+      kubernetes_deployment_conf: "{{ run_kubernetes_deployment_conf }}"

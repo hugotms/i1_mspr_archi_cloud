@@ -6,4 +6,4 @@
   roles:
     - role: kubernetes_deployment
       kubernetes_deployment_conf: "{{ run_kubernetes_deployment_conf }}"
-      kubernetes_deployment_proxy: "{{ run_proxy_floating_ip }}"
+      proxy_floating_ip: "{{ run_proxy_floating_ip }}"
