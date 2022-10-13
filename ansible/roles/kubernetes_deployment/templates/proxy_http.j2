@@ -1,21 +1,19 @@
 # {{ ansible_managed }}
 
-{% for namespace in kubernetes_deployment_conf %}
-{% if namespace.apps is defined %}
+{% for namespace in kubernetes_deployment_conf | selectattr('apps', 'defined') %}
 {% for app in namespace.apps %}
-{% for container in app.containers %}
-{% if container.ports is defined %}
+{% if namespace.state | default('present') != 'absent' and app.state | default('present') != 'absent' %}
+{% for container in app.containers | selectattr('ports', 'defined') %}
 {% for port in container.ports %}
 {% if port.protocol | default('tcp') | upper == 'HTTP' %}
 {{ app.name | lower }}-{{ container.name | default(app.name) | lower }}-service.{{ namespace.namespace | lower }}.{{ ansible_domain | lower }}    {{ namespace.namespace }}_{{ app.name }}_{{ container.name | default(app.name) }}_{{ port.nodePort }}_{{ port.protocol }}_backend
 {% if port.url is defined %}
-{{ port.url | lower }}    {{ namespace.namespace }}_{{ app.name }}_{{ container.name | default(app.name) }}_{{ port.nodePort }}_{{ port.protocol }}_backend
+{{ port.url | lower }}    {{ namespace.namespace }}_{{ app.name }}_{{ container.name | default(app.name) }}_{{ port.nodePort }}_http_backend
 {% endif %}
 
 {% endif %}
 {% endfor %}
-{% endif %}
-{% endfor %}
 {% endfor %}
 {% endif %}
+{% endfor %}
 {% endfor %}
