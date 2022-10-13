@@ -1,0 +1,29 @@
+---
+
+- name: install haproxy on nodes
+  ansible.builtin.apt:
+    name: haproxy
+    state: present
+  throttle: 1
+  tags: proxy
+  become: True
+
+- name: deploy default conf
+  ansible.builtin.copy:
+    src: default_haproxy.cfg
+    dest: /etc/haproxy/haproxy.cfg
+    owner: root
+    group: root
+    mode: '0644'
+  tags:
+    - proxy
+    - definitive
+  become: True
+
+- name: start haproxy service
+  ansible.builtin.service:
+    name: haproxy
+    state: restarted
+    enabled: True
+  tags: proxy
+  become: True

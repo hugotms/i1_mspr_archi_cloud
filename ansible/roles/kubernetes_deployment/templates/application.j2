@@ -36,7 +36,7 @@ spec:
         ports:
 {% for port in container.ports %}
         - containerPort: {{ port.containerPort }}
-          protocol: {{ port.protocol | default('tcp') | upper }}
+          protocol: {{ (port.protocol | default('tcp') | upper == 'HTTP') | ternary('TCP', port.protocol | default('tcp') | upper) }}
 {% endfor %}
 {% endif %}
 {% if container.envVars is defined %}
@@ -56,8 +56,8 @@ spec:
 {% for volume in container.volumes %}
       - name: {{ volume.name | default(volume.path | replace("/", "")) | lower }}
         nfs:
-          server: {{ kubernetes_deployment_nfs.server }}
-          path: {{ kubernetes_deployment_nfs.root }}/{{ item.0.namespace }}-{{ item.1.name }}/{{ volume.name | default(volume.path | replace("/", "")) | lower }}/
+          server: {{ ansible_host }}
+          path: /data/{{ item.0.namespace }}-{{ item.1.name }}/{{ volume.name | default(volume.path | replace("/", "")) | lower }}/
 {% endfor %} 
 {% endif %}
 {% endfor %}
@@ -73,7 +73,7 @@ metadata:
     app: {{ item.1.name }}
     role: service
 spec:
-{% if item.1.exposed is defined and item.1.exposed %}
+{% if container.ports | selectattr('nodePort', 'defined') | length > 0 %}
   type: NodePort
 {% endif %}
   selector:
@@ -81,10 +81,10 @@ spec:
   ports:
 {% for port in container.ports %}
     - name: port-{{ port.clusterPort | default(port.containerPort) }}-{{ port.protocol | default('tcp') | lower }}
-      protocol: {{ port.protocol | default('tcp') | upper }}
+      protocol: {{ (port.protocol | default('tcp') | upper == 'HTTP') | ternary('TCP', port.protocol | default('tcp') | upper) }}
       port: {{ port.clusterPort | default(port.containerPort) }}
       targetPort: {{ port.containerPort }}
-{% if item.1.exposed is defined and item.1.exposed %}
+{% if port.nodePort is defined %}
       nodePort: {{ port.nodePort }}
 {% endif %}
 {% endfor %}

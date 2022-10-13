@@ -1,9 +1,9 @@
 ---
 
 - name: deploy services on cluster
-  hosts: control-plane
+  hosts: kubernetes
 
   roles:
     - role: kubernetes_deployment
       kubernetes_deployment_conf: "{{ run_kubernetes_deployment_conf }}"
-      kubernetes_deployment_nfs: "{{ play_nfs_configuration }}"
+      proxy_floating_ip: "{{ run_proxy_floating_ip }}"

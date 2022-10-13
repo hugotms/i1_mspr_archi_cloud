@@ -1,0 +1,24 @@
+---
+apiVersion: projectcalico.org/v3
+kind: GlobalNetworkPolicy
+metadata:
+  name: kubernetes-proxy-keepalived-policy
+spec:
+  selector: has(kubernetes-host)
+  types:
+  - Ingress
+  - Egress
+  ingress:
+  - action: Allow
+    protocol: TCP
+    destination:
+      selector: has(kubernetes-host)
+      ports:
+      - 80
+      - 443
+      - 8181
+  - action: Allow
+    protocol: 112
+  egress:
+  - action: Allow
+    protocol: 112

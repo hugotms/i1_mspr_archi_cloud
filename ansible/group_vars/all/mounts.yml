@@ -1,0 +1,5 @@
+---
+
+play_nfs_configuration:
+  - path: kube-system/haproxy
+    mount: /etc/haproxy

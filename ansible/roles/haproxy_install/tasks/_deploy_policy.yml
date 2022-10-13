@@ -1,0 +1,19 @@
+---
+
+- name: copy proxy policy on master
+  ansible.builtin.copy:
+    src: proxy_policy.yml
+    dest: /tmp/proxy-network-policy.yml
+  tags: haproxy
+
+- name: apply proxy network policy to cluster
+  ansible.builtin.command: calicoctl apply -f /tmp/proxy-network-policy.yml
+  tags:
+    - haproxy
+    - network
+
+- name: remove configuration files on node
+  ansible.builtin.file:
+    path: /tmp/proxy-network-policy.yml
+    state: absent
+  tags: haproxy

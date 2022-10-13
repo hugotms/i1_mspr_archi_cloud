@@ -100,26 +100,3 @@
     name: kubernetes
   tags: system
   become: True
-
-- name: create nfs-group
-  ansible.builtin.group:
-    name: "nfs-group"
-    gid: 1200
-    state: present
-  tags: system
-  become: True
-
-- name: add svcansible to nfs-group
-  ansible.builtin.user:
-    name: svcansible
-    groups: "nfs-group"
-    append: True
-  tags: system
-  become: True
-
-- name: install nfs packages on worker
-  ansible.builtin.apt:
-    name: nfs-common
-    state: present
-  tags: system
-  become: True
