@@ -10,7 +10,7 @@ vrrp_script check_haproxy {
     weight 2
 }
 
-vrrp_instance VI_01 }} {
+vrrp_instance VI_01 {
 {% if groups.nodes.index(inventory_hostname) | int == 0 %}
     state MASTER
 {% else %}
