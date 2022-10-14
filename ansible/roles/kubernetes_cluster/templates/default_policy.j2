@@ -36,6 +36,35 @@ spec:
     protocol: UDP
     destination:
       selector: has(kubernetes-host)
+      nets:
+{% for server in groups['nfs-server'] %}
+    - {{ hostvars[server].ansible_host }}/32
+{% endfor %}
+      ports:
+      - 111
+      - 2049
+  - action: Allow
+    protocol: TCP
+    destination:
+      selector: has(kubernetes-host)
+      nets:
+{% for server in groups['nfs-server'] %}
+    - {{ hostvars[server].ansible_host }}/32
+{% endfor %}
+      ports:
+      - 111
+      - 2049
+  - action: Deny
+    protocol: UDP
+    destination:
+      selector: has(kubernetes-host)
+      ports:
+      - 111
+      - 2049
+  - action: Deny
+    protocol: TCP
+    destination:
+      selector: has(kubernetes-host)
       ports:
       - 111
       - 2049
@@ -45,8 +74,6 @@ spec:
       selector: has(kubernetes-host)
       ports:
       - 22
-      - 111
-      - 2049
       - 2379
       - 2380
       - 6443

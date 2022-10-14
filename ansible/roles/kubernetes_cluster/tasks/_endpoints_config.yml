@@ -6,9 +6,9 @@
     state: directory
   tags: cluster
 
-- name: copy default network policy on master
-  ansible.builtin.copy:
-    src: default_policy.yml
+- name: adding default network policy on master
+  ansible.builtin.template:
+    src: default_policy.j2
     dest: /tmp/k8s-configurations/default-network-policy.yml
   tags: cluster
 
