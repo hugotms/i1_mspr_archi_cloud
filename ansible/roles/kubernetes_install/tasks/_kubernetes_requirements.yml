@@ -2,10 +2,9 @@
 
 - name: install apt dependencies
   ansible.builtin.apt:
-    name: "{{ item }}"
+    name: "{{ _apt_dependencies }}"
     state: present
     update_cache: True
-  loop: "{{ _apt_dependencies }}"
   tags: system
   become: True
 
