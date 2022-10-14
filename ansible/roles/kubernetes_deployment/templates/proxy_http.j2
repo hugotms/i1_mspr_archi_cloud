@@ -6,7 +6,7 @@
 {% for container in app.containers | selectattr('ports', 'defined') %}
 {% for port in container.ports %}
 {% if port.protocol | default('tcp') | upper == 'HTTP' %}
-{{ app.name | lower }}-{{ container.name | default(app.name) | lower }}-service.{{ namespace.namespace | lower }}.{{ ansible_domain | lower }}    {{ namespace.namespace }}_{{ app.name }}_{{ container.name | default(app.name) }}_{{ port.nodePort }}_{{ port.protocol }}_backend
+{{ app.name | lower }}-{{ container.name | default(app.name) | lower }}-service.{{ namespace.namespace | lower }}.{{ ansible_domain | lower }}    {{ namespace.namespace }}_{{ app.name }}_{{ container.name | default(app.name) }}_{{ port.nodePort }}_http_backend
 {% if port.url is defined %}
 {{ port.url | lower }}    {{ namespace.namespace }}_{{ app.name }}_{{ container.name | default(app.name) }}_{{ port.nodePort }}_http_backend
 {% endif %}
