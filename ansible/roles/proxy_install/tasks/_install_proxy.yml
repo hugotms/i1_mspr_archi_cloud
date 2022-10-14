@@ -15,6 +15,7 @@
     owner: root
     group: root
     mode: '0644'
+  throttle: 1
   tags:
     - proxy
     - definitive

@@ -1,0 +1,21 @@
+---
+
+- name: create custom script directory
+  ansible.builtin.file:
+    path: /opt/cluster-scripts/
+    state: directory
+    recurse: True
+  tags: letsencrypt
+
+- name: upload custom scripts to directory
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "{{ item }}.sh"
+    mode: '0755'
+  loop: "{{ _scripts }}"
+  tags: letsencrypt
+  become: True
+
+- name: launch certificate creation
+  ansible.builtin.command: /opt/cluster-scripts/create-cert.sh
+  tags: letsencrypt

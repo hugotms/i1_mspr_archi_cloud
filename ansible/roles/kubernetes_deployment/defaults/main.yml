@@ -1,3 +1,24 @@
 ---
 
 run_directories: []
+
+kubernetes_deployment_conf:
+  - namespace: kube-system
+    apps:
+
+      - name: certbot
+        containers:
+          - image: certbot/certbot:v1.31.0
+            commands:
+              - /bin/sh
+              - -c
+            args:
+              - while true; do echo ready; sleep 1000; done
+            volumes:
+              - path: /etc/letsencrypt
+              - path: /var/lib/letsencrypt
+            ports:
+              - containerPort: 80
+                nodePort: 30000
+        rules:
+          - protocol: tcp
