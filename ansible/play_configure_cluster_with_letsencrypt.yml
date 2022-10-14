@@ -5,6 +5,7 @@
   vars:
     calico_version: "{{ play_calico_version }}"
     proxy_floating_ip: "{{ run_proxy_floating_ip }}"
+    admin_namespace: "{{ play_admin_namespace }}"
 
   roles:
     - role: kubernetes_install
@@ -16,3 +17,14 @@
       nfs_mount: "{{ play_nfs_configuration }}"
 
     - role: proxy_install
+
+    - role: kubernetes_deployment
+      https_enabled: False
+    
+    - role: letsencrypt_config
+      production_cluster: "{{ run_production_cluster | default(False) }}"
+      site_fqdn: "{{ run_site_fqdn }}"
+      site_email: "{{ run_site_email }}"
+      when: "'control-plane' in group_names"
+
+    - role: kubernetes_deployment

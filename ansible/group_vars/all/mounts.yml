@@ -1,5 +1,5 @@
 ---
 
 play_nfs_configuration:
-  - path: kube-system/haproxy
+  - path: "{{ play_admin_namespace }}-haproxy"
     mount: /etc/haproxy
