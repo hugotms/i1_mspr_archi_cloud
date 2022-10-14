@@ -15,6 +15,31 @@ spec:
 {% for port in item.1.containers | selectattr('ports', 'defined') | map(attribute='ports') | flatten | selectattr('nodePort', 'defined') %}
   - action: Allow
     protocol: {{ (port.protocol | default('tcp') | upper == 'HTTP') | ternary('TCP', port.protocol | default('tcp') | upper) }}
+{% if (port.protocol | default('tcp') | upper == 'HTTP') | ternary('TCP', port.protocol | default('tcp') | upper) == 'TCP' %}
+    source:
+      nets:
+      - {{ ansible_host.split('.')[0:3] | join('.') }}.0/24
+{% endif %}
+    destination:
+      selector: has(kubernetes-host)
+{% if (port.protocol | default('tcp') | upper == 'HTTP') | ternary('TCP', port.protocol | default('tcp') | upper) == 'UDP' %}
+      nets:
+      - {{ proxy_floating_ip }}/32
+{% endif %}
+      ports:
+      - {{ port.nodePort }}
+{% if port.protocol | default('tcp') | upper == 'TCP' and port.lbPort is defined %}
+  - action: Allow
+    protocol: TCP
+    destination:
+      selector: has(kubernetes-host)
+      nets:
+      - {{ proxy_floating_ip }}/32
+      ports:
+      - {{ port.lbPort }}
+{% endif %}
+  - action: Deny
+    protocol: {{ (port.protocol | default('tcp') | upper == 'HTTP') | ternary('TCP', port.protocol | default('tcp') | upper) }}
     destination:
       selector: has(kubernetes-host)
       ports:
