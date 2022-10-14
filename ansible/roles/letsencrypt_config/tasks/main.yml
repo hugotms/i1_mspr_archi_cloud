@@ -6,11 +6,12 @@
     state: directory
     recurse: True
   tags: letsencrypt
+  become: True
 
 - name: upload custom scripts to directory
   ansible.builtin.template:
     src: "{{ item }}.j2"
-    dest: "{{ item }}.sh"
+    dest: "/opt/cluster-scripts/{{ item }}.sh"
     mode: '0755'
   loop: "{{ _scripts }}"
   tags: letsencrypt
@@ -18,4 +19,11 @@
 
 - name: launch certificate creation
   ansible.builtin.command: /opt/cluster-scripts/create-cert.sh
-  tags: letsencrypt
+  register: result
+  until: result.stdout.find("Successfully received certificate.") != -1
+  retries: 12
+  delay: 10
+  changed_when: False
+  tags:
+    - letsencrypt
+    - definitive

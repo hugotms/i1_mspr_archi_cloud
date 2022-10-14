@@ -34,14 +34,15 @@ listen stats
 
 frontend http_front
     bind {{ proxy_floating_ip }}:80
-{% if https_enabled | default(True) %}
-    bind {{ proxy_floating_ip }}:443 ssl crt /etc/haproxy/haproxy.pem
-{% endif %}
 
     acl letsencrypt-acl path_beg /.well-known/acme-challenge/
     use_backend kube-system_certbot_http_backend if letsencrypt-acl
 
+{% if https_enabled | default(True) %}
+    bind {{ proxy_floating_ip }}:443 ssl crt /etc/haproxy/haproxy.pem
     redirect scheme https unless { ssl_fc }
+{% endif %}
+
     use_backend %[req.hdr(host),lower,map(/etc/haproxy/urls.map,be_static)]
     option  forwardfor
 

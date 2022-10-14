@@ -18,7 +18,7 @@
 - name: create http map proxy file
   ansible.builtin.template:
     src: proxy_http.j2
-    dest: /data/kube-system/haproxy/urls.map
+    dest: "/data/{{ admin_namespace }}-haproxy/urls.map"
     owner: root
     mode: '0644'
   tags: deployment
@@ -27,7 +27,7 @@
 - name: create haproxy configuration file
   ansible.builtin.template:
     src: proxy_config.j2
-    dest: /data/kube-system/haproxy/haproxy.cfg
+    dest: "/data/{{ admin_namespace }}-haproxy/haproxy.cfg"
     owner: root
     mode: '0644'
   tags: deployment

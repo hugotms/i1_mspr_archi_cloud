@@ -7,3 +7,4 @@
     - role: kubernetes_deployment
       kubernetes_deployment_conf: "{{ run_kubernetes_deployment_conf }}"
       proxy_floating_ip: "{{ run_proxy_floating_ip }}"
+      admin_namespace: "{{ play_admin_namespace }}"

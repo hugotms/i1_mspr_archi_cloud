@@ -3,7 +3,7 @@
 run_directories: []
 
 kubernetes_deployment_conf:
-  - namespace: kube-system
+  - namespace: "{{ admin_namespace }}"
     apps:
 
       - name: certbot
