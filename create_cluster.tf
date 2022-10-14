@@ -5,15 +5,23 @@ resource "local_file" "inventory" {
       hosts:
         ${vsphere_virtual_machine.master.name}:
           ansible_host: ${vsphere_virtual_machine.master.default_ip_address}
-          cloud_function: master
         ${vsphere_virtual_machine.worker1.name}:
           ansible_host: ${vsphere_virtual_machine.worker1.default_ip_address}
-          cloud_function: worker
         ${vsphere_virtual_machine.worker2.name}:
           ansible_host: ${vsphere_virtual_machine.worker2.default_ip_address}
-          cloud_function: worker
       children:
+        kubernetes:
+          children:
+            control-plane:
+            nodes:
         control-plane:
+          hosts:
+            ${vsphere_virtual_machine.master.name}:
+        nodes:
+          hosts:
+            ${vsphere_virtual_machine.worker1.name}:
+            ${vsphere_virtual_machine.worker2.name}:
+        nfs-server:
           hosts:
             ${vsphere_virtual_machine.master.name}:
   EOF

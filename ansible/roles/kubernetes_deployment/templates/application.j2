@@ -61,25 +61,24 @@ spec:
 {% endfor %} 
 {% endif %}
 {% endfor %}
-{% for container in item.1.containers %}
-{% if container.ports is defined %}
+{% if item.1.containers | selectattr('ports', 'defined') | length > 0 %}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ item.1.name }}-{{ container.name | default(item.1.name) }}-service
+  name: {{ item.1.name }}-service
   namespace: {{ item.0.namespace }}
   labels:
     app: {{ item.1.name }}
     role: service
 spec:
-{% if container.ports | selectattr('nodePort', 'defined') | length > 0 %}
+{% if item.1.containers | selectattr('ports', 'defined') | map(attribute='ports') | flatten | selectattr('nodePort', 'defined') | length > 0 %}
   type: NodePort
 {% endif %}
   selector:
     app: {{ item.1.name }}
   ports:
-{% for port in container.ports %}
+{% for port in item.1.containers | selectattr('ports', 'defined') | map(attribute='ports') | flatten %}
     - name: port-{{ port.clusterPort | default(port.containerPort) }}-{{ port.protocol | default('tcp') | lower }}
       protocol: {{ (port.protocol | default('tcp') | upper == 'HTTP') | ternary('TCP', port.protocol | default('tcp') | upper) }}
       port: {{ port.clusterPort | default(port.containerPort) }}
@@ -89,4 +88,3 @@ spec:
 {% endif %}
 {% endfor %}
 {% endif %}
-{% endfor %}

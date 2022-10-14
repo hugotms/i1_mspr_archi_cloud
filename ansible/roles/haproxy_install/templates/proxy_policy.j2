@@ -13,6 +13,16 @@ spec:
     protocol: TCP
     destination:
       selector: has(kubernetes-host)
+      nets:
+      - {{ proxy_floating_ip }}/32
+      ports:
+      - 80
+      - 443
+      - 8181
+  - action: Deny
+    protocol: TCP
+    destination:
+      selector: has(kubernetes-host)
       ports:
       - 80
       - 443

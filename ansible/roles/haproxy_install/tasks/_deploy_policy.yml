@@ -1,8 +1,8 @@
 ---
 
 - name: copy proxy policy on master
-  ansible.builtin.copy:
-    src: proxy_policy.yml
+  ansible.builtin.template:
+    src: proxy_policy.j2
     dest: /tmp/proxy-network-policy.yml
   tags: haproxy
 
