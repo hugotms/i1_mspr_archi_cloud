@@ -1,4 +1,4 @@
-{% if item.1.containers | selectattr('ports', 'defined') | map(attribute='ports') | flatten | selectattr('nodePort', 'defined') | length > 0 %}
+{% if item.1.containers | selectattr('ports', 'defined') | map(attribute='ports') | flatten | selectattr('nodePort', 'defined') | selectattr('lbPort', 'defined') | length > 0 %}
 ---
 apiVersion: projectcalico.org/v3
 kind: GlobalNetworkPolicy
@@ -12,25 +12,19 @@ spec:
   types:
   - Ingress
   ingress:
-{% for port in item.1.containers | selectattr('ports', 'defined') | map(attribute='ports') | flatten | selectattr('nodePort', 'defined') %}
+{% for port in item.1.containers | selectattr('ports', 'defined') | map(attribute='ports') | flatten | selectattr('nodePort', 'defined') | selectattr('lbPort', 'defined') %}
   - action: Allow
     protocol: {{ (port.protocol | default('tcp') | upper == 'HTTP') | ternary('TCP', port.protocol | default('tcp') | upper) }}
-{% if (port.protocol | default('tcp') | upper == 'HTTP') | ternary('TCP', port.protocol | default('tcp') | upper) == 'TCP' %}
     source:
       nets:
       - {{ ansible_host.split('.')[0:3] | join('.') }}.0/24
-{% endif %}
     destination:
       selector: has(kubernetes-host)
-{% if (port.protocol | default('tcp') | upper == 'HTTP') | ternary('TCP', port.protocol | default('tcp') | upper) == 'UDP' %}
-      nets:
-      - {{ proxy_floating_ip }}/32
-{% endif %}
       ports:
       - {{ port.nodePort }}
-{% if port.protocol | default('tcp') | upper == 'TCP' and port.lbPort is defined %}
+{% if port.protocol | default('tcp') | upper != 'HTTP' and port.lbPort is defined %}
   - action: Allow
-    protocol: TCP
+    protocol: {{ (port.protocol | default('tcp') | upper == 'HTTP') | ternary('TCP', port.protocol | default('tcp') | upper) }}
     destination:
       selector: has(kubernetes-host)
       nets:
@@ -44,7 +38,7 @@ spec:
       selector: has(kubernetes-host)
       ports:
       - {{ port.nodePort }}
-{% if port.protocol | default('tcp') | upper == 'TCP' and port.lbPort is defined %}
+{% if port.protocol | default('tcp') | upper != 'HTTP' and port.lbPort is defined %}
       - {{ port.lbPort }}
 {% endif %}
 {% endfor %}

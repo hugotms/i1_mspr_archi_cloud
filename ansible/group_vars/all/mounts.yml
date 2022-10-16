@@ -1,5 +1,7 @@
 ---
 
 play_nfs_configuration:
-  - path: "{{ play_admin_namespace }}-haproxy"
-    mount: /etc/haproxy
+  - path: "{{ play_admin_namespace }}-certbot/etcletsencrypt"
+    mount: /etc/letsencrypt
+  - path: "{{ play_admin_namespace }}-nginx"
+    mount: /etc/nginx

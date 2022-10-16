@@ -18,7 +18,6 @@ spec:
       ports:
       - 80
       - 443
-      - 8181
   - action: Deny
     protocol: TCP
     destination:
@@ -26,7 +25,6 @@ spec:
       ports:
       - 80
       - 443
-      - 8181
   - action: Allow
     protocol: 112
   egress:

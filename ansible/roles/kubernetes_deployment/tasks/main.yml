@@ -6,7 +6,7 @@
 
 - name: reload haproxy to get new configuration
   ansible.builtin.service:
-    name: haproxy
+    name: nginx
     state: reloaded
     enabled: True
   when: "'nodes' in group_names"

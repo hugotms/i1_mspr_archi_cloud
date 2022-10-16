@@ -1,5 +1,3 @@
 #!/bin/bash
 
 kubectl exec -n {{ admin_namespace }} -it $(kubectl get pods -n {{ admin_namespace }} | grep certbot-deployment | cut -d " " -f1) -- certbot renew -n
-
-sudo cat /data/{{ admin_namespace }}-certbot/etcletsencrypt/live/{{ site_fqdn }}/fullchain.pem /data/{{ admin_namespace }}-certbot/etcletsencrypt/live/{{ site_fqdn }}/privkey.pem | sudo tee /data/{{ admin_namespace }}-haproxy/haproxy.pem > /dev/null

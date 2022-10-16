@@ -5,7 +5,7 @@ global_defs {
 }
 
 vrrp_script check_haproxy {
-    script "/usr/bin/systemctl is-active --quiet haproxy.service"
+    script "/usr/bin/systemctl is-active --quiet nginx.service"
     interval 2
     weight 2
 }
