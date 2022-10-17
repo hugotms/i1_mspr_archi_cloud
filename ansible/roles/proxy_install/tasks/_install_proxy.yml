@@ -16,10 +16,10 @@
   tags: proxy
   become: True
 
-- name: deploy crontask for proxy reload
+- name: deploy crontask for proxy restart
   ansible.builtin.cron:
     name: "reload nginx proxy"
-    job: "/bin/systemctl reload nginx.service"
+    job: "/bin/systemctl restart nginx.service"
     user: root
     hour: "0"
     minute: "0"
