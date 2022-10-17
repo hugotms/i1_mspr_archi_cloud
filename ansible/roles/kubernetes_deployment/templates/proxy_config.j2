@@ -27,6 +27,7 @@ http {
 {% for namespace in kubernetes_deployment_conf | selectattr('apps', 'defined') %}
 {% if namespace.state | default('present') != 'absent' %}
 {% for app in namespace.apps %}
+{% if app.state | default('present') != 'absent' %}
 {% for port in app.containers | selectattr('ports', 'defined') | map(attribute='ports') | flatten | selectattr('nodePort', 'defined') | selectattr('protocol', 'defined') %}
 {% if port.protocol | upper == 'HTTP' %}
     upstream {{ namespace.namespace }}_{{ app.name }}_{{ port.nodePort }}_http_backend {
@@ -38,6 +39,7 @@ http {
 
 {% endif %}
 {% endfor %}
+{% endif %}
 {% endfor %}
 {% endif %}
 {% endfor %}
@@ -61,6 +63,7 @@ http {
 {% for namespace in kubernetes_deployment_conf | selectattr('apps', 'defined') %}
 {% if namespace.state | default('present') != 'absent' %}
 {% for app in namespace.apps %}
+{% if app.state | default('present') != 'absent' %}
 {% for port in app.containers | selectattr('ports', 'defined') | map(attribute='ports') | flatten | selectattr('nodePort', 'defined') | selectattr('protocol', 'defined') %}
 {% if port.protocol | upper == 'HTTP' %}
     server {
@@ -95,6 +98,7 @@ http {
 {% endif %}
 {% endif %}
 {% endfor %}
+{% endif %}
 {% endfor %}
 {% endif %}
 {% endfor %}
@@ -104,6 +108,7 @@ stream {
 {% for namespace in kubernetes_deployment_conf | selectattr('apps', 'defined') %}
 {% if namespace.state | default('present') != 'absent' %}
 {% for app in namespace.apps %}
+{% if app.state | default('present') != 'absent' %}
 {% for port in app.containers | selectattr('ports', 'defined') | map(attribute='ports') | flatten | selectattr('nodePort', 'defined') | selectattr('lbPort', 'defined') %}
     upstream {{ namespace.namespace }}_{{ app.name }}_{{ port.nodePort }}_{{ port.protocol | default('tcp') | lower }}_backend {
         least_conn;
@@ -113,6 +118,7 @@ stream {
     }
 
 {% endfor %}
+{% endif %}
 {% endfor %}
 {% endif %}
 {% endfor %}
@@ -120,6 +126,7 @@ stream {
 {% for namespace in kubernetes_deployment_conf | selectattr('apps', 'defined') %}
 {% if namespace.state | default('present') != 'absent' %}
 {% for app in namespace.apps %}
+{% if app.state | default('present') != 'absent' %}
 {% for port in app.containers | selectattr('ports', 'defined') | map(attribute='ports') | flatten | selectattr('nodePort', 'defined') | selectattr('lbPort', 'defined') %}
     server {
         listen {{ port.lbPort }}{{ (port.protocol | default('tcp') | upper == 'UDP') | ternary(' udp;', ';')}}
@@ -127,6 +134,7 @@ stream {
     }
 
 {% endfor %}
+{% endif %}
 {% endfor %}
 {% endif %}
 {% endfor %}
