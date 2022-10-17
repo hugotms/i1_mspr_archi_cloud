@@ -129,7 +129,7 @@ stream {
 {% if app.state | default('present') != 'absent' %}
 {% for port in app.containers | selectattr('ports', 'defined') | map(attribute='ports') | flatten | selectattr('nodePort', 'defined') | selectattr('lbPort', 'defined') %}
     server {
-        listen {{ port.lbPort }}{{ (port.protocol | default('tcp') | upper == 'UDP') | ternary(' udp;', ';')}}
+        listen {{ port.lbPort }}{{ (port.protocol | default('tcp') | upper == 'UDP') | ternary(' udp;', ';') }}
         proxy_pass  {{ namespace.namespace }}_{{ app.name }}_{{ port.nodePort }}_{{ port.protocol | default('tcp') | lower }}_backend;
     }
 
