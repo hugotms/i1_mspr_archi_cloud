@@ -8,17 +8,21 @@
   tags: letsencrypt
   become: True
 
-- name: upload custom scripts to directory
+- name: upload custom script to directory
   ansible.builtin.template:
-    src: "{{ item }}.j2"
-    dest: "/opt/cluster-scripts/{{ item }}.sh"
+    src: update-cert.j2
+    dest: /opt/cluster-scripts/update-cert.sh
     mode: '0755'
-  loop: "{{ _scripts }}"
   tags: letsencrypt
   become: True
 
 - name: launch certificate creation
-  ansible.builtin.command: /opt/cluster-scripts/create-cert.sh
+  ansible.builtin.shell: >-
+    kubectl exec -n {{ admin_namespace }} -it \
+    $(kubectl get pods -n {{ admin_namespace }} | grep certbot-deployment | cut -d " " -f1) -- \
+    certbot certonly --standalone -n -d {{ site_fqdn }} -m {{ site_email }} --agree-tos {{ production_cluster | ternary('', '--test-cert') }}
+  args:
+    executable: /bin/bash
   register: result
   until: result.stdout.find("Successfully received certificate.") != -1
   retries: 12
@@ -27,3 +31,11 @@
   tags:
     - letsencrypt
     - definitive
+
+- name: add certificate renewal to crontab
+  ansible.builtin.cron:
+    name: "update certificates"
+    job: "/opt/cluster-scripts/update-cert.sh"
+    hour: "0"
+    minute: "0"
+  tags: letsencrypt

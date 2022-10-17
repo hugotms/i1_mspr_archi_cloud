@@ -4,10 +4,10 @@
   ansible.builtin.import_tasks: _configuration.yml
   when: "'control-plane' in group_names and 'nfs-server' in group_names"
 
-- name: reload haproxy to get new configuration
+- name: restart proxy to get new configuration
   ansible.builtin.service:
-    name: haproxy
-    state: reloaded
+    name: nginx
+    state: restarted
     enabled: True
   when: "'nodes' in group_names"
   tags: deployment

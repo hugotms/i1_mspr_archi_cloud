@@ -1,97 +1,141 @@
-global
-    log         127.0.0.1 local2
+# {{ ansible_managed }}
 
-    maxconn     4000
-    user        haproxy
-    group       haproxy
-    daemon
+load_module /usr/lib/nginx/modules/ngx_stream_module.so;
+user www-data;
+worker_processes auto;
+pid /run/nginx.pid;
 
-defaults
-    mode                    http
-    log                     global
-    option                  httplog
-    option                  dontlognull
-    option http-server-close
-    option forwardfor       except 127.0.0.0/8
-    option                  redispatch
-    retries                 3
-    timeout http-request    10s
-    timeout queue           1m
-    timeout connect         10s
-    timeout client          1m
-    timeout server          1m
-    timeout http-keep-alive 10s
-    timeout check           10s
-    maxconn                 3000
+events {
+    worker_connections  1024;
+}
 
-listen stats 
-    bind {{ proxy_floating_ip }}:8181
-    stats enable
-    stats hide-version
-    stats refresh 30s
-    stats show-node
-    stats uri /stats
-
-frontend http_front
-    bind {{ proxy_floating_ip }}:80
-
-    acl letsencrypt-acl path_beg /.well-known/acme-challenge/
-    use_backend kube-system_certbot_http_backend if letsencrypt-acl
-
-{% if https_enabled | default(True) %}
-    bind {{ proxy_floating_ip }}:443 ssl crt /etc/haproxy/haproxy.pem
-    redirect scheme https unless { ssl_fc }
+http {
+    include /etc/nginx/mime.types;
+    include    /etc/nginx/proxy_params;
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log;
+    server_tokens off;
+{% if https_enabled %}
+    ssl_certificate /etc/letsencrypt/live/{{ site_fqdn }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ site_fqdn }}/privkey.pem;
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_session_cache  shared:SSL:10m;
+    ssl_session_timeout 10m;
 {% endif %}
 
-    use_backend %[req.hdr(host),lower,map(/etc/haproxy/urls.map,be_static)]
-    option  forwardfor
-
-backend {{ admin_namespace }}_certbot_http_backend
-{% for server in groups['nodes'] %}
-    server {{ hostvars[server].inventory_hostname | lower }} {{ hostvars[server].ansible_host }}:30000
-{% endfor %}
-
-{% for namespace in kubernetes_deployment_conf %}
-{% if namespace.apps is defined and namespace.state | default('present') != 'absent' %}
+{% for namespace in kubernetes_deployment_conf | selectattr('apps', 'defined') %}
+{% if namespace.state | default('present') != 'absent' %}
 {% for app in namespace.apps %}
-{% for container in app.containers %}
-{% if container.ports is defined %}
-{% for port in container.ports %}
-{% if port.protocol | default('tcp') | upper == 'HTTP' %}
-backend {{ namespace.namespace }}_{{ app.name }}_{{ container.name | default(app.name) }}_{{ port.nodePort }}_{{ port.protocol | default('tcp') | lower }}_backend
-    balance leastconn
-    mode http
+{% if app.state | default('present') != 'absent' %}
+{% for port in app.containers | selectattr('ports', 'defined') | map(attribute='ports') | flatten | selectattr('nodePort', 'defined') | selectattr('protocol', 'defined') %}
+{% if port.protocol | upper == 'HTTP' %}
+    upstream {{ namespace.namespace }}_{{ app.name }}_{{ port.nodePort }}_http_backend {
+        least_conn;
 {% for server in groups['nodes'] %}
-    server {{ hostvars[server].inventory_hostname | lower }} {{ hostvars[server].ansible_host }}:{{ port.nodePort }} check
+        server {{ hostvars[server].ansible_host }}:{{ port.nodePort }};
 {% endfor %}
+    }
 
 {% endif %}
 {% endfor %}
 {% endif %}
 {% endfor %}
-{% endfor %}
 {% endif %}
 {% endfor %}
 
-{% for namespace in kubernetes_deployment_conf %}
-{% if namespace.apps is defined and namespace.state | default('present') != 'absent' %}
+    upstream {{ admin_namespace }}_certbot_http_backend {
+        least_conn;
+{% for server in groups['nodes'] %}
+        server {{ hostvars[server].ansible_host }}:30000;
+{% endfor %}
+    }
+
+    server {
+        listen 80;
+        server_name {{ site_fqdn }};
+
+        location / {
+            proxy_pass http://{{ admin_namespace }}_certbot_http_backend;
+        }
+    }
+
+{% for namespace in kubernetes_deployment_conf | selectattr('apps', 'defined') %}
+{% if namespace.state | default('present') != 'absent' %}
 {% for app in namespace.apps %}
-{% for container in app.containers %}
-{% if container.ports is defined %}
-{% for port in container.ports %}
-{% if port.protocol | default('tcp') | upper == 'TCP' and port.lbPort is defined %}
-listen {{ namespace.namespace }}_{{ app.name }}_{{ container.name | default(app.name) }}_{{ port.nodePort }}_{{ port.protocol | default('tcp') | lower }}_port
-    bind {{ proxy_floating_ip }}:{{ port.lbPort }}
-    balance leastconn
-    mode tcp
-{% for server in groups['nodes'] %}
-    server {{ hostvars[server].inventory_hostname | lower }} {{ hostvars[server].ansible_host }}:{{ port.nodePort }} check
-{% endfor %}
+{% if app.state | default('present') != 'absent' %}
+{% for port in app.containers | selectattr('ports', 'defined') | map(attribute='ports') | flatten | selectattr('nodePort', 'defined') | selectattr('protocol', 'defined') %}
+{% if port.protocol | upper == 'HTTP' %}
+    server {
+        listen 80;
+{% if port.url is defined %}
+        server_name {{ app.name | lower }}-{{ container.name | default(app.name) | lower }}-service.{{ namespace.namespace | lower }}.{{ ansible_domain | lower }} {{ port.url }};
+{% else %}
+        server_name {{ app.name | lower }}-{{ container.name | default(app.name) | lower }}-service.{{ namespace.namespace | lower }}.{{ ansible_domain | lower }};
+{% endif %}
+{% if https_enabled %}
+        return 301 https://$host$request_uri;
+{% else %}
+        location / {
+            proxy_pass http://{{ namespace.namespace }}_{{ app.name }}_{{ port.nodePort }}_http_backend;
+        }
+{% endif %}
+    }
+
+{% if https_enabled %}
+    server {
+        listen 443 ssl;
+{% if port.url is defined %}
+        server_name {{ app.name | lower }}-{{ container.name | default(app.name) | lower }}-service.{{ namespace.namespace | lower }}.{{ ansible_domain | lower }} {{ port.url }};
+{% else %}
+        server_name {{ app.name | lower }}-{{ container.name | default(app.name) | lower }}-service.{{ namespace.namespace | lower }}.{{ ansible_domain | lower }};
+{% endif %}
+        location / {
+            proxy_pass http://{{ namespace.namespace }}_{{ app.name }}_{{ port.nodePort }}_http_backend;
+        }
+    }
 
 {% endif %}
+{% endif %}
 {% endfor %}
 {% endif %}
 {% endfor %}
+{% endif %}
+{% endfor %}
+}
+
+stream {
+{% for namespace in kubernetes_deployment_conf | selectattr('apps', 'defined') %}
+{% if namespace.state | default('present') != 'absent' %}
+{% for app in namespace.apps %}
+{% if app.state | default('present') != 'absent' %}
+{% for port in app.containers | selectattr('ports', 'defined') | map(attribute='ports') | flatten | selectattr('nodePort', 'defined') | selectattr('lbPort', 'defined') %}
+    upstream {{ namespace.namespace }}_{{ app.name }}_{{ port.nodePort }}_{{ port.protocol | default('tcp') | lower }}_backend {
+        least_conn;
+{% for server in groups['nodes'] %}
+        server {{ hostvars[server].ansible_host }}:{{ port.nodePort }};
+{% endfor %}
+    }
+
 {% endfor %}
 {% endif %}
 {% endfor %}
+{% endif %}
+{% endfor %}
+
+{% for namespace in kubernetes_deployment_conf | selectattr('apps', 'defined') %}
+{% if namespace.state | default('present') != 'absent' %}
+{% for app in namespace.apps %}
+{% if app.state | default('present') != 'absent' %}
+{% for port in app.containers | selectattr('ports', 'defined') | map(attribute='ports') | flatten | selectattr('nodePort', 'defined') | selectattr('lbPort', 'defined') %}
+    server {
+        listen {{ port.lbPort }}{{ (port.protocol | default('tcp') | upper == 'UDP') | ternary(' udp;', ';') }}
+        proxy_pass  {{ namespace.namespace }}_{{ app.name }}_{{ port.nodePort }}_{{ port.protocol | default('tcp') | lower }}_backend;
+    }
+
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+}

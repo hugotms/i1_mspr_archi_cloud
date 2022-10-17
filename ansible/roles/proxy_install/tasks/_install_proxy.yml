@@ -1,30 +1,27 @@
 ---
 
-- name: install haproxy on nodes
+- name: install proxy on nodes
   ansible.builtin.apt:
-    name: haproxy
+    name: nginx
     state: present
   throttle: 1
   tags: proxy
   become: True
 
-- name: deploy default conf
-  ansible.builtin.copy:
-    src: default_haproxy.cfg
-    dest: /etc/haproxy/haproxy.cfg
-    owner: root
-    group: root
-    mode: '0644'
-  throttle: 1
-  tags:
-    - proxy
-    - definitive
-  become: True
-
-- name: start haproxy service
+- name: start proxy service
   ansible.builtin.service:
-    name: haproxy
+    name: nginx
     state: restarted
     enabled: True
+  tags: proxy
+  become: True
+
+- name: deploy crontask for proxy restart
+  ansible.builtin.cron:
+    name: "restart nginx proxy"
+    job: "/bin/systemctl restart nginx.service"
+    user: root
+    hour: "0"
+    minute: "0"
   tags: proxy
   become: True

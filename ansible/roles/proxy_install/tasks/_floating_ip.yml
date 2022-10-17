@@ -1,6 +1,6 @@
 ---
 
-- name: enable host to bind to floatin ip
+- name: enable host to bind to floating ip
   ansible.builtin.lineinfile:
     path: /etc/sysctl.d/99-proxy-bind-floating-ip.conf
     line: net.ipv4.ip_nonlocal_bind = 1
