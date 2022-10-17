@@ -18,7 +18,7 @@
 
 - name: deploy crontask for proxy restart
   ansible.builtin.cron:
-    name: "reload nginx proxy"
+    name: "restart nginx proxy"
     job: "/bin/systemctl restart nginx.service"
     user: root
     hour: "0"
