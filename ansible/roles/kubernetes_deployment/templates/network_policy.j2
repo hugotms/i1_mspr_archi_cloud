@@ -1,4 +1,4 @@
-{% if item.1.containers | selectattr('ports', 'defined') | map(attribute='ports') | flatten | selectattr('nodePort', 'defined') | selectattr('lbPort', 'defined') | length > 0 %}
+{% if item.1.containers | selectattr('ports', 'defined') | map(attribute='ports') | flatten | selectattr('nodePort', 'defined') | length > 0 %}
 ---
 apiVersion: projectcalico.org/v3
 kind: GlobalNetworkPolicy
@@ -12,12 +12,14 @@ spec:
   types:
   - Ingress
   ingress:
-{% for port in item.1.containers | selectattr('ports', 'defined') | map(attribute='ports') | flatten | selectattr('nodePort', 'defined') | selectattr('lbPort', 'defined') %}
+{% for port in item.1.containers | selectattr('ports', 'defined') | map(attribute='ports') | flatten | selectattr('nodePort', 'defined') %}
   - action: Allow
     protocol: {{ (port.protocol | default('tcp') | upper == 'HTTP') | ternary('TCP', port.protocol | default('tcp') | upper) }}
+{% if port.protocol | default('tcp') | upper == 'HTTP' or port.lbPort is defined %}
     source:
       nets:
       - {{ ansible_host.split('.')[0:3] | join('.') }}.0/24
+{% endif %}
     destination:
       selector: has(kubernetes-host)
       ports:
@@ -32,6 +34,7 @@ spec:
       ports:
       - {{ port.lbPort }}
 {% endif %}
+{% if port.protocol | default('tcp') | upper == 'HTTP' or port.lbPort is defined %}
   - action: Deny
     protocol: {{ (port.protocol | default('tcp') | upper == 'HTTP') | ternary('TCP', port.protocol | default('tcp') | upper) }}
     destination:
@@ -40,6 +43,7 @@ spec:
       - {{ port.nodePort }}
 {% if port.protocol | default('tcp') | upper != 'HTTP' and port.lbPort is defined %}
       - {{ port.lbPort }}
+{% endif %}
 {% endif %}
 {% endfor %}
 ---

@@ -28,7 +28,3 @@
       when:
         - "'control-plane' in group_names"
         - "run_https_enabled | default(True)"
-
-    - role: kubernetes_deployment
-      https_enabled: "{{ run_https_enabled | default(True) }}"
-      when: run_https_enabled | default(True)

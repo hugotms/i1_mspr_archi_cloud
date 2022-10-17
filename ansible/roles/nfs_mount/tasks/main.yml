@@ -5,6 +5,8 @@
     path: "/data/{{ item.path }}"
     state: directory
     recurse: True
+    owner: svcansible
+    group: nfs-group
   loop: "{{ nfs_mount }}"
   loop_control:
     label: "{{ item.path }}"
@@ -27,7 +29,7 @@
   tags: mount
   become: True
 
-- name: mount nfs volume for haproxy.cfg
+- name: mount nfs volume on nodes
   ansible.posix.mount:
     src: "{{ hostvars[groups['nfs-server'][0]].ansible_host }}:/data/{{ item.path }}"
     path: "{{ item.mount }}"

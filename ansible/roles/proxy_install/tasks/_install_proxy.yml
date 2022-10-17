@@ -22,6 +22,6 @@
     job: "/bin/systemctl reload nginx.service"
     user: root
     hour: "0"
-    minutes: "0"
+    minute: "0"
   tags: proxy
   become: True
