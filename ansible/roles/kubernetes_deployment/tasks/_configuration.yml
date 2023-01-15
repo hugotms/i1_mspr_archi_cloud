@@ -39,12 +39,12 @@
 
 - name: create data directory for volumes
   ansible.builtin.file:
-    path: "/data/{{ item.namespace }}-{{ item.app }}/{{ item.volume }}"
+    path: "/data/{{ item.namespace }}/{{ item.volume }}"
     state: directory
     recurse: True
   loop: "{{ _templated_directories.stdout | from_json }}"
   loop_control:
-    label: "{{ item.namespace }}-{{ item.app }}/{{ item.volume }}"
+    label: "/data/{{ item.namespace }}/{{ item.volume }}"
   when: item.delete == "false"
   tags: deployment
 
@@ -92,11 +92,11 @@
 
 - name: delete volumes directories
   ansible.builtin.file:
-    path: "/data/{{ item.namespace }}-{{ item.app }}/{{ item.volume }}"
+    path: "/data/{{ item.namespace }}/{{ item.volume }}"
     state: absent
   loop: "{{ _templated_directories.stdout | from_json }}"
   loop_control:
-    label: "{{ item.namespace }}-{{ item.app }}/{{ item.volume }}"
+    label: "/data/{{ item.namespace }}/{{ item.volume }}"
   when: item.delete == "true"
   tags: deployment
 
