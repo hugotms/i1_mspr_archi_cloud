@@ -84,7 +84,7 @@ http {
 
 {% if https_enabled %}
     server {
-        listen 443 ssl;
+        listen 443 ssl http2;
 {% if port.url is defined %}
         server_name {{ app.name | lower }}-{{ container.name | default(app.name) | lower }}-service.{{ namespace.namespace | lower }}.{{ ansible_domain | lower }} {{ port.url }};
 {% else %}
