@@ -3,7 +3,6 @@
 - name: patch system
   hosts: kubernetes
   serial: 1
-
   roles:
 
     - role: system_patching

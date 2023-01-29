@@ -3,6 +3,7 @@
 - name: configure services and rules
   ansible.builtin.import_tasks: _configuration.yml
   when: "'control-plane' in group_names and 'nfs-server' in group_names"
+  run_once: True
   tags: kubernetes_deployment
 
 - name: restart proxy to get new configuration
