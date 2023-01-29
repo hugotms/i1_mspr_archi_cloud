@@ -1,15 +1,5 @@
 ---
 
-- name: upgrade all system
-  ansible.builtin.apt:
-    name: "*"
-    state: latest
-    autoremove: True
-  tags:
-    - upgrade
-    - definitive
-  become: True
-
 - name: install apt dependencies
   ansible.builtin.apt:
     name: "{{ _apt_dependencies }}"

@@ -16,7 +16,7 @@
 - name: create proxy configuration file
   ansible.builtin.template:
     src: proxy_config.j2
-    dest: "/data/{{ admin_namespace }}-nginx/nginx.conf"
+    dest: "/data/{{ admin_namespace }}/nginx/nginx.conf"
     mode: '0644'
   become: True
 
