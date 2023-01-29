@@ -57,7 +57,7 @@ spec:
       - name: {{ volume.name | default(volume.path | replace("/", "")) | lower }}
         nfs:
           server: {{ ansible_host }}
-          path: /data/{{ item.0.namespace }}-{{ item.1.name }}/{{ volume.name | default(volume.path | replace("/", "")) | lower }}/
+          path: /data/{{ item.0.namespace }}/{{ volume.name | default(item.1.name + volume.path | replace("/", "")) | lower }}/
 {% endfor %} 
 {% endif %}
 {% endfor %}

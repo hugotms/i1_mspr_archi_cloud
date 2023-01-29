@@ -1,7 +1,5 @@
 ansible/inventories/
 
-ansible/group_vars/control-plane/
-
 .terraform/
 
 .terraform.*

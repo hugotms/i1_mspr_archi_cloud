@@ -3,11 +3,14 @@
 - name: install haproxy
   ansible.builtin.import_tasks: _install_proxy.yml
   when: "'nodes' in group_names"
+  tags: proxy_install
 
 - name: deploy keepalived
   ansible.builtin.import_tasks: _floating_ip.yml
   when: "'nodes' in group_names"
+  tags: proxy_install
 
 - name: deploy proxy and keepalived network policy
   ansible.builtin.import_tasks: _deploy_policy.yml
   when: "'control-plane' in group_names"
+  tags: proxy_install

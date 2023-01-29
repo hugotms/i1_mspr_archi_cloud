@@ -4,16 +4,12 @@
   ansible.builtin.template:
     src: proxy_policy.j2
     dest: /tmp/proxy-network-policy.yml
-  tags: haproxy
 
 - name: apply proxy network policy to cluster
   ansible.builtin.command: calicoctl apply -f /tmp/proxy-network-policy.yml
-  tags:
-    - haproxy
-    - network
+  tags: network
 
 - name: remove configuration files on node
   ansible.builtin.file:
     path: /tmp/proxy-network-policy.yml
     state: absent
-  tags: haproxy

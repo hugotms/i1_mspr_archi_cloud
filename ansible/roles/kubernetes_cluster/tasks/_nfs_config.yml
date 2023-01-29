@@ -4,7 +4,6 @@
   ansible.builtin.file:
     path: /data
     state: directory
-  tags: cluster
   become: True
 
 - name: create filesystem on seperate disk
@@ -12,16 +11,13 @@
     fstype: ext4
     dev: "{{ kubernetes_data_dev }}"
   tags:
-    - cluster
     - partitions
     - definitive
   become: True
 
 - name: removing unwanted data
   ansible.builtin.command: "tune2fs -m 0 {{ kubernetes_data_dev }}"
-  tags:
-    - cluster
-    - partitions
+  tags: partitions
   become: True
 
 - name: mount partition on filesystem
@@ -30,9 +26,7 @@
     path: /data
     state: mounted
     fstype: ext4
-  tags:
-    - cluster
-    - partitions
+  tags: partitions
   become: True
 
 - name: set permissions on data directory
@@ -42,14 +36,12 @@
     owner: svcansible
     group: nfs-group
     mode: "2777"
-  tags: cluster
   become: True
 
 - name: install nfs packages on server
   ansible.builtin.apt:
     name: nfs-kernel-server
-    state: present
-  tags: cluster
+    state: latest
   become: True
 
 - name: add network to exports
@@ -57,7 +49,6 @@
     line: "/data {{ ansible_host.split('.')[0:3] | join('.') }}.0/24(rw,async,no_root_squash,no_subtree_check)"
     path: /etc/exports
     create: True
-  tags: cluster
   become: True
 
 - name: start nfs server
@@ -65,5 +56,4 @@
     name: nfs-server
     enabled: True
     state: restarted
-  tags: cluster
   become: True

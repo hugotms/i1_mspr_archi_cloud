@@ -6,17 +6,13 @@
     --apiserver-cert-extra-sans={{ ansible_host }}  \
     --node-name {{ inventory_hostname | lower }} \
     --pod-network-cidr=172.16.0.0/16
-  tags:
-    - cluster
-    - init
-    - definitive
+  tags: definitive
   become: True
 
 - name: create svcansible kubernetes config folder on master
   ansible.builtin.file:
     path: /home/svcansible/.kube
     state: directory
-  tags: cluster
 
 - name: copy kubernetes admin config in svcansible config folder
   ansible.builtin.copy:
@@ -25,7 +21,6 @@
     dest: /home/svcansible/.kube/config
     owner: svcansible
     group: ansible
-  tags: cluster
   become: True
 
 - name: wait for cluster availability
@@ -35,13 +30,11 @@
   retries: 12
   delay: 10
   changed_when: False
-  tags: cluster
 
 - name: get calico manifest
   ansible.builtin.get_url:
     url: "https://raw.githubusercontent.com/projectcalico/calico/{{ calico_version }}/manifests/calico.yaml"
     dest: /tmp
-  tags: cluster
 
 - name: install calico network
   ansible.builtin.shell: >-
@@ -49,33 +42,9 @@
     && kubectl apply -f /tmp/calico.yaml
   args:
     executable: /bin/bash
-  tags:
-    - cluster
-    - network
+  tags: network
 
 - name: removing calico configuration file
   ansible.builtin.file:
     path: /tmp/calico.yaml
     state: absent
-  tags: cluster
-
-- name: join cluster command
-  ansible.builtin.command: kubeadm token create --print-join-command
-  register: run_join_command
-  tags:
-    - cluster
-    - join
-    - definitive
-  become: True
-
-- name: save command in temporary file
-  ansible.builtin.lineinfile:
-    path: "/tmp/{{ client_id | lower }}.sh"
-    line: "{{ run_join_command.stdout }}"
-    create: True
-  delegate_to: localhost
-  tags:
-    - cluster
-    - join
-    - definitive
-  become: True
