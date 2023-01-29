@@ -1,15 +1,16 @@
 ---
 
-- name: update cache if necessary
+- name: update apt cache
   ansible.builtin.apt:
     update_cache: True
-    cache_valid_time: 3600
+    clean: True
   tags: system_patching
   become: True
 
 - name: upgrade distribution
   ansible.builtin.apt:
     upgrade: dist
+    autoremove: True
   register: _apt_dist_upgrade
   tags: system_patching
   become: True
