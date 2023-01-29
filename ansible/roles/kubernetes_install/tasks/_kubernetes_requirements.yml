@@ -5,7 +5,9 @@
     name: "*"
     state: latest
     update_cache: True
-  tags: upgrade
+  tags:
+    - upgrade
+    - definitive
   become: True
 
 - name: install apt dependencies
