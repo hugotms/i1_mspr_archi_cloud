@@ -34,6 +34,7 @@
     - role: letsencrypt_config
       production_cluster: "{{ run_production_cluster | default(False) }}"
       site_email: "{{ run_site_email }}"
+      run_once: True
       when:
         - "'control-plane' in group_names"
         - "run_https_enabled | default(True)"
