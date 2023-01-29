@@ -19,12 +19,6 @@
   loop: "{{ _swap_fs }}"
   become: True
 
-- name: install containerd
-  ansible.builtin.apt:
-    name: containerd
-    state: present
-  become: True
-
 - name: add modules for containerd
   ansible.builtin.blockinfile:
     path: /etc/modules-load.d/containerd.conf

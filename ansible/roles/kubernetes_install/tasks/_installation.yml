@@ -18,7 +18,13 @@
     name: "{{ _kubernetes_packages }}"
     state: present
     allow_downgrade: True
+    allow_change_held_packages: True
     update_cache: True
+  become: True
+
+- name: hold package when version is specified
+  ansible.builtin.command: "apt-mark hold {{ item | split('=') | first }}"
+  loop: "{{ _kubernetes_packages }}"
   become: True
 
 - name: install calicoctl

@@ -18,3 +18,4 @@ _kubernetes_packages:
   - kubeadm=1.25.5-00
   - kubectl=1.25.5-00
   - cri-tools=1.25.0-00
+  - containerd
