@@ -3,7 +3,7 @@
 - name: configure kubernetes cluster
   hosts: kubernetes
   vars:
-    calico_version: "{{ play_calico_version }}"
+    calico_version: v3.24.1
     admin_namespace: "{{ play_admin_namespace }}"
     proxy_floating_ip: "{{ run_proxy_floating_ip }}"
     site_fqdn: "{{ run_site_fqdn }}"
