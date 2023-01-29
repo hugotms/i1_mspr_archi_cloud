@@ -14,6 +14,6 @@ _swap_fs:
   - none
 
 _kubernetes_packages:
-  - kubelet 
+  - kubelet=1.25.5-00
   - kubeadm 
   - kubectl
