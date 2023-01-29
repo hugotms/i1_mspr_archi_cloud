@@ -13,7 +13,7 @@
   when:
     - item.state is not defined or item.state != "absent"
     - "'nfs-server' in group_names"
-  tags: mount
+  tags: nfs_mount
   become: True
 
 - name: delete shared nfs directories
@@ -26,7 +26,7 @@
   when:
     - item.state is defined and item.state == "absent"
     - "'nfs-server' in group_names"
-  tags: mount
+  tags: nfs_mount
   become: True
 
 - name: mount nfs volume on nodes
@@ -41,6 +41,6 @@
     label: "{{ item.path }}"
   when: "'nodes' in group_names"
   tags:
-    - mount
+    - nfs_mount
     - partitions
   become: True

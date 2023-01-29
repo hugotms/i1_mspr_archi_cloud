@@ -5,7 +5,7 @@
     path: /opt/cluster-scripts/
     state: directory
     recurse: True
-  tags: letsencrypt
+  tags: letsencrypt_config
   become: True
 
 - name: upload custom script to directory
@@ -13,7 +13,7 @@
     src: update-cert.j2
     dest: /opt/cluster-scripts/update-cert.sh
     mode: '0755'
-  tags: letsencrypt
+  tags: letsencrypt_config
   become: True
 
 - name: launch certificate creation
@@ -29,7 +29,7 @@
   delay: 10
   changed_when: False
   tags:
-    - letsencrypt
+    - letsencrypt_config
     - definitive
 
 - name: add certificate renewal to crontab
@@ -38,4 +38,4 @@
     job: "/opt/cluster-scripts/update-cert.sh"
     hour: "0"
     minute: "0"
-  tags: letsencrypt
+  tags: letsencrypt_config

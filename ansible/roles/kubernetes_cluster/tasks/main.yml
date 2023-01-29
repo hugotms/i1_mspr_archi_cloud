@@ -3,6 +3,16 @@
 - name: start a kubernetes cluster
   ansible.builtin.import_tasks: _cluster_init.yml
   when: "'control-plane' in group_names"
+  tags:
+    - kubernetes_cluster
+    - init
+
+- name: start a kubernetes cluster
+  ansible.builtin.import_tasks: _cluster_join.yml
+  when: "'control-plane' in group_names"
+  tags:
+    - kubernetes_cluster
+    - join
 
 - name: copy join command on workers
   ansible.builtin.copy:
@@ -10,7 +20,7 @@
     dest: /tmp/join_command.sh
   when: "'nodes' in group_names"
   tags:
-    - cluster
+    - kubernetes_cluster
     - join
     - definitive
   become: True
@@ -19,7 +29,7 @@
   ansible.builtin.command: "sed -i '/kubeadm/ s/$/ --node-name {{ inventory_hostname | lower }}/' /tmp/join_command.sh"
   when: "'nodes' in group_names"
   tags:
-    - cluster
+    - kubernetes_cluster
     - join
     - definitive
   become: True
@@ -30,13 +40,16 @@
     state: absent
   delegate_to: localhost
   when: "'control-plane' in group_names"
-  tags: worker
+  tags:
+    - kubernetes_cluster
+    - worker
   become: True
 
 - name: launch joining command on workers
   ansible.builtin.command: bash /tmp/join_command.sh
   when: "'nodes' in group_names"
   tags:
+    - kubernetes_cluster
     - worker
     - join
     - definitive
@@ -47,19 +60,22 @@
     path: /tmp/join_command.sh
     state: absent
   when: "'nodes' in group_names"
-  tags: worker
+  tags:
+    - kubernetes_cluster
+    - worker
   become: True
 
 - name: create endpoints configuration files
   ansible.builtin.import_tasks: _endpoints_config.yml
   when: "'control-plane' in group_names"
+  tags: kubernetes_cluster
 
 - name: create nfs-group
   ansible.builtin.group:
     name: "nfs-group"
     gid: 1200
     state: present
-  tags: system
+  tags: kubernetes_cluster
   become: True
 
 - name: add svcansible to nfs-group
@@ -67,17 +83,18 @@
     name: svcansible
     groups: "nfs-group"
     append: True
-  tags: system
+  tags: kubernetes_cluster
   become: True
 
 - name: install nfs packages on worker
   ansible.builtin.apt:
     name: nfs-common
-    state: present
+    state: latest
   when: "'nodes' in group_names"
-  tags: system
+  tags: kubernetes_cluster
   become: True
 
 - name: install nfs server
   ansible.builtin.import_tasks: _nfs_config.yml
   when: "'nfs-server' in group_names"
+  tags: kubernetes_cluster

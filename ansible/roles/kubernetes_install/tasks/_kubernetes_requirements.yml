@@ -2,16 +2,21 @@
 
 - name: install apt dependencies
   ansible.builtin.apt:
+    name: "*"
+    state: latest
+    update_cache: True
+  tags: upgrade
+  become: True
+
+- name: install apt dependencies
+  ansible.builtin.apt:
     name: "{{ _apt_dependencies }}"
     state: present
-    update_cache: True
-  tags: system
   become: True
 
 - name: disable swap
   ansible.builtin.command: swapoff -a
   when: ansible_swaptotal_mb > 0
-  tags: system
   become: True
 
 - name: remove swap fs
@@ -20,14 +25,12 @@
     fstype: swap
     state: absent
   loop: "{{ _swap_fs }}"
-  tags: system
   become: True
 
 - name: install containerd
   ansible.builtin.apt:
     name: containerd
     state: present
-  tags: system
   become: True
 
 - name: add modules for containerd
@@ -39,7 +42,6 @@
     create: True
     owner: root
     group: root
-  tags: system
   register: _containerd_modules
   become: True
 
@@ -48,7 +50,6 @@
   args:
     executable: /bin/bash
   when: _containerd_modules.changed
-  tags: system
   become: True
 
 - name: add system configuration for kubernetes
@@ -61,21 +62,18 @@
     create: True
     owner: root
     group: root
-  tags: system
   register: _sys_config
   become: True
 
 - name: apply system configuration
   ansible.builtin.command: sysctl --system
   when: _sys_config.changed
-  tags: system
   become: True
 
 - name: set default containerd config
   ansible.builtin.shell: containerd config default > /etc/containerd/config.toml
   args:
     executable: /bin/bash
-  tags: system
   become: True
 
 - name: add cgroups configuration for containerd
@@ -84,18 +82,15 @@
     search_string: "[plugins.\"io.containerd.grpc.v1.cri\".containerd.runtimes.runc.options]"
     line: "          [plugins.\"io.containerd.grpc.v1.cri\".containerd.runtimes.runc.options]\n            SystemdCgroup = true"
     firstmatch: True
-  tags: system
   become: True
 
 - name: restart containerd service
   ansible.builtin.service:
     name: containerd
     state: restarted
-  tags: system
   become: True
 
 - name: install kubernetes python package
   ansible.builtin.pip:
     name: kubernetes
-  tags: system
   become: True
