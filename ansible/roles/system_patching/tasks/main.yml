@@ -3,7 +3,6 @@
 - name: update apt cache
   ansible.builtin.apt:
     update_cache: True
-    clean: True
   tags: system_patching
   become: True
 
