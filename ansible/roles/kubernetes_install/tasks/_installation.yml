@@ -17,6 +17,7 @@
   ansible.builtin.apt:
     name: "{{ _kubernetes_packages }}"
     state: present
+    allow_downgrade: True
     update_cache: True
   become: True
 

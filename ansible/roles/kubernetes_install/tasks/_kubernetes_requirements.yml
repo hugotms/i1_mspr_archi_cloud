@@ -4,6 +4,7 @@
   ansible.builtin.apt:
     name: "*"
     state: latest
+    autoremove: True
     update_cache: True
   tags:
     - upgrade

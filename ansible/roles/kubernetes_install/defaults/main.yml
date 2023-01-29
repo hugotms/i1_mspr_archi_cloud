@@ -15,5 +15,6 @@ _swap_fs:
 
 _kubernetes_packages:
   - kubelet=1.25.5-00
-  - kubeadm 
-  - kubectl
+  - kubeadm=1.25.5-00
+  - kubectl=1.25.5-00
+  - cri-tools=1.25.0-00
