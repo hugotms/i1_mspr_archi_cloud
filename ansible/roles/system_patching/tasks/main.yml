@@ -1,6 +1,18 @@
 ---
 
 - name: upgrade distribution
-  ansible.builtin.import_tasks: _system_patching.yml
-  tags: system_patching
+  block:
+
+    - name: upgrade distribution
+      ansible.builtin.apt:
+        upgrade: dist
+        update_cache: True
+      register: _apt_dist_upgrade
+
+    - name: reboot host if necessary
+      ansible.builtin.reboot:
+      when: _apt_dist_upgrade.changed
+
   throttle: 1
+  tags: system_patching
+  become: True
