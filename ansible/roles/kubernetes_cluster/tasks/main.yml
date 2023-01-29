@@ -3,13 +3,15 @@
 - name: start a kubernetes cluster
   ansible.builtin.import_tasks: _cluster_init.yml
   when: "'control-plane' in group_names"
+  run_once: True
   tags:
     - kubernetes_cluster
     - init
 
-- name: start a kubernetes cluster
+- name: enable worker to join kubernetes cluster
   ansible.builtin.import_tasks: _cluster_join.yml
   when: "'control-plane' in group_names"
+  run_once: True
   tags:
     - kubernetes_cluster
     - join
@@ -40,6 +42,7 @@
     state: absent
   delegate_to: localhost
   when: "'control-plane' in group_names"
+  run_once: True
   tags:
     - kubernetes_cluster
     - worker
@@ -68,6 +71,7 @@
 - name: create endpoints configuration files
   ansible.builtin.import_tasks: _endpoints_config.yml
   when: "'control-plane' in group_names"
+  run_once: True
   tags: kubernetes_cluster
 
 - name: create nfs-group
@@ -97,4 +101,5 @@
 - name: install nfs server
   ansible.builtin.import_tasks: _nfs_config.yml
   when: "'nfs-server' in group_names"
+  run_once: True
   tags: kubernetes_cluster

@@ -13,6 +13,7 @@
   when:
     - item.state is not defined or item.state != "absent"
     - "'nfs-server' in group_names"
+  run_once: True
   tags: nfs_mount
   become: True
 
@@ -26,6 +27,7 @@
   when:
     - item.state is defined and item.state == "absent"
     - "'nfs-server' in group_names"
+  run_once: True
   tags: nfs_mount
   become: True
 

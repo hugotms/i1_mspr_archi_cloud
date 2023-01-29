@@ -1,0 +1,22 @@
+---
+
+- name: update apt cache
+  ansible.builtin.apt:
+    update_cache: True
+    clean: True
+  tags: system_patching
+  become: True
+
+- name: upgrade distribution
+  ansible.builtin.apt:
+    upgrade: dist
+    autoremove: True
+  register: _apt_dist_upgrade
+  tags: system_patching
+  become: True
+
+- name: reboot host if necessary
+  ansible.builtin.reboot:
+  when: _apt_dist_upgrade.changed
+  tags: system_patching
+  become: True

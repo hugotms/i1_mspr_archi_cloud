@@ -13,4 +13,5 @@
 - name: deploy proxy and keepalived network policy
   ansible.builtin.import_tasks: _deploy_policy.yml
   when: "'control-plane' in group_names"
+  run_once: True
   tags: proxy_install

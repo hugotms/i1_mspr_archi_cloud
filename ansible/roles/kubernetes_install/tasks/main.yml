@@ -1,11 +1,33 @@
 ---
 
+- name: install apt dependencies
+  ansible.builtin.apt:
+    name: "{{ _apt_dependencies }}"
+    state: present
+  tags: kubernetes_install
+  become: True
+
+- name: disable swap
+  ansible.builtin.command: swapoff -a
+  when: ansible_swaptotal_mb > 0
+  tags: kubernetes_install
+  become: True
+
+- name: remove swap fs
+  ansible.builtin.mount:
+    name: "{{ item }}"
+    fstype: swap
+    state: absent
+  loop: "{{ _swap_fs }}"
+  tags: kubernetes_install
+  become: True
+
+- name: install kubernetes packages
+  ansible.builtin.import_tasks: _installation.yml
+  tags: kubernetes_install
+
 - name: install and configure kubernetes system requirements
   ansible.builtin.import_tasks: _kubernetes_requirements.yml
   tags:
     - kubernetes_install
     - requirements
-
-- name: install kubernetes packages
-  ansible.builtin.import_tasks: _installation.yml
-  tags: kubernetes_install
