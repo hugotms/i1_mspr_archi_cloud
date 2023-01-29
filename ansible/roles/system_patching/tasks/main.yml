@@ -1,18 +1,15 @@
 ---
 
 - name: upgrade distribution
-  block:
+  ansible.builtin.apt:
+    upgrade: dist
+    update_cache: True
+  register: _apt_dist_upgrade
+  tags: system_patching
+  become: True
 
-    - name: upgrade distribution
-      ansible.builtin.apt:
-        upgrade: dist
-        update_cache: True
-      register: _apt_dist_upgrade
-
-    - name: reboot host if necessary
-      ansible.builtin.reboot:
-      when: _apt_dist_upgrade.changed
-
-  throttle: 1
+- name: reboot host if necessary
+  ansible.builtin.reboot:
+  when: _apt_dist_upgrade.changed
   tags: system_patching
   become: True

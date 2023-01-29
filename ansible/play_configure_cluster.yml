@@ -1,5 +1,13 @@
 ---
 
+- name: patch system
+  hosts: kubernetes
+  serial: 1
+
+  roles:
+
+    - role: system_patching
+
 - name: configure kubernetes cluster
   hosts: kubernetes
   vars:
@@ -9,7 +17,6 @@
     site_fqdn: "{{ run_site_fqdn }}"
 
   roles:
-    - role: system_patching
 
     - role: kubernetes_install
 
