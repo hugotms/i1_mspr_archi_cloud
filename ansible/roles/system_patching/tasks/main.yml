@@ -1,0 +1,6 @@
+---
+
+- name: upgrade distribution
+  ansible.builtin.import_tasks: _system_patching.yml
+  tags: system_patching
+  throttle: 1

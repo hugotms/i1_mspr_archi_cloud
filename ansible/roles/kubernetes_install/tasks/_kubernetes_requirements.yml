@@ -5,7 +5,6 @@
     name: "*"
     state: latest
     autoremove: True
-    update_cache: True
   tags:
     - upgrade
     - definitive

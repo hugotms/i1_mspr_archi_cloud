@@ -9,6 +9,8 @@
     site_fqdn: "{{ run_site_fqdn }}"
 
   roles:
+    - role: system_patching
+
     - role: kubernetes_install
 
     - role: kubernetes_cluster
@@ -21,6 +23,7 @@
 
     - role: kubernetes_deployment
       https_enabled: False
+      tags: definitive
     
     - role: letsencrypt_config
       production_cluster: "{{ run_production_cluster | default(False) }}"
