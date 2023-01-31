@@ -35,7 +35,10 @@
 - name: add certificate renewal to crontab
   ansible.builtin.cron:
     name: "update certificates"
+    user: root
     job: "/opt/cluster-scripts/update-cert.sh"
     hour: "0"
     minute: "0"
   tags: letsencrypt_config
+  become_user: root
+  become: True
