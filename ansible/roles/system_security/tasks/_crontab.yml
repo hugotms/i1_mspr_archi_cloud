@@ -1,5 +1,11 @@
 ---
 
+- name: install cron on host
+  ansible.builtin.apt:
+    name: cron
+    state: present
+  become: True
+
 - name: reset permissions on /etc/crontab
   ansible.builtin.file:
     path: /etc/crontab
@@ -36,9 +42,9 @@
     - cron.deny
   become: True
 
-- name: start crond on host
+- name: start cron on host
   ansible.builtin.service:
-    name: crond
+    name: cron
     state: started
     enabled: True
   become: True
