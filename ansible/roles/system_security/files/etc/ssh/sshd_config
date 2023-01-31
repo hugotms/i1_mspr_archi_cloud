@@ -77,7 +77,7 @@ AllowTcpForwarding no
 X11Forwarding no
 #X11DisplayOffset 10
 #X11UseLocalhost yes
-PermitTTY no
+PermitTTY yes
 PrintMotd no
 #PrintLastLog yes
 #TCPKeepAlive yes
