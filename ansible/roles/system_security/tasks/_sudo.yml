@@ -17,11 +17,12 @@
 
 - name: copy sudoers file on host
   ansible.builtin.copy:
-    src: files/etc/sudoers.d/*
+    src: "{{ item }}"
     dest: /etc/sudoers.d/
     owner: root
     group: root
     mode: '0640'
     backup: True
     validate: /usr/sbin/visudo -csf %s
+  with_fileglob: files/etc/sudoers.d/*
   become: True

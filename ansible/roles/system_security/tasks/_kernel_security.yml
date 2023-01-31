@@ -2,11 +2,12 @@
 
 - name: deploy kernel configuration on host
   ansible.builtin.copy:
-    src: files/etc/sysctl.d/*
+    src: "{{ item }}"
     dest: /etc/sysctl.d/
     owner: root
     group: root
-    mode: '0644'
+    mode: '0640'
+  with_fileglob: files/etc/sysctl.d/*
   register: _sysctld_files
   become: True
 
