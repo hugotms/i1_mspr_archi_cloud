@@ -1,9 +1,11 @@
 ---
 
-- name: patch system
-  hosts: kubernetes
+- name: deploy system requirements
+  hosts: all
   serial: 1
   roles:
+    - role: system_security
+
     - role: system_patching
 
 - name: configure kubernetes cluster

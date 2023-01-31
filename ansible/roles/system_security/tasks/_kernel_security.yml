@@ -1,0 +1,17 @@
+---
+
+- name: deploy kernel configuration on host
+  ansible.builtin.copy:
+    src: files/etc/sysctl.d/*
+    dest: /etc/sysctl.d/
+    owner: root
+    group: root
+    mode: '0644'
+  register: _sysctld_files
+  become: True
+
+- name: reboot host if necessary
+  ansible.builtin.reboot:
+  when: _sysctld_files.changed
+  tags: system_security
+  become: True

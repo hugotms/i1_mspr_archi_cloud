@@ -1,0 +1,15 @@
+---
+
+- name: set grub password
+  ansible.builtin.lineinfile:
+    path: /etc/default/grub
+
+- name: update grub if needed
+  ansible.builtin.command: update-grub
+  when: _grub_files.changed
+  become: True
+
+- name: reboot host to reflect changes if needed
+  ansible.builtin.reboot:
+  when: _grub_files.changed
+  become: True

@@ -1,0 +1,32 @@
+---
+
+- name: secure kernel options
+  ansible.builtin.import_tasks: _kernel_security.yml
+  tags:
+    - system_security
+    - kernel
+
+- name: secure sshd configuration
+  ansible.builtin.import_tasks: _sshd.yml
+  tags:
+    - system_security
+    - sshd
+
+- name: secure sudoers
+  ansible.builtin.import_tasks: _sudo.yml
+  tags:
+    - system_security
+    - sudo
+
+- name: secure crontab
+  ansible.builtin.import_tasks: _crontab.yml
+  tags:
+    - system_security
+    - crontab
+
+#- name: secure packages and services
+#  ansible.builtin.import_tasks: _packages_and_services.yml
+#  tags:
+#    - system_security
+#    - packages
+#    - services

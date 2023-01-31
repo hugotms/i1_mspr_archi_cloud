@@ -1,0 +1,5 @@
+# Ansible managed
+
+Defaults logfile="/var/log/sudo.log"
+
+svcansible ALL = (ALL) NOPASSWD: NOEXEC: ALL

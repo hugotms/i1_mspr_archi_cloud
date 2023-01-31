@@ -1,5 +1,7 @@
 ---
 
+# disable cd-rom installs
+
 - name: update apt cache
   ansible.builtin.apt:
     update_cache: True
