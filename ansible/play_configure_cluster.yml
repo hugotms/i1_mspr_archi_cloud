@@ -4,9 +4,9 @@
   hosts: all
   serial: 1
   roles:
-    - role: system_security
-
     - role: system_patching
+
+    - role: system_security
 
 - name: configure kubernetes cluster
   hosts: kubernetes

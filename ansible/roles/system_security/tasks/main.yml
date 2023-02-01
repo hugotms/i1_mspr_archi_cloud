@@ -6,6 +6,12 @@
     - system_security
     - kernel
 
+- name: secure users
+  ansible.builtin.import_tasks: _user.yml
+  tags:
+    - system_security
+    - user
+
 - name: secure sshd configuration
   ansible.builtin.import_tasks: _sshd.yml
   tags:

@@ -1,0 +1,15 @@
+---
+
+- name: create sudo_allowed group
+  ansible.builtin.group:
+    name: sudo_allowed
+    gid: 1200
+    state: present
+  become: True
+
+- name: add svcansible to sudo_allowed group
+  ansible.builtin.user:
+    name: svcansible
+    groups: sudo_allowed
+    append: True
+  become: True

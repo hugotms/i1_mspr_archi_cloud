@@ -25,3 +25,15 @@
     backup: True
     validate: /usr/sbin/visudo -csf %s
   become: True
+
+- name: change permissions of sudo binaries
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: root
+    group: sudo_allowed
+    mode: '1750'
+  with_items:
+    - /usr/bin/sudo
+    - /usr/bin/sudoedit
+    - /usr/bin/sudoreplay
+  become: True
