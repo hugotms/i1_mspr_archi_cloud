@@ -30,8 +30,8 @@
   ansible.builtin.file:
     path: "{{ item }}"
     owner: root
-    group: sudo_allowed
-    mode: '1750'
+    group: wheel
+    mode: '4750'
   with_items:
     - /usr/bin/sudo
     - /usr/bin/sudoedit

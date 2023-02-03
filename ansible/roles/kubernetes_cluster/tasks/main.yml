@@ -77,7 +77,7 @@
 - name: create nfs-group
   ansible.builtin.group:
     name: "nfs-group"
-    gid: 1201
+    gid: 1200
     state: present
   tags: kubernetes_cluster
   become: True
