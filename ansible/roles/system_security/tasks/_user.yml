@@ -1,11 +1,27 @@
 ---
 
+- name: create wheel group
+  ansible.builtin.group:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - ansible
+    - wheel
+  become: True
+
 - name: add svcansible to wheel group
   ansible.builtin.user:
     name: svcansible
-    groups: wheel
+    groups: "{{ item }}"
     append: True
+  with_items:
+    - ansible
+    - wheel
+  register: _svcansible_groups
   become: True
+
+- name: reset connection
+  ansible.builtin.meta: reset_connection
 
 - name: require wheel membership to use 'su'
   community.general.pamd:

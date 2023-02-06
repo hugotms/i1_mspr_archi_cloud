@@ -1,0 +1,11 @@
+---
+
+# /!\ this playbook requires root password
+
+- name: deploy system requirements
+  hosts: all
+  become_method: su
+  roles:
+    - role: system_patching
+
+    - role: system_security
