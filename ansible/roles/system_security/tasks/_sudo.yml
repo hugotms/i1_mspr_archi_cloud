@@ -31,3 +31,15 @@
     name: sudo
     state: absent
   become: True
+
+- name: change permissions of sudo binaries
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: root
+    group: wheel
+    mode: '4750'
+  with_items:
+    - /usr/bin/sudo
+    - /usr/bin/sudoedit
+    - /usr/bin/sudoreplay
+  become: True
