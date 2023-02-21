@@ -29,6 +29,7 @@
     enabled: False
   loop: "{{ _disabled_services }}"
   become: True
+  ignore_errors: True
 
 - name: uninstall non required packages
   ansible.builtin.apt:
