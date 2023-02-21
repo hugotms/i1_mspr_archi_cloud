@@ -1,8 +1,0 @@
----
-
-_disabled_services:
-  - bla
-
-_uninstall_packages:
-  - at
-  - bla

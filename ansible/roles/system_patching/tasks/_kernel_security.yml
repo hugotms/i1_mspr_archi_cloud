@@ -7,11 +7,5 @@
     owner: root
     group: root
     mode: '0640'
-  register: _sysctld_files
-  become: True
-
-- name: reboot host if necessary
-  ansible.builtin.reboot:
-  when: _sysctld_files.changed
-  tags: system_security
+  notify: reboot host if necessary
   become: True

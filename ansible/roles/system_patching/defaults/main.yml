@@ -1,0 +1,25 @@
+---
+
+_disabled_services:
+  - cups
+  - dbus
+  - hald
+  #- ConsoleKit
+  #- PolicyKit
+  #- Exim
+  #- Postfix
+  #- ntpd
+  #- Bind
+
+_uninstall_packages:
+  - at
+  - atftpd
+  - nis
+  - rsh-redone-server
+  - rsh-server
+  - telnetd
+  - tftpd
+  - tftpd-hpa
+  - unattended-upgrades
+  - xinetd
+  - yp-tools

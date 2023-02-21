@@ -1,24 +1,39 @@
 ---
 
-# disable cd-rom installs
+- name: secure packages and services
+  ansible.builtin.import_tasks: _packages_and_services.yml
+  tags:
+    - system_security
+    - patching
+    - packages
+    - services
 
-- name: update apt cache
-  ansible.builtin.apt:
-    update_cache: True
-    clean: True
-  tags: system_patching
-  become: True
+- name: secure kernel options
+  ansible.builtin.import_tasks: _kernel_security.yml
+  tags:
+    - system_security
+    - kernel
 
-- name: upgrade distribution
-  ansible.builtin.apt:
-    upgrade: dist
-    autoremove: True
-  register: _apt_dist_upgrade
-  tags: system_patching
-  become: True
+- name: secure users
+  ansible.builtin.import_tasks: _user.yml
+  tags:
+    - system_security
+    - user
 
-- name: reboot host if necessary
-  ansible.builtin.reboot:
-  when: _apt_dist_upgrade.changed
-  tags: system_patching
-  become: True
+- name: secure sshd configuration
+  ansible.builtin.import_tasks: _sshd.yml
+  tags:
+    - system_security
+    - sshd
+
+- name: secure sudoers
+  ansible.builtin.import_tasks: _sudo.yml
+  tags:
+    - system_security
+    - sudo
+
+- name: secure crontab
+  ansible.builtin.import_tasks: _crontab.yml
+  tags:
+    - system_security
+    - crontab

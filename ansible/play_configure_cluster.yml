@@ -2,11 +2,9 @@
 
 - name: deploy system requirements
   hosts: all
-  serial: 1
+  serial: "{{ run_first_install | default(1) }}"
   roles:
     - role: system_patching
-
-    - role: system_security
 
 - name: configure kubernetes cluster
   hosts: kubernetes
