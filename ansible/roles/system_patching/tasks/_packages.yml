@@ -22,15 +22,6 @@
   notify: reboot host if necessary
   become: True
 
-- name: disable non required services
-  ansible.builtin.service:
-    name: "{{ item }}"
-    state: stopped
-    enabled: False
-  loop: "{{ _disabled_services }}"
-  become: True
-  ignore_errors: True
-
 - name: uninstall non required packages
   ansible.builtin.apt:
     name: "{{ _uninstall_packages }}"

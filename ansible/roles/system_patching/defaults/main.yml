@@ -1,20 +1,19 @@
 ---
 
-_disabled_services:
-  - cups
-  - dbus
-  - hald
-  #- ConsoleKit
-  #- PolicyKit
-  #- Exim
-  #- Postfix
-  #- ntpd
-  #- Bind
-
 _uninstall_packages:
   - at
   - atftpd
+  - bind*
+  - consolekit
+  - cups
+  - dbus
+  - exim4
+  - hal
   - nis
+  - ntpudate
+  - policykit*
+  - polkit*
+  - postfix
   - rsh-redone-server
   - rsh-server
   - telnetd

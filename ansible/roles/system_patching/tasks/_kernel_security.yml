@@ -9,3 +9,46 @@
     mode: '0640'
   notify: reboot host if necessary
   become: True
+
+- name: install AppArmor
+  ansible.builtin.apt:
+    name:
+      - apparmor
+      - apparmor-utils
+    state: present
+  become: True
+
+- name: get default grub config
+  ansible.builtin.shell: >-
+    grep GRUB_CMDLINE_LINUX_DEFAULT /etc/default/grub \
+    | cut -d "=" -f2 \
+    | sed 's/"//g'
+  changed_when: False
+  register: _default_grub
+
+- name: add apparmor to grub configuration
+  ansible.builtin.template:
+    src: etc-default-grub.d.j2
+    dest: /etc/default/grub.d/apparmor.cfg
+    owner: root
+    group: root
+    mode: '0640'
+  become: True
+  register: _grub_config
+
+- name: update grub configuration
+  ansible.builtin.command: update-grub
+  become: True
+  when: _grub_config.changed
+  notify: reboot host if necessary
+
+- name: enforce all apparmor profiles
+  ansible.builtin.command: aa-enforce /etc/apparmor.d/*
+  become: True
+
+- name: ensure apparmor service is started
+  ansible.builtin.service:
+    name: apparmor
+    state: restarted
+    enabled: True
+  become: True
