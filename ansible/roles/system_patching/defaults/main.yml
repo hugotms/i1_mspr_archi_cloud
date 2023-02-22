@@ -6,7 +6,6 @@ _uninstall_packages:
   - bind*
   - consolekit
   - cups
-  - dbus
   - exim4
   - hal
   - nis
