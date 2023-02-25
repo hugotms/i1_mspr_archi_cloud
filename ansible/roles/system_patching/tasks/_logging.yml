@@ -14,11 +14,12 @@
     group: root
     mode: '0640'
   become: True
+  notify: reboot host if necessary
 
 - name: ensure auditd service is started
   ansible.builtin.service:
     name: auditd
-    state: restarted
+    state: started
     enabled: True
   become: True
 

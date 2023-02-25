@@ -1,0 +1,7 @@
+---
+
+_nfs_mount:
+  - path: "{{ admin_namespace }}/certbotetcletsencrypt"
+    mount: /etc/letsencrypt
+  - path: "{{ admin_namespace }}/nginx"
+    mount: /etc/nginx

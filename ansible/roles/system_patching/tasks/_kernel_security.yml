@@ -7,8 +7,18 @@
     owner: root
     group: root
     mode: '0640'
-  notify: reboot host if necessary
   become: True
+  notify: reboot host if necessary
+
+- name: define module that can be use
+  ansible.builtin.copy:
+    src: files/etc/modprobe.d/
+    dest: /etc/modprobe.d/
+    owner: root
+    group: root
+    mode: '0640'
+  become: True
+  notify: reboot host if necessary
 
 - name: install AppArmor
   ansible.builtin.apt:

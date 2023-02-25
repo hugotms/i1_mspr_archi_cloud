@@ -1,7 +1,0 @@
----
-
-play_nfs_configuration:
-  - path: "{{ play_admin_namespace }}/certbotetcletsencrypt"
-    mount: /etc/letsencrypt
-  - path: "{{ play_admin_namespace }}/nginx"
-    mount: /etc/nginx

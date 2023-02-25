@@ -6,6 +6,12 @@
   roles:
     - role: system_patching
 
+- name: configure NFS
+  hosts: all
+  roles:
+    - role: data_share
+      admin_namespace: "{{ play_admin_namespace }}"
+
 - name: configure kubernetes cluster
   hosts: kubernetes
   vars:
@@ -19,9 +25,6 @@
 
     - role: kubernetes_cluster
       kubernetes_data_dev: "{{ run_data_dev }}"
-
-    - role: nfs_mount
-      nfs_mount: "{{ play_nfs_configuration }}"
 
     - role: proxy_install
 
