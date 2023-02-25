@@ -10,6 +10,7 @@
   hosts: all
   roles:
     - role: data_share
+      data_share_dev: "{{ run_data_dev }}"
       admin_namespace: "{{ play_admin_namespace }}"
 
 - name: configure kubernetes cluster
@@ -24,7 +25,6 @@
     - role: kubernetes_install
 
     - role: kubernetes_cluster
-      kubernetes_data_dev: "{{ run_data_dev }}"
 
     - role: proxy_install
 
