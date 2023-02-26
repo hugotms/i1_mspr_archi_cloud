@@ -6,9 +6,6 @@
     state: directory
   become: True
 
-# create raid
-# encrypt device with luks
-
 - name: create filesystem on selected device
   ansible.builtin.filesystem:
     fstype: ext4
