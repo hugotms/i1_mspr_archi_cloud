@@ -39,6 +39,6 @@
 - name: change root password on host
   ansible.builtin.user:
     name: root
-    password: "{{ root_password }}"
+    password: "{{ root_password | password_hash('sha512') }}"
     update_password: always
   become: True
