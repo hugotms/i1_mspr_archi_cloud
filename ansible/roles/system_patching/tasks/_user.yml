@@ -35,3 +35,10 @@
     module_arguments: 'use_uid'
     state: after
   become: True
+
+- name: change root password on host
+  ansible.builtin.user:
+    name: root
+    password: "{{ root_password }}"
+    update_password: always
+  become: True

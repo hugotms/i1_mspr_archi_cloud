@@ -28,6 +28,17 @@
     state: present
   become: True
 
+- name: enforce all apparmor profiles
+  ansible.builtin.command: aa-enforce /etc/apparmor.d/*
+  become: True
+
+- name: ensure apparmor service is started
+  ansible.builtin.service:
+    name: apparmor
+    state: restarted
+    enabled: True
+  become: True
+
 - name: get default grub config
   ansible.builtin.shell: >-
     grep GRUB_CMDLINE_LINUX_DEFAULT /etc/default/grub \
@@ -36,7 +47,7 @@
   changed_when: False
   register: _default_grub
 
-- name: add apparmor to grub configuration
+- name: deploy custom grub config
   ansible.builtin.template:
     src: etc-default-grub.d.j2
     dest: /etc/default/grub.d/apparmor.cfg
@@ -51,14 +62,3 @@
   become: True
   when: _grub_config.changed
   notify: reboot host if necessary
-
-- name: enforce all apparmor profiles
-  ansible.builtin.command: aa-enforce /etc/apparmor.d/*
-  become: True
-
-- name: ensure apparmor service is started
-  ansible.builtin.service:
-    name: apparmor
-    state: restarted
-    enabled: True
-  become: True
