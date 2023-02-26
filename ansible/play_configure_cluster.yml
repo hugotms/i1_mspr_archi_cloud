@@ -2,7 +2,7 @@
 
 - name: deploy system requirements
   hosts: all
-  serial: "{{ run_first_install | default(1) }}"
+  serial: 1
   roles:
     - role: system_patching
 

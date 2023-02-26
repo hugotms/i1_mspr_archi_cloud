@@ -9,7 +9,7 @@
     - wheel
   become: True
 
-- name: add svcansible to wheel group
+- name: add svcansible to secondary group
   ansible.builtin.user:
     name: svcansible
     groups: "{{ item }}"
@@ -41,4 +41,5 @@
     name: root
     password: "{{ root_password | password_hash('sha512') }}"
     update_password: always
+  when: root_password is defined and root_password != ''
   become: True

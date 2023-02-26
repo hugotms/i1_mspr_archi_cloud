@@ -40,5 +40,4 @@
     hour: "0"
     minute: "0"
   tags: letsencrypt_config
-  become_user: root
   become: True

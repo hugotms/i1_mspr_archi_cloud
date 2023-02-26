@@ -22,7 +22,6 @@
     owner: root
     group: root
     mode: '0640'
-    backup: True
     validate: /usr/sbin/visudo -csf %s
   become: True
 
