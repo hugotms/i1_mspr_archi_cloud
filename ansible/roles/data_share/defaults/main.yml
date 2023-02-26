@@ -3,5 +3,7 @@
 _nfs_mount:
   - path: "{{ admin_namespace }}/certbotetcletsencrypt"
     mount: /etc/letsencrypt
+    opts: rw,auto,soft
   - path: "{{ admin_namespace }}/nginx"
     mount: /etc/nginx
+    opts: rw,auto,soft,nosuid,noexec,nodev

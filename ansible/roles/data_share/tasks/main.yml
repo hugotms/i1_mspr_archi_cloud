@@ -16,7 +16,7 @@
   tags: data_share
   become: True
 
-- name: install nfs packages on worker
+- name: install nfs client on host
   ansible.builtin.apt:
     name: nfs-common
     state: latest
@@ -33,7 +33,7 @@
   ansible.posix.mount:
     src: "{{ hostvars[groups['nfs-server'][0]].ansible_host }}:/data/{{ item.path }}"
     path: "{{ item.mount }}"
-    opts: rw,auto,soft
+    opts: "{{ item.opts }}"
     state: "{{ item.state | default('mounted') }}"
     fstype: nfs
   loop: "{{ _nfs_mount }}"
