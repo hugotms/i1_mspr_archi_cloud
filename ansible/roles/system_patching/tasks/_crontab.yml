@@ -14,7 +14,7 @@
     mode: '0640'
   become: True
 
-- name: reset permissions on crontab configuration directories
+- name: reset permissions on crontab configuration files
   ansible.builtin.file:
     path: "/etc/{{ item }}"
     owner: root

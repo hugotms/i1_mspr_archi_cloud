@@ -9,12 +9,12 @@
   tags: definitive
   become: True
 
-- name: create svcansible kubernetes config folder on master
+- name: create kubernetes config folder on master
   ansible.builtin.file:
     path: /home/svcansible/.kube
     state: directory
 
-- name: copy kubernetes admin config in svcansible config folder
+- name: copy kubernetes config in svcansible folder
   ansible.builtin.copy:
     remote_src: True
     src: /etc/kubernetes/admin.conf
