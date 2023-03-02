@@ -1,0 +1,20 @@
+---
+
+- name: set sshd_config for host
+  ansible.builtin.copy:
+    src: files/etc/ssh/sshd_config
+    dest: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: '0640'
+    validate: /usr/sbin/sshd -t -f %s
+  register: _sshd_conf
+  become: True
+
+- name: restart sshd if needed
+  ansible.builtin.service:
+    name: sshd
+    state: restarted
+    enabled: True
+  when: _sshd_conf.changed
+  become: True

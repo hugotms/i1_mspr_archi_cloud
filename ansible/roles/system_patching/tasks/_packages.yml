@@ -1,0 +1,30 @@
+---
+
+- name: change apt repolist
+  ansible.builtin.copy:
+    src: files/etc/apt/sources.list
+    dest: /etc/apt/sources.list
+    owner: root
+    group: root
+    mode: '0644'
+  become: True
+
+- name: update apt cache
+  ansible.builtin.apt:
+    update_cache: True
+    clean: True
+  become: True
+
+- name: upgrade distribution
+  ansible.builtin.apt:
+    upgrade: dist
+    autoremove: True
+  notify: reboot host if necessary
+  become: True
+
+- name: uninstall non required packages
+  ansible.builtin.apt:
+    name: "{{ _uninstall_packages }}"
+    state: absent
+    autoremove: True
+  become: True

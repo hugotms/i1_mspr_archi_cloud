@@ -1,0 +1,39 @@
+---
+
+- name: install auditd
+  ansible.builtin.apt:
+    name: auditd
+    state: present
+  become: True
+
+- name: configure auditd
+  ansible.builtin.copy:
+    src: files/etc/audit/rules.d/
+    dest: /etc/audit/rules.d/
+    owner: root
+    group: root
+    mode: '0640'
+  become: True
+  notify: reboot host if necessary
+
+- name: ensure auditd service is started
+  ansible.builtin.service:
+    name: auditd
+    state: started
+    enabled: True
+  become: True
+
+- name: install logrotate
+  ansible.builtin.apt:
+    name: logrotate
+    state: present
+  become: True
+
+- name: configure logrotate
+  ansible.builtin.copy:
+    src: files/etc/logrotate.d/
+    dest: /etc/logrotate.d/
+    owner: root
+    group: root
+    mode: '0640'
+  become: True

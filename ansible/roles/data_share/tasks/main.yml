@@ -1,0 +1,73 @@
+---
+
+- name: create nfs-group
+  ansible.builtin.group:
+    name: "nfs-group"
+    gid: 1200
+    state: present
+  tags: data_share
+  become: True
+
+- name: add svcansible to nfs-group
+  ansible.builtin.user:
+    name: svcansible
+    groups: "nfs-group"
+    append: True
+  tags: data_share
+  become: True
+
+- name: install nfs client on host
+  ansible.builtin.apt:
+    name: nfs-common
+    state: latest
+  when: "'nfs-server' not in group_names"
+  tags: data_share
+  become: True
+
+- name: install nfs server
+  ansible.builtin.import_tasks: _nfs_server.yml
+  when: "'nfs-server' in group_names"
+  tags: data_share
+
+- name: mount nfs volume on nodes
+  ansible.posix.mount:
+    src: "{{ hostvars[groups['nfs-server'][0]].ansible_host }}:/data/{{ item.path }}"
+    path: "{{ item.mount }}"
+    opts: "{{ item.opts }}"
+    state: "{{ item.state | default('mounted') }}"
+    fstype: nfs
+  loop: "{{ _nfs_mount }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when: "'nodes' in group_names"
+  become: True
+  tags:
+    - data_share
+    - partitions
+
+- name: create data directory on control-plane
+  ansible.builtin.file:
+    path: /data
+    state: directory
+  when:
+    - "'control-plane' in group_names"
+    - "'nfs-server' not in group_names"
+  become: True
+  tags:
+    - data_share
+    - partitions
+
+- name: mount nfs volume on control-plane
+  ansible.posix.mount:
+    src: "{{ hostvars[groups['nfs-server'][0]].ansible_host }}:/data"
+    path: /data
+    opts: rw,auto,soft
+    state: mounted
+    fstype: nfs
+  when:
+    - "'control-plane' in group_names"
+    - "'nfs-server' not in group_names"
+  become: True
+  tags:
+    - data_share
+    - partitions

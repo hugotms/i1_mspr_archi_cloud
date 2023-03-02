@@ -1,0 +1,7 @@
+# Ansible managed
+
+Defaults requiretty,use_pty,umask=0027
+Defaults ignore_dot,env_reset
+Defaults logfile="/var/log/sudo.log"
+
+svcansible ALL = (ALL) NOPASSWD: ALL

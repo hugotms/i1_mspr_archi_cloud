@@ -1,0 +1,44 @@
+---
+
+- name: ensure sudo is installed on system
+  ansible.builtin.apt:
+    name: sudo
+    state: latest
+  become: True
+
+- name: create sudoers.d directory
+  ansible.builtin.file:
+    path: /etc/sudoers.d/
+    state: directory
+    owner: root
+    group: root
+    mode: '0750'
+  become: True
+
+- name: copy sudoers file on host
+  ansible.builtin.copy:
+    src: files/etc/sudoers.d/
+    dest: /etc/sudoers.d/
+    owner: root
+    group: root
+    mode: '0640'
+    validate: /usr/sbin/visudo -csf %s
+  become: True
+
+- name: ensure sudo group is inexistant
+  ansible.builtin.group:
+    name: sudo
+    state: absent
+  become: True
+
+- name: change permissions of sudo binaries
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: root
+    group: wheel
+    mode: '4750'
+  with_items:
+    - /usr/bin/sudo
+    - /usr/bin/sudoedit
+    - /usr/bin/sudoreplay
+  become: True

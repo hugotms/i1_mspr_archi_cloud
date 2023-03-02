@@ -6,23 +6,23 @@
     state: directory
   become: True
 
-- name: create filesystem on seperate disk
+- name: create filesystem on selected device
   ansible.builtin.filesystem:
     fstype: ext4
-    dev: "{{ kubernetes_data_dev }}"
+    dev: "{{ data_share_dev }}"
   tags:
     - partitions
     - definitive
   become: True
 
 - name: removing unwanted data
-  ansible.builtin.command: "tune2fs -m 0 {{ kubernetes_data_dev }}"
+  ansible.builtin.command: "tune2fs -m 0 {{ data_share_dev }}"
   tags: partitions
   become: True
 
 - name: mount partition on filesystem
   ansible.builtin.mount:
-    src: "{{ kubernetes_data_dev }}"
+    src: "{{ data_share_dev }}"
     path: /data
     state: mounted
     fstype: ext4
@@ -56,4 +56,27 @@
     name: nfs-server
     enabled: True
     state: restarted
+  become: True
+
+- name: create shared nfs directories
+  ansible.builtin.file:
+    path: "/data/{{ item.path }}"
+    state: directory
+    recurse: True
+    owner: svcansible
+    group: nfs-group
+  loop: "{{ _nfs_mount }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when: item.state is not defined or item.state != "absent"
+  become: True
+
+- name: delete shared nfs directories
+  ansible.builtin.file:
+    path: "/data/{{ item.path }}"
+    state: absent
+  loop: "{{ _nfs_mount }}"
+  loop_control:
+    label: "{{ item.path }}"
+  when: item.state is defined and item.state == "absent"
   become: True

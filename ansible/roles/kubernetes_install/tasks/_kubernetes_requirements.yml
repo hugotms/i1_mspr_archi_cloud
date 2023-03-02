@@ -60,4 +60,3 @@
 - name: install kubernetes python package
   ansible.builtin.pip:
     name: kubernetes
-  become: True

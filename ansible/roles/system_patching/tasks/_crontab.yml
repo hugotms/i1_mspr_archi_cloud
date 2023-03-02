@@ -1,0 +1,50 @@
+---
+
+- name: install cron on host
+  ansible.builtin.apt:
+    name: cron
+    state: present
+  become: True
+
+- name: reset permissions on /etc/crontab
+  ansible.builtin.file:
+    path: /etc/crontab
+    owner: root
+    group: root
+    mode: '0640'
+  become: True
+
+- name: reset permissions on crontab configuration directories
+  ansible.builtin.file:
+    path: "/etc/{{ item }}"
+    owner: root
+    group: root
+    mode: '0750'
+  with_items:
+    - cron.d
+    - cron.hourly
+    - cron.daily
+    - cron.weekly
+    - cron.monthly
+  become: True
+
+- name: deploy files to secure crontab and at
+  ansible.builtin.copy:
+    src: "files/etc/{{ item }}"
+    dest: "/etc/{{ item }}"
+    owner: root
+    group: root
+    mode: '0640'
+  with_items:
+    - at.allow
+    - at.deny
+    - cron.allow
+    - cron.deny
+  become: True
+
+- name: start cron on host
+  ansible.builtin.service:
+    name: cron
+    state: started
+    enabled: True
+  become: True

@@ -1,0 +1,45 @@
+---
+
+- name: create wheel group
+  ansible.builtin.group:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - ansible
+    - wheel
+  become: True
+
+- name: add svcansible to secondary group
+  ansible.builtin.user:
+    name: svcansible
+    groups: "{{ item }}"
+    append: True
+  with_items:
+    - ansible
+    - wheel
+  register: _svcansible_groups
+  become: True
+
+- name: reset connection
+  ansible.builtin.meta: reset_connection
+
+- name: require wheel membership to use 'su'
+  community.general.pamd:
+    name: su
+    type: auth
+    control: sufficient
+    module_path: pam_rootok.so
+    new_type: auth
+    new_control: required
+    new_module_path: pam_wheel.so
+    module_arguments: 'use_uid'
+    state: after
+  become: True
+
+- name: change root password on host
+  ansible.builtin.user:
+    name: root
+    password: "{{ root_password | password_hash('sha512') }}"
+    update_password: always
+  when: root_password is defined and root_password != ''
+  become: True

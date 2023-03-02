@@ -1,0 +1,23 @@
+---
+
+_uninstall_packages:
+  - at
+  - atftpd
+  - bind*
+  - consolekit
+  - cups
+  - exim4
+  - hal
+  - nis
+  - ntpudate
+  - policykit*
+  - polkit*
+  - postfix
+  - rsh-redone-server
+  - rsh-server
+  - telnetd
+  - tftpd
+  - tftpd-hpa
+  - unattended-upgrades
+  - xinetd
+  - yp-tools
