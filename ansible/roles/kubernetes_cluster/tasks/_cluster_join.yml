@@ -8,10 +8,15 @@
   delay: 10
   changed_when: False
 
+- name: check if worker is already joined
+  ansible.builtin.shell: kubectl get nodes --all-namespaces --no-headers | cut -d " " -f1
+  args:
+    executable: /bin/bash
+  register: cluster_server
+
 - name: join cluster command
   ansible.builtin.command: kubeadm token create --print-join-command
   register: run_join_command
-  tags: definitive
   become: True
 
 - name: save command in temporary file
@@ -20,5 +25,4 @@
     line: "{{ run_join_command.stdout }}"
     create: True
   delegate_to: localhost
-  tags: definitive
   become: True

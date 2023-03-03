@@ -1,6 +1,6 @@
 ---
 
-- name: install haproxy
+- name: install proxy
   ansible.builtin.import_tasks: _install_proxy.yml
   when: "'nodes' in group_names"
   tags: proxy_install

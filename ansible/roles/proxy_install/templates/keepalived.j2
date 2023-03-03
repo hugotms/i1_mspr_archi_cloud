@@ -1,10 +1,10 @@
 global_defs {
-    lvs_id haproxy_DH
+    lvs_id proxy_DH
     enable_script_security
     script_user root root
 }
 
-vrrp_script check_haproxy {
+vrrp_script check_proxy {
     script "/usr/bin/systemctl is-active --quiet nginx.service"
     interval 2
     weight 2
@@ -23,6 +23,6 @@ vrrp_instance VI_01 {
         {{ proxy_floating_ip }}
     }
     track_script {
-        check_haproxy
+        check_proxy
     }
 }

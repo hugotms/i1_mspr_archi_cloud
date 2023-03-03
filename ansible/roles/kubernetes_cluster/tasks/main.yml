@@ -24,7 +24,6 @@
   tags:
     - kubernetes_cluster
     - join
-    - definitive
   become: True
 
 - name: append hostname to script
@@ -33,7 +32,6 @@
   tags:
     - kubernetes_cluster
     - join
-    - definitive
   become: True
 
 - name: remove command file on localhost
@@ -50,12 +48,13 @@
 
 - name: launch joining command on workers
   ansible.builtin.command: bash /tmp/join_command.sh
-  when: "'nodes' in group_names"
+  when:
+    - "'nodes' in group_names"
+    - "inventory_hostname not in cluster_server.stdout_lines"
   tags:
     - kubernetes_cluster
     - worker
     - join
-    - definitive
   become: True
 
 - name: remove command file on workers
