@@ -17,7 +17,9 @@
 
 - name: removing unwanted data
   ansible.builtin.command: "tune2fs -m 0 {{ data_share_dev }}"
-  tags: partitions
+  tags:
+    - partitions
+    - definitive
   become: True
 
 - name: mount partition on filesystem
